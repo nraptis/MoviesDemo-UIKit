@@ -222,10 +222,6 @@ class CommunityGridView: UIView {
             }
         }
         
-        
-        let arr = Array(_visibleCommunityGridCellViewSet).sorted()
-        print("We have these cells visible: \(arr)")
-        
         _communityCellModelsToAdd.removeAll(keepingCapacity: true)
         for communityCellModel in visibleCommunityCellModels {
             let index = communityCellModel.index
@@ -233,8 +229,6 @@ class CommunityGridView: UIView {
                 _communityCellModelsToAdd.append(communityCellModel)
             }
         }
-        
-        
         
         print("🪩 We Have \(_communityGridCellViewsToRecycle.count) Slots, For \(_communityCellModelsToAdd.count) Visible Cells...")
         
@@ -251,93 +245,6 @@ class CommunityGridView: UIView {
             loopIndex += 1
         }
         
-        
-        
-        //communityGridCellViews
-        
-        
-        
-        print("layoutNotifyotifyVisibleCellsMayHaveChanged")
-        
-        
-        
-        
-        /*
-        
-        var preExisted = 0
-        // We can do a O(N ^ 2) loop.
-        for communityGridCellView in communityGridCellViews {
-            if communityGridCellView.isActive {
-                var isVisible = false
-                for communityCellModel in visibleCommunityCellModels {
-                    if communityGridCellView.communityCellModel === communityCellModel {
-                        isVisible = true
-                        break
-                    }
-                }
-                if isVisible == false {
-                    _communityGridCellViewsTemp.append(communityGridCellView)
-                } else {
-                    preExisted += 1
-                }
-            }
-        }
-        
-        var removez = 0
-        // We can do a O(N ^ 2) loop.
-        for communityGridCellView in _communityGridCellViewsTemp {
-            var removeIndex = -1
-            for communityGridCellViewIndex in 0..<communityGridCellViews.count {
-                if communityGridCellView.isActive {
-                    if communityGridCellView === communityGridCellViews[communityGridCellViewIndex] {
-                        removeIndex = communityGridCellViewIndex
-                        break
-                    }
-                }
-            }
-            if removeIndex != -1 {
-                removez += 1
-                depositCommunityGridCellView(communityGridCellView)
-                communityGridCellViews.remove(at: removeIndex)
-            }
-        }
-        
-        print("We wanted to remove \(_communityGridCellViewsTemp.count) views, removed \(removez) views..")
-        
-        // Now we add new cells to this.
-        _communityGridCellViewsTemp.removeAll(keepingCapacity: true)
-        
-        var ignoez = 0
-        // We can do a O(N ^ 2) loop.
-        var visibleCommunityCellModelIndex = 0
-        while visibleCommunityCellModelIndex < visibleCommunityCellModels.count  {
-            let communityCellModel = visibleCommunityCellModels[visibleCommunityCellModelIndex]
-            var isVisible = false
-            for communityGridCellView in communityGridCellViews {
-                if communityGridCellView.isActive {
-                    if communityGridCellView.communityCellModel === communityCellModel {
-                        isVisible = true
-                        break
-                    }
-                }
-            }
-            
-            if isVisible == false {
-                let communityGridCellView = withdrawCommunityGridCellView(communityCellModel: communityCellModel)
-         communityGridCellView.show(communityCellModel: communityCellModel)
-                communityGridCellViews.append(communityGridCellView)
-                _communityGridCellViewsTemp.append(communityGridCellView)
-            } else {
-                ignoez += 1
-            }
-            
-            visibleCommunityCellModelIndex += 1
-        }
-        
-        print("🧯 Now we have \(communityGridCellViews.count) views..., we gathered up \(_communityGridCellViewsTemp.count) fresh, and hd \(ignoez) ignore")
-        
-        */
-        
         refreshAllActiveFrames()
         
         for communityGridCellView in _communityGridCellViewsToRefresh {
@@ -348,7 +255,6 @@ class CommunityGridView: UIView {
     func notifyCellStateChange(_ communityCellModel: CommunityCellModel) {
         //print("Now the Visible Cells: \(communityCellModel.index) haith ChanGeD")
         
-        /*
         for communityGridCellView in communityGridCellViews {
             if communityGridCellView.isActive {
                 if communityGridCellView.communityCellModel === communityCellModel {
@@ -356,7 +262,6 @@ class CommunityGridView: UIView {
                 }
             }
         }
-        */
     }
     
     func notifyCellStateChange(_ communityGridCellView: CommunityGridCellView) {

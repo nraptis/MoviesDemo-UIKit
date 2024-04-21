@@ -8,12 +8,11 @@
 import Foundation
 
 struct CommunityCellConstants {
-    static let outerRadius = CGFloat(16.0)
-    static let innerRadius = CGFloat(14.0)
-    
-    static let buttonRadius = CGFloat(8.0)
-    
-    static let lineThickness = CGFloat(4.0)
-    
-    static let bottomAreaHeight = CGFloat(44.0)
+    static let outerRadius = CGFloat(Device.isPad ? 16.0 : 12.0)
+    static let innerRadius = CGFloat(Device.isPad ? 14.0 : 10.0)
+    static let frameRadius = CGFloat(Device.isPad ? 12.0 : 8.0)
+    static let buttonRadius = CGFloat(Device.isPad ? 12.0 : 8.0)
+    static let outlineThickness = CGFloat(Device.isPad ? 2.0 : 1.0)
+    static let frameThickness = CGFloat(Device.isPad ? 2.0 : 1.0)
+    static let bottomAreaHeight = CGFloat(Device.isPad ? 36.0 : 22.0)
 }

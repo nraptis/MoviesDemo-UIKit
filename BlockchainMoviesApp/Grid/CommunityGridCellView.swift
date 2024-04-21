@@ -16,17 +16,29 @@ class CommunityGridCellView: UIView {
         let result = UIImageView(frame: CGRect(x: 0.0, y: 0.0, width: 32.0, height: 32.0))
         result.translatesAutoresizingMaskIntoConstraints = false
         result.contentMode = .scaleAspectFill
-        
         result.backgroundColor = UIColor(red: CGFloat.random(in: 0.0...1.0),
                                          green: CGFloat.random(in: 0.0...1.0),
                                          blue: CGFloat.random(in: 0.0...1.0),
                                          alpha: 1.0)
-        
         return result
     }()
     
-    lazy var loadingView: CellLoadingView = {
-        let result = CellLoadingView(isShowing: false)
+    lazy var fillView: UIView = {
+        let result = UIView(frame: CGRect(x: 0.0, y: 0.0, width: 32.0, height: 32.0))
+        result.translatesAutoresizingMaskIntoConstraints = false
+        result.backgroundColor = DarkwingDuckTheme._gray200
+        return result
+    }()
+    
+    lazy var frameView: CommunityCellFrameView = {
+        let result = CommunityCellFrameView(frame: .zero)
+        result.translatesAutoresizingMaskIntoConstraints = false
+        return result
+    }()
+    
+    
+    lazy var loadingView: CommunityCellLoadingView = {
+        let result = CommunityCellLoadingView(isShowing: false)
         result.translatesAutoresizingMaskIntoConstraints = false
         return result
     }()
@@ -36,14 +48,14 @@ class CommunityGridCellView: UIView {
             print("retry")
         }))
         result.view.translatesAutoresizingMaskIntoConstraints = false
-        result.view.backgroundColor = DarkwingDuckTheme._gray200
+        result.view.backgroundColor = UIColor.clear
         return result
     }()
     
     lazy var missingContentHostingViewController: UIViewController = {
         let result = UIHostingController(rootView: CommunityCellMissingContentView())
         result.view.translatesAutoresizingMaskIntoConstraints = false
-        result.view.backgroundColor = DarkwingDuckTheme._gray200
+        result.view.backgroundColor = UIColor.clear
         return result
     }()
     
@@ -103,158 +115,111 @@ class CommunityGridCellView: UIView {
         layer.cornerRadius = CommunityCellConstants.outerRadius
         clipsToBounds = true
         
+        let frameFillLeft = CommunityCellConstants.outlineThickness + CommunityCellConstants.frameThickness
+        let frameFillTop = CommunityCellConstants.outlineThickness + CommunityCellConstants.frameThickness
+        let frameFillRight = -(CommunityCellConstants.outlineThickness + CommunityCellConstants.frameThickness)
+        let frameFillBottom = -(CommunityCellConstants.outlineThickness + CommunityCellConstants.bottomAreaHeight - CommunityCellConstants.outlineThickness)
+        
+        
+        
+        addSubview(fillView)
+        //imageView.backgroundColor = DarkwingDuckTheme._gray200
+        fillView.layer.cornerRadius = CommunityCellConstants.innerRadius
+        fillView.clipsToBounds = true
+        addConstraints([
+            NSLayoutConstraint(item: fillView, attribute: .left, relatedBy: .equal, toItem: self,
+                               attribute: .left, multiplier: 1.0, constant: CommunityCellConstants.outlineThickness),
+            NSLayoutConstraint(item: fillView, attribute: .top, relatedBy: .equal, toItem: self,
+                               attribute: .top, multiplier: 1.0, constant: CommunityCellConstants.outlineThickness),
+            NSLayoutConstraint(item: fillView, attribute: .right, relatedBy: .equal, toItem: self,
+                               attribute: .right, multiplier: 1.0, constant: -CommunityCellConstants.outlineThickness),
+            NSLayoutConstraint(item: fillView, attribute: .bottom, relatedBy: .equal, toItem: self,
+                               attribute: .bottom, multiplier: 1.0, constant: -CommunityCellConstants.outlineThickness)
+        ])
+        
         addSubview(imageView)
         //imageView.backgroundColor = DarkwingDuckTheme._gray200
         imageView.layer.cornerRadius = CommunityCellConstants.innerRadius
         imageView.clipsToBounds = true
+        imageView.alpha = 0.5
         addConstraints([
-            NSLayoutConstraint(item: imageView,
-                               attribute: .left,
-                               relatedBy: .equal,
-                               toItem: self,
-                               attribute: .left,
-                               multiplier: 1.0,
-                               constant: 2.0),
-            NSLayoutConstraint(item: imageView,
-                               attribute: .top,
-                               relatedBy: .equal,
-                               toItem: self,
-                               attribute: .top,
-                               multiplier: 1.0,
-                               constant: 2.0),
-            NSLayoutConstraint(item: imageView,
-                               attribute: .right,
-                               relatedBy: .equal,
-                               toItem: self,
-                               attribute: .right,
-                               multiplier: 1.0,
-                               constant: -2.0),
-            NSLayoutConstraint(item: imageView,
-                               attribute: .bottom,
-                               relatedBy: .equal,
-                               toItem: self,
-                               attribute: .bottom,
-                               multiplier: 1.0,
-                               constant: -2.0)
+            NSLayoutConstraint(item: imageView, attribute: .left, relatedBy: .equal, toItem: self,
+                               attribute: .left, multiplier: 1.0, constant: CommunityCellConstants.outlineThickness),
+            NSLayoutConstraint(item: imageView, attribute: .top, relatedBy: .equal, toItem: self,
+                               attribute: .top, multiplier: 1.0, constant: CommunityCellConstants.outlineThickness),
+            NSLayoutConstraint(item: imageView, attribute: .right, relatedBy: .equal, toItem: self,
+                               attribute: .right, multiplier: 1.0, constant: -CommunityCellConstants.outlineThickness),
+            NSLayoutConstraint(item: imageView, attribute: .bottom, relatedBy: .equal, toItem: self,
+                               attribute: .bottom, multiplier: 1.0, constant: -CommunityCellConstants.outlineThickness)
         ])
+        
+        
+        
         
         addSubview(loadingView)
         loadingView.layer.cornerRadius = CommunityCellConstants.innerRadius
         loadingView.clipsToBounds = true
         //loadingView.show()
         addConstraints([
-            NSLayoutConstraint(item: loadingView,
-                               attribute: .left,
-                               relatedBy: .equal,
-                               toItem: self,
-                               attribute: .left,
-                               multiplier: 1.0,
-                               constant: 2.0),
-            
-            NSLayoutConstraint(item: loadingView,
-                               attribute: .top,
-                               relatedBy: .equal,
-                               toItem: self,
-                               attribute: .top,
-                               multiplier: 1.0,
-                               constant: 2.0),
-            
-            NSLayoutConstraint(item: loadingView,
-                               attribute: .right,
-                               relatedBy: .equal,
-                               toItem: self,
-                               attribute: .right,
-                               multiplier: 1.0,
-                               constant: -2.0),
-            NSLayoutConstraint(item: loadingView,
-                               attribute: .bottom,
-                               relatedBy: .equal,
-                               toItem: self,
-                               attribute: .bottom,
-                               multiplier: 1.0,
-                               constant: -2.0)
+            NSLayoutConstraint(item: loadingView, attribute: .left, relatedBy: .equal, toItem: self,
+                               attribute: .left, multiplier: 1.0, constant: CommunityCellConstants.outlineThickness),
+            NSLayoutConstraint(item: loadingView, attribute: .top, relatedBy: .equal, toItem: self,
+                               attribute: .top, multiplier: 1.0, constant: CommunityCellConstants.outlineThickness),
+            NSLayoutConstraint(item: loadingView, attribute: .right, relatedBy: .equal, toItem: self,
+                               attribute: .right, multiplier: 1.0, constant: -CommunityCellConstants.outlineThickness),
+            NSLayoutConstraint(item: loadingView, attribute: .bottom, relatedBy: .equal, toItem: self,
+                               attribute: .bottom, multiplier: 1.0, constant: -CommunityCellConstants.outlineThickness)
         ])
         
         /*
+        addSubview(frameView)
+        frameView.layer.cornerRadius = CommunityCellConstants.innerRadius
+        frameView.clipsToBounds = true
+        //loadingView.show()
+        addConstraints([
+            NSLayoutConstraint(item: frameView, attribute: .left, relatedBy: .equal, toItem: self,
+                               attribute: .left, multiplier: 1.0, constant: CommunityCellConstants.outlineThickness),
+            NSLayoutConstraint(item: frameView, attribute: .top, relatedBy: .equal, toItem: self,
+                               attribute: .top, multiplier: 1.0, constant: CommunityCellConstants.outlineThickness),
+            NSLayoutConstraint(item: frameView, attribute: .right, relatedBy: .equal, toItem: self,
+                               attribute: .right, multiplier: 1.0, constant: -CommunityCellConstants.outlineThickness),
+            NSLayoutConstraint(item: frameView, attribute: .bottom, relatedBy: .equal, toItem: self,
+                               attribute: .bottom, multiplier: 1.0, constant: -CommunityCellConstants.outlineThickness)
+        ])
+        
         if let errorView = errorHostingViewController.view {
-            
             addSubview(errorView)
-            errorView.clipsToBounds = true
-            errorView.layer.cornerRadius = CommunityCellConstants.innerRadius
+            
+            //errorView.clipsToBounds = true
+            //errorView.layer.cornerRadius = CommunityCellConstants.frameRadius
             
             addConstraints([
-                NSLayoutConstraint(item: errorView,
-                                   attribute: .left,
-                                   relatedBy: .equal,
-                                   toItem: self,
-                                   attribute: .left,
-                                   multiplier: 1.0,
-                                   constant: 2.0),
-                
-                NSLayoutConstraint(item: errorView,
-                                   attribute: .top,
-                                   relatedBy: .equal,
-                                   toItem: self,
-                                   attribute: .top,
-                                   multiplier: 1.0,
-                                   constant: 2.0),
-                
-                NSLayoutConstraint(item: errorView,
-                                   attribute: .right,
-                                   relatedBy: .equal,
-                                   toItem: self,
-                                   attribute: .right,
-                                   multiplier: 1.0,
-                                   constant: -2.0),
-                NSLayoutConstraint(item: errorView,
-                                   attribute: .bottom,
-                                   relatedBy: .equal,
-                                   toItem: self,
-                                   attribute: .bottom,
-                                   multiplier: 1.0,
-                                   constant: -2.0)
+                NSLayoutConstraint(item: errorView, attribute: .left, relatedBy: .equal, toItem: self,
+                                   attribute: .left, multiplier: 1.0, constant: frameFillLeft),
+                NSLayoutConstraint(item: errorView, attribute: .top, relatedBy: .equal, toItem: self,
+                                   attribute: .top, multiplier: 1.0, constant: frameFillTop),
+                NSLayoutConstraint(item: errorView, attribute: .right, relatedBy: .equal, toItem: self,
+                                   attribute: .right, multiplier: 1.0, constant: frameFillRight),
+                NSLayoutConstraint(item: errorView, attribute: .bottom, relatedBy: .equal, toItem: self,
+                                   attribute: .bottom, multiplier: 1.0, constant: frameFillBottom)
             ])
         }
         
         if let missingContentView = missingContentHostingViewController.view {
-            
             addSubview(missingContentView)
-            missingContentView.clipsToBounds = true
-            missingContentView.layer.cornerRadius = CommunityCellConstants.innerRadius
             addConstraints([
-                NSLayoutConstraint(item: missingContentView,
-                                   attribute: .left,
-                                   relatedBy: .equal,
-                                   toItem: self,
-                                   attribute: .left,
-                                   multiplier: 1.0,
-                                   constant: CommunityCellConstants.lineThickness),
-                
-                NSLayoutConstraint(item: missingContentView,
-                                   attribute: .top,
-                                   relatedBy: .equal,
-                                   toItem: self,
-                                   attribute: .top,
-                                   multiplier: 1.0,
-                                   constant: CommunityCellConstants.lineThickness),
-                
-                NSLayoutConstraint(item: missingContentView,
-                                   attribute: .right,
-                                   relatedBy: .equal,
-                                   toItem: self,
-                                   attribute: .right,
-                                   multiplier: 1.0,
-                                   constant: -(CommunityCellConstants.lineThickness)),
-                NSLayoutConstraint(item: missingContentView,
-                                   attribute: .bottom,
-                                   relatedBy: .equal,
-                                   toItem: self,
-                                   attribute: .bottom,
-                                   multiplier: 1.0,
-                                   constant: -(CommunityCellConstants.lineThickness))
+                NSLayoutConstraint(item: missingContentView, attribute: .left, relatedBy: .equal, toItem: self,
+                                   attribute: .left, multiplier: 1.0, constant: frameFillLeft),
+                NSLayoutConstraint(item: missingContentView, attribute: .top, relatedBy: .equal, toItem: self,
+                                   attribute: .top, multiplier: 1.0, constant: frameFillTop),
+                NSLayoutConstraint(item: missingContentView, attribute: .right, relatedBy: .equal, toItem: self,
+                                   attribute: .right, multiplier: 1.0, constant: frameFillRight),
+                NSLayoutConstraint(item: missingContentView, attribute: .bottom, relatedBy: .equal, toItem: self,
+                                   attribute: .bottom, multiplier: 1.0, constant: frameFillBottom)
             ])
         }
         */
+        
         
         addSubview(button)
         button.layer.cornerRadius = CommunityCellConstants.innerRadius

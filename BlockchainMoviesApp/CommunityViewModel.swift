@@ -37,7 +37,6 @@ class CommunityViewModel {
     @MainActor private(set) var visibleCommunityCellModels = [CommunityCellModel]()
     @MainActor private(set) var communityCellModels = [CommunityCellModel]()
     
-    
     var pageSize = 0
     
     var numberOfItems = 0

@@ -22,7 +22,6 @@ struct CommunityCellMissingContentView: View {
             }
             .frame(width: geometry.size.width,
                    height: geometry.size.height)
-            .background(DarkwingDuckTheme.gray200)
         }
     }
 }
