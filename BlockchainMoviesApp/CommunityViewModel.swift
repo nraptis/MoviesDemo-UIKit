@@ -35,6 +35,8 @@ class CommunityViewModel {
     @MainActor private var _cacheContents = [KeyIndexImage]()
     
     @MainActor private(set) var visibleCommunityCellModels = [CommunityCellModel]()
+    @MainActor private(set) var communityCellModels = [CommunityCellModel]()
+    
     
     var pageSize = 0
     
@@ -435,13 +437,6 @@ class CommunityViewModel {
         }
     }
     
-    @MainActor private func _clearVisibleCommunityCellModels() {
-        for communityCellModel in visibleCommunityCellModels {
-            _depositCommunityCellModel(communityCellModel)
-        }
-        visibleCommunityCellModels.removeAll(keepingCapacity: true)
-    }
-    
     @MainActor private func _clearCommunityCellDatas() {
         for communityCellData in communityCellDatas {
             if let communityCellData = communityCellData {
@@ -460,7 +455,9 @@ class CommunityViewModel {
         
         gridLayout.clear()
         
-        _clearVisibleCommunityCellModels()
+        visibleCommunityCellModels.removeAll(keepingCapacity: true)
+        communityCellModels.removeAll(keepingCapacity: true)
+        
         _clearCommunityCellDatas()
     }
     
@@ -750,25 +747,6 @@ class CommunityViewModel {
         return nil
     }
     
-    
-    @MainActor var communityCellModelQueue = [CommunityCellModel]()
-    @MainActor func _withdrawCommunityCellModel(index: Int) -> CommunityCellModel {
-        if communityCellModelQueue.count > 0 {
-            let result = communityCellModelQueue.removeLast()
-            result.index = index
-            return result
-        } else {
-            let result = CommunityCellModel()
-            return result
-        }
-    }
-    
-    @MainActor private func _depositCommunityCellModel(_ cellModel: CommunityCellModel) {
-        cellModel.index = -1
-        cellModel.cellModelState = .missingModel
-        communityCellModelQueue.append(cellModel)
-    }
-    
     @MainActor func fetchMorePagesIfNecessary() {
         
         if isFetching { return }
@@ -882,16 +860,22 @@ class CommunityViewModel {
             isAnyItemPresent = true
         }
         
-        _clearVisibleCommunityCellModels()
+        visibleCommunityCellModels.removeAll(keepingCapacity: true)
         
         let onScreen = getFirstAndLastCellIndexOnScreen()
         guard onScreen.isValid else {
             return
         }
         
+        while communityCellModels.count <= onScreen.lastIndex {
+            let communityCellModel = CommunityCellModel()
+            communityCellModel.index = communityCellModels.count
+            communityCellModels.append(communityCellModel)
+        }
+        
         var index = onScreen.firstIndex
         while index <= onScreen.lastIndex {
-            let communityCellModel = _withdrawCommunityCellModel(index: index)
+            let communityCellModel = communityCellModels[index]
             visibleCommunityCellModels.append(communityCellModel)
             index += 1
         }

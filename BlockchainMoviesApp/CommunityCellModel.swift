@@ -94,3 +94,15 @@ class CommunityCellModel {
         }
     }
 }
+
+extension CommunityCellModel: Equatable {
+    static func == (lhs: CommunityCellModel, rhs: CommunityCellModel) -> Bool {
+        ObjectIdentifier(lhs) == ObjectIdentifier(rhs)
+    }
+}
+
+extension CommunityCellModel: Hashable {
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(ObjectIdentifier(self))
+    }
+}

@@ -214,6 +214,7 @@
 		E867A0E92BC9FFFD003C77B4 /* Grid */ = {
 			isa = PBXGroup;
 			children = (
+				E8CDA0842BD54CD1003A1C73 /* CommunityGridView.swift */,
 				E8CDA08E2BD57DBB003A1C73 /* CommunityGridCellView.swift */,
 				E8CDA0962BD58CFF003A1C73 /* CellSuccessView.swift */,
 				E8CDA0902BD57E0F003A1C73 /* CellLoadingView.swift */,
@@ -223,7 +224,6 @@
 				E8CDA0782BD547FB003A1C73 /* CommunityCellErrorView.swift */,
 				E8CDA07E2BD5483A003A1C73 /* CommunityCellMissingContentView.swift */,
 				E8CDA0802BD54A41003A1C73 /* CommunityCellConstants.swift */,
-				E8CDA0842BD54CD1003A1C73 /* CommunityGridView.swift */,
 				E8CDA0822BD54CBF003A1C73 /* CommunityGridViewController.swift */,
 				E8CDA0862BD54D58003A1C73 /* CommunityGridViewControllerRepresentable.swift */,
 				E8CDA0882BD553B3003A1C73 /* CommunityView.swift */,

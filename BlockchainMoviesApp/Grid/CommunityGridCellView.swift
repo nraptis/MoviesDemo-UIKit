@@ -16,6 +16,12 @@ class CommunityGridCellView: UIView {
         let result = UIImageView(frame: CGRect(x: 0.0, y: 0.0, width: 32.0, height: 32.0))
         result.translatesAutoresizingMaskIntoConstraints = false
         result.contentMode = .scaleAspectFill
+        
+        result.backgroundColor = UIColor(red: CGFloat.random(in: 0.0...1.0),
+                                         green: CGFloat.random(in: 0.0...1.0),
+                                         blue: CGFloat.random(in: 0.0...1.0),
+                                         alpha: 1.0)
+        
         return result
     }()
     
@@ -98,7 +104,7 @@ class CommunityGridCellView: UIView {
         clipsToBounds = true
         
         addSubview(imageView)
-        imageView.backgroundColor = DarkwingDuckTheme._gray200
+        //imageView.backgroundColor = DarkwingDuckTheme._gray200
         imageView.layer.cornerRadius = CommunityCellConstants.innerRadius
         imageView.clipsToBounds = true
         addConstraints([

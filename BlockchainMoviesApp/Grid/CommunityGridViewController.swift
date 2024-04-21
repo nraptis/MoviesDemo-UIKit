@@ -86,7 +86,7 @@ class CommunityGridViewController: UIViewController {
         layoutContainerSizeUpdateSubscriber = communityViewModel.layoutContainerSizeUpdatePublisher
             .sink { [weak self] newContentSize in
                 if let self = self {
-                    self.communityGridView.layoutNotifyContainerSizeDidChanged(newContentSize)
+                    self.communityGridView.layoutNotifyContainerSizeDidChange(newContentSize)
                 }
             }
         
