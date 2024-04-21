@@ -9,9 +9,11 @@ import Foundation
 import BlockChainNetworking
 import BlockChainDatabase
 
-// This is the model which wraps the network and
-// database models. It does not directly drive UI.
 class CommunityCellData {
+    
+    // The state of the cell, the UI
+    // should always reflect this state.
+    var cellModelState = CellModelState.illegal
     
     // This index is the # of the cell, for example cells[0]
     // has an index of 0, and cells[100] has an index of 100.

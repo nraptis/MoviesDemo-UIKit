@@ -7,8 +7,7 @@
 
 import Foundation
 
-protocol DirtyImageDownloaderType: AnyObject, Identifiable, Hashable {
-    var id: Int { get }
+protocol DirtyImageDownloaderType: AnyObject, Hashable {
     var index: Int { get }
     var urlString: String? { get }
 }

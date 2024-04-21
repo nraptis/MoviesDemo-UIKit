@@ -49,8 +49,12 @@ class DirtyImageDownloader {
     
     @DirtyImageDownloaderActor private var _purgeList = [Int]()
     
-    @DirtyImageDownloaderActor func startTasksIfNecessary() async {
+    @DirtyImageDownloaderActor func cancelAllOutOfIndexRange(firstIndex: Int, lastIndex: Int) async {
         
+    }
+    
+    @DirtyImageDownloaderActor func startTasksIfNecessary() async {
+    
         if isBlocked || isPaused {
             return
         }

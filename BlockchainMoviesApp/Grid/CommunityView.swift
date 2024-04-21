@@ -2,15 +2,14 @@
 //  CommunityView.swift
 //  BlockchainMoviesApp
 //
-//  Created by "Nick" Django Raptis on 4/9/24.
+//  Created by Nicky Taylor on 4/21/24.
 //
 
 import SwiftUI
 
 struct CommunityView: View {
     
-    @Environment (CommunityViewModel.self) var communityViewModel: CommunityViewModel
-    
+    var communityViewModel: CommunityViewModel
     var body: some View {
         
         return GeometryReader { containerGeometry in
@@ -43,14 +42,6 @@ struct CommunityView: View {
                 
                 ZStack {
                     GeometryReader { geometry in
-                        
-                        let geometryWidth = geometry.size.width
-                        let geometryHeight = geometry.size.height
-                        
-                        let staticGridLayout = communityViewModel.staticGridLayout
-                        staticGridLayout.registerContainer(CGRect(x: 0.0, y: 0.0, width: geometryWidth, height: geometryHeight),
-                                                           communityViewModel.numberOfCells)
-                        
                         return guts(containerGeometry: geometry)
                     }
                 }
@@ -73,96 +64,25 @@ struct CommunityView: View {
         // initial load. Once we get an item or an error,
         // all the loading will be done with the pull-refresh.
         //
-        var isScrollViewShowing = false
+        
         var isLoadingViewShowing = false
         if communityViewModel.isAnyItemPresent {
-            isScrollViewShowing = true
+            
         } else {
             if communityViewModel.isFetching {
                 isLoadingViewShowing = true
-            } else {
-                isScrollViewShowing = true
             }
         }
         
         return ZStack {
-            ScrollView {
-                scrollContent(containerGeometry: containerGeometry)
-                    .background(DarkwingDuckTheme.gray050)
-            }
-            .refreshable {
-                await communityViewModel.refresh()
-            }
-            .onAppear {
-                UIRefreshControl.appearance().tintColor = DarkwingDuckTheme._gray700
-            }
-            .opacity(isScrollViewShowing ? 1.0 : 0.0)
-            
+            CommunityGridViewControllerRepresentable(communityViewModel: communityViewModel,
+                                                     width: geometryWidth,
+                                                     height: geometryHeight)
             LoadingView()
                 .frame(width: geometryWidth, height: geometryHeight)
                 .opacity(isLoadingViewShowing ? 1.0 : 0.0)
         }
         .frame(width: geometryWidth, height: geometryHeight)
-    }
-    
-    @MainActor func scrollContent(containerGeometry: GeometryProxy) -> some View {
-        
-        let containerFrame = containerGeometry.frame(in: .global)
-        let geometryWidth = containerFrame.width
-        let geometryHeight = containerFrame.height
-        
-        var contentHeight = communityViewModel.layoutHeight
-        if contentHeight < containerGeometry.size.height {
-            contentHeight = containerGeometry.size.height
-        }
-        
-        var isGridShowing = false
-        var isNoItemsShowing = false
-        var isErrorShowing = false
-        
-        if communityViewModel.isAnyItemPresent {
-            isGridShowing = true
-        } else if communityViewModel.isNetworkErrorPresent {
-            isErrorShowing = true
-        } else {
-            isNoItemsShowing = true
-        }
-        
-        return ZStack(alignment: .top) {
-            GeometryReader { scrollContentGeometry in
-                grid(containerGeometry, scrollContentGeometry)
-            }
-            .opacity(isGridShowing ? 1.0 : 0.0)
-            
-            NoItemsView()
-                .frame(width: geometryWidth, height: geometryHeight)
-                .opacity(isNoItemsShowing ? 1.0 : 0.0)
-            
-            ErrorView(text: "An Error Occurred")
-                .frame(width: geometryWidth, height: geometryHeight)
-                .opacity(isErrorShowing ? 1.0 : 0.0)
-        }
-        .frame(width: communityViewModel.layoutWidth,
-               height: contentHeight)
-    }
-    
-    @MainActor private func grid(_ containerGeometry: GeometryProxy, _ scrollContentGeometry: GeometryProxy) -> some View {
-        
-        let contentFrame = scrollContentGeometry.frame(in: .global)
-        let containerFrame = containerGeometry.frame(in: .global)
-
-        let frame = CGRect(x: 0.0,
-                           y: contentFrame.origin.y - containerFrame.origin.y,
-                           width: contentFrame.size.width,
-                           height: contentFrame.size.height)
-        
-        let staticGridLayout = communityViewModel.staticGridLayout
-        staticGridLayout.registerScrollContent(frame)
-        
-        return ThumbGrid(list: communityViewModel.gridCellModels) { gridCellModel in
-            CommunityCell()
-                .environment(gridCellModel)
-        }
     }
     
     @MainActor func getLogoBarContainer(logoBarHeight: CGFloat) -> some View {

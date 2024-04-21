@@ -16,8 +16,7 @@ struct RootView: View {
         @Bindable var router = router
         @Bindable var rootViewModel = rootViewModel
         return NavigationStack(path: $router.navigationPath) {
-            CommunityView()
-                .environment(router.communityViewModel)
+            CommunityView(communityViewModel: router.communityViewModel)
                 .navigationDestination(for: MovieDetailsViewModel.self) { movieDetailsViewModel in
                     MovieDetailsView()
                         .environment(movieDetailsViewModel)

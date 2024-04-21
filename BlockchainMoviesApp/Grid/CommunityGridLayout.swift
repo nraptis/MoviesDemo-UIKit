@@ -1,5 +1,5 @@
 //
-//  StaticGridLayout.swift
+//  CommunityGridLayout.swift
 //  BlockchainMoviesApp
 //
 //  Created by "Nick" Django Raptis on 4/19/24.
@@ -8,20 +8,18 @@
 import UIKit
 import SwiftUI
 
-protocol StaticGridLayoutDelegate: AnyObject {
+protocol CommunityGridLayoutDelegate: AnyObject {
     func layoutDidChangeVisibleCells()
-    func layoutDidChangeWidth()
-    func layoutDidChangeHeight()
-    func layoutContainerSizeDidChange()
+    func layoutDidChangeSize()
 }
 
-@MainActor class StaticGridLayout {
+class CommunityGridLayout {
     
-    nonisolated init() {
+    init() {
 
     }
     
-    weak var delegate: StaticGridLayoutDelegate?
+    weak var delegate: CommunityGridLayoutDelegate?
     
     // The content (grid) entire width and height
     private(set) var width: CGFloat = 255
@@ -29,6 +27,7 @@ protocol StaticGridLayoutDelegate: AnyObject {
     
     // cell grid layout parameters
     private let cellMaximumWidth = Device.isPad ? 170 : 100
+    
     private var cellWidth = 100
     private var cellHeight = 100
     
@@ -44,11 +43,10 @@ protocol StaticGridLayoutDelegate: AnyObject {
     private var _numberOfRows = 0
     private var _numberOfCols = 0
     
-    private var _maximumNumberOfVisibleCells = 0
     private var _cellXArray = [Int]()
     
-    private var _containerFrame = CGRect.zero
-    private var _scrollContentFrame = CGRect.zero
+    private var _containerSize = CGSize.zero
+    private var _scrollContentOffset = CGPoint.zero
     
     func clear() {
         _numberOfCells = 0
@@ -73,19 +71,17 @@ protocol StaticGridLayoutDelegate: AnyObject {
         }
     }
     
-    func registerContainer(_ newContainerFrame: CGRect, _ numberOfCells: Int) {
-        if newContainerFrame != _containerFrame || numberOfCells != _numberOfCells {
-            print("🤡 [StaticGridLayout] registerContainer [\(newContainerFrame.width) x \(newContainerFrame.height)], #\(numberOfCells) cells.")
-            _containerFrame = newContainerFrame
+    func registerContainer(_ newContainerSize: CGSize, _ numberOfCells: Int) {
+        if newContainerSize != _containerSize || numberOfCells != _numberOfCells {
+            print("🤡 [CommunityGridLayout] registerContainer [\(newContainerSize.width) x \(newContainerSize.height)], #\(numberOfCells) cells.")
+            _containerSize = newContainerSize
             _numberOfCells = numberOfCells
             layoutGrid()
-            calculateMaximumNumberOfVisibleCells()
-            delegate?.layoutContainerSizeDidChange()
         }
     }
     
-    func registerScrollContent(_ newScrollContentFrame: CGRect) {
-        _scrollContentFrame = newScrollContentFrame
+    func registerScrollContent(_ newScrollContentOffset: CGPoint) {
+        _scrollContentOffset = newScrollContentOffset
         refreshVisibleCells()
     }
     
@@ -136,19 +132,15 @@ protocol StaticGridLayoutDelegate: AnyObject {
         let previousWidth = width
         let previousHeight = height
         
-        width = _containerFrame.width
+        width = _containerSize.width
         height = CGFloat(_numberOfRows * cellHeight + (cellPaddingTop + cellPaddingBottom))
         //add the space between each cell vertically
         if _numberOfRows > 1 {
             height += CGFloat((_numberOfRows - 1) * cellSpacingV)
         }
         
-        if previousWidth != width {
-            delegate?.layoutDidChangeWidth()
-        }
-        
-        if previousHeight != height {
-            delegate?.layoutDidChangeHeight()
+        if (previousWidth != width) || (previousHeight != height) {
+            delegate?.layoutDidChangeSize()
         }
     }
     
@@ -201,21 +193,27 @@ protocol StaticGridLayoutDelegate: AnyObject {
     func getNumberOfCells() -> Int {
         _numberOfCells
     }
-    
-    func getMaximumNumberOfVisibleCells() -> Int {
-        return _maximumNumberOfVisibleCells
-    }
 }
 
 // clipping helpers
-extension StaticGridLayout {
+extension CommunityGridLayout {
     
     func getContainerTop() -> Int {
-        Int(_containerFrame.minY - _scrollContentFrame.minY)
+        let value = _scrollContentOffset.y
+        if value > 0.0 {
+            return Int(value + 0.5)
+        } else {
+            return Int(value - 0.5)
+        }
     }
     
     func getContainerBottom() -> Int {
-        Int(_containerFrame.maxY - _scrollContentFrame.minY)
+        let value = _scrollContentOffset.y + _containerSize.height
+        if value > 0.0 {
+            return Int(value + 0.5)
+        } else {
+            return Int(value - 0.5)
+        }
     }
     
     // cell top
@@ -255,7 +253,7 @@ extension StaticGridLayout {
 }
 
 // cell frame helpers
-extension StaticGridLayout {
+extension CommunityGridLayout {
     
     func getCellX(cellIndex: Int) -> CGFloat {
         var colIndex = getColIndex(cellIndex: cellIndex)
@@ -282,7 +280,7 @@ extension StaticGridLayout {
 }
 
 // grid layout helpers (internal)
-extension StaticGridLayout {
+extension CommunityGridLayout {
     
     private func calculateNumberOfRows() {
         if _numberOfCols > 0 {
@@ -300,7 +298,7 @@ extension StaticGridLayout {
         //if _numberOfCells <= 0 { return 0 }
         
         _numberOfCols = 1
-        let availableWidth = _containerFrame.width - CGFloat(cellPaddingLeft + cellPaddingRight)
+        let availableWidth = _containerSize.width - CGFloat(cellPaddingLeft + cellPaddingRight)
         
         //try out horizontal counts until the cells would be
         //smaller than the maximum width
@@ -329,7 +327,7 @@ extension StaticGridLayout {
             return
         }
         
-        var totalSpace = Int(_containerFrame.width)
+        var totalSpace = Int(_containerSize.width)
         totalSpace -= cellPaddingLeft
         totalSpace -= cellPaddingRight
         
@@ -357,7 +355,7 @@ extension StaticGridLayout {
             spaceConsumed += cellSpacingH * (_numberOfCols - 1)
         }
         
-        let realWidth = Int(_containerFrame.width + 0.5)
+        let realWidth = Int(_containerSize.width + 0.5)
         let extraOffset = (realWidth - spaceConsumed) / 2
         
         var cellX = cellPaddingLeft + extraOffset
@@ -365,37 +363,5 @@ extension StaticGridLayout {
             _cellXArray.append(cellX)
             cellX += cellWidth + cellSpacingH
         }
-    }
-    
-    private func calculateMaximumNumberOfVisibleCells() {
-        
-        let totalSpace = Int(_containerFrame.height + 0.5)
-        
-        if totalSpace <= 0 {
-            _maximumNumberOfVisibleCells = 0
-            return
-        }
-        
-        if _numberOfCols <= 0 {
-            _maximumNumberOfVisibleCells = 0
-            return
-        }
-        
-        if cellHeight <= 0 {
-            _maximumNumberOfVisibleCells = 0
-            return
-        }
-        
-        var y = -(cellHeight)
-        var numberOfRows = 1
-        
-        y += cellHeight
-        y += cellSpacingV
-        while y < totalSpace {
-            numberOfRows += 1
-            y += cellHeight
-            y += cellSpacingV
-        }
-        _maximumNumberOfVisibleCells = _numberOfCols * numberOfRows
     }
 }

@@ -11,7 +11,7 @@ import UIKit
     static let shared = DirtyImageDownloaderActor()
 }
 
-struct KeyAndIndexPair {
+struct KeyIndex {
     let key: String
     let index: Int
 }
@@ -22,12 +22,16 @@ struct KeyIndexImage {
     let index: Int
 }
 
-extension KeyAndIndexPair: Equatable {
-    
+extension KeyIndex: Equatable {
+    static func == (lhs: KeyIndex, rhs: KeyIndex) -> Bool {
+        lhs.index == rhs.index
+    }
 }
 
-extension KeyAndIndexPair: Hashable {
-    
+extension KeyIndex: Hashable {
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(index)
+    }
 }
 
 class DirtyImageCache {
@@ -83,30 +87,30 @@ class DirtyImageCache {
         }
     }
     
-    @DirtyImageCacheActor func batchRetrieve(_ keyAndIndexPairs: [KeyAndIndexPair]) async -> [KeyAndIndexPair: UIImage] {
-        var result = [KeyAndIndexPair: UIImage]()
+    @DirtyImageCacheActor func batchRetrieve(_ keyIndexs: [KeyIndex]) async -> [KeyIndex: UIImage] {
+        var result = [KeyIndex: UIImage]()
         
         if DISABLED { return result }
         
-        for keyAndIndexPair in keyAndIndexPairs {
+        for keyIndex in keyIndexs {
             var image: UIImage?
-            if let node = self.fileRecycler.get(keyAndIndexPair.key) {
+            if let node = self.fileRecycler.get(keyIndex.key) {
                 image = node.loadImage()
             }
             if let image = image {
-                result[keyAndIndexPair] = image
+                result[keyIndex] = image
             }
             try? await Task.sleep(nanoseconds: 100_000)
         }
         return result
     }
     
-    @DirtyImageCacheActor func singleRetrieve(_ keyAndIndexPair: KeyAndIndexPair) async -> UIImage? {
+    @DirtyImageCacheActor func singleRetrieve(_ keyIndex: KeyIndex) async -> UIImage? {
         
         if DISABLED { return nil }
         
         var image: UIImage?
-        if let node = self.fileRecycler.get(keyAndIndexPair.key) {
+        if let node = self.fileRecycler.get(keyIndex.key) {
             image = node.loadImage()
         }
         if let image = image {
