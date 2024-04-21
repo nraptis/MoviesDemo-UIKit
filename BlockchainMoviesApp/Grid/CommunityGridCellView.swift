@@ -10,6 +10,8 @@ import SwiftUI
 
 class CommunityGridCellView: UIView {
     
+    var updates = 0
+    
     lazy var imageView: UIImageView = {
         let result = UIImageView(frame: CGRect(x: 0.0, y: 0.0, width: 32.0, height: 32.0))
         result.translatesAutoresizingMaskIntoConstraints = false
@@ -56,7 +58,7 @@ class CommunityGridCellView: UIView {
         result.clipsToBounds = true
         
         //TODO:
-        result.isHidden = true
+        //result.isHidden = true
         
         return result
     }()
@@ -68,11 +70,11 @@ class CommunityGridCellView: UIView {
         result.textColor = UIColor.red
         result.font = UIFont.systemFont(ofSize: 22.0, weight: .semibold)
         result.textAlignment = .center
-        result.layer.cornerRadius = 4.0
+        result.layer.cornerRadius = 12.0
         result.clipsToBounds = true
         
         //TODO:
-        result.isHidden = true
+        //result.isHidden = true
         
         return result
     }()
@@ -81,6 +83,8 @@ class CommunityGridCellView: UIView {
     var constraintTop: NSLayoutConstraint?
     var constraintWidth: NSLayoutConstraint?
     var constraintHeight: NSLayoutConstraint?
+    
+    var isActive = false
     
     let communityViewModel: CommunityViewModel
     var communityCellModel: CommunityCellModel
@@ -94,8 +98,8 @@ class CommunityGridCellView: UIView {
         clipsToBounds = true
         
         addSubview(imageView)
-        imageView.backgroundColor = UIColor.brown
-        imageView.layer.cornerRadius = 10.0
+        imageView.backgroundColor = DarkwingDuckTheme._gray200
+        imageView.layer.cornerRadius = CommunityCellConstants.innerRadius
         imageView.clipsToBounds = true
         addConstraints([
             NSLayoutConstraint(item: imageView,
@@ -129,8 +133,9 @@ class CommunityGridCellView: UIView {
         ])
         
         addSubview(loadingView)
-        loadingView.layer.cornerRadius = 10.0
+        loadingView.layer.cornerRadius = CommunityCellConstants.innerRadius
         loadingView.clipsToBounds = true
+        //loadingView.show()
         addConstraints([
             NSLayoutConstraint(item: loadingView,
                                attribute: .left,
@@ -164,6 +169,7 @@ class CommunityGridCellView: UIView {
                                constant: -2.0)
         ])
         
+        /*
         if let errorView = errorHostingViewController.view {
             
             addSubview(errorView)
@@ -242,6 +248,7 @@ class CommunityGridCellView: UIView {
                                    constant: -(CommunityCellConstants.lineThickness))
             ])
         }
+        */
         
         addSubview(button)
         button.layer.cornerRadius = CommunityCellConstants.innerRadius
@@ -355,10 +362,19 @@ class CommunityGridCellView: UIView {
         }
     }
     
-    
-    
-    func reset() {
+    func hide() {
+        isHidden = true
+        isUserInteractionEnabled = false
+        isActive = false
         imageView.image = nil
+    }
+    
+    func show(communityCellModel: CommunityCellModel) {
+        self.communityCellModel = communityCellModel
+        isHidden = false
+        isUserInteractionEnabled = true
+        isActive = true
+        updateState()
     }
     
     private var _x = CGFloat(0.0)
@@ -396,17 +412,21 @@ class CommunityGridCellView: UIView {
         }
     }
     
-    func updateStatus(_ state: CellModelState) {
-        switch state {
-        case .illegal:
-            statusLabel.text = "Illegal"
-            statusLabel.textColor = UIColor.red
+    func updateState() {
+        
+        let cellModelState = communityCellModel.cellModelState
+        
+        switch cellModelState {
         case .missingModel:
             statusLabel.text = "No Model"
             statusLabel.textColor = UIColor.yellow
-        case .success:
+        case .idle:
+            statusLabel.text = "Idle"
+            statusLabel.textColor = UIColor.systemMint
+        case .success(_, _, let image):
             statusLabel.text = "Success"
             statusLabel.textColor = UIColor.green
+            imageView.image = image
         case .downloading:
             statusLabel.text = "D-Load (Q)"
             statusLabel.textColor = UIColor.gray
@@ -420,6 +440,8 @@ class CommunityGridCellView: UIView {
             statusLabel.text = "No Key"
             statusLabel.textColor = UIColor.red
         }
+        
+        
         
         /*
         switch state {

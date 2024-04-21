@@ -55,12 +55,12 @@ class CommunityGridViewController: UIViewController {
     func notifySizeMayHaveChanged(_ size: CGSize) {
         print("notifySizeMayHaveChanged from [\(self.size.width) x \(self.size.height)] to [\(size.width) x \(size.height)]")
         self.size = size
-        communityGridView.notifyContainerSizeMayHaveChanged(size)
+        communityGridView.worldNotifyContainerSizeMayHaveChanged(size)
     }
     
     var cellNeedsUpdateSubscriber: AnyCancellable?
     var layoutContainerSizeUpdateSubscriber: AnyCancellable?
-    var layoutFrameHeightUpdateSubscriber: AnyCancellable?
+    var layoutContentsSizeUpdateSubscriber: AnyCancellable?
     var visibleCellsUpdateSubscriber: AnyCancellable?
     
     func linkUpSubscribers() {
@@ -86,14 +86,22 @@ class CommunityGridViewController: UIViewController {
         layoutContainerSizeUpdateSubscriber = communityViewModel.layoutContainerSizeUpdatePublisher
             .sink { [weak self] newContentSize in
                 if let self = self {
-                    self.communityGridView.notifyContentSizeMayHaveChanged(newContentSize)
+                    self.communityGridView.layoutNotifyContainerSizeDidChanged(newContentSize)
                 }
             }
+        
+        layoutContentsSizeUpdateSubscriber = communityViewModel.layoutContentsSizeUpdatePublisher
+            .sink { [weak self] newContentSize in
+                if let self = self {
+                    self.communityGridView.layoutNotifyotifyContentSizeMayHaveChanged(newContentSize)
+                }
+            }
+        
         
         visibleCellsUpdateSubscriber = communityViewModel.visibleCellsUpdatePublisher
             .sink { [weak self] in
                 if let self = self {
-                    self.communityGridView.notifyVisibleCellsMayHaveChanged()
+                    self.communityGridView.layoutNotifyotifyVisibleCellsMayHaveChanged()
                 }
             }
     }

@@ -7,18 +7,19 @@
 
 import UIKit
 
-enum CellModelState: Equatable {
+enum CellModelState {
     
-    case downloading
-    case downloadingActively
     
-    case success(UIImage)
+    case downloading(CommunityCellData, String) // We have a data model and key.
+    case downloadingActively(CommunityCellData, String) // We have a data model and key.
     
-    case error
+    case success(CommunityCellData, String, UIImage) // We have a data model and key.
     
-    case illegal
-    case missingModel // There is no web service model downloaded for this slot.
-    //                   It may be as the result of a refresh, or a connection loss.
+    case error(CommunityCellData, String) // We have a data model and key.
     
-    case missingKey // This is going to be a cell with no image URL.
+    case idle(CommunityCellData, String) // We have a data model and key.
+    
+    case missingKey(CommunityCellData) // This is going to be a cell with no image URL.
+    
+    case missingModel
 }

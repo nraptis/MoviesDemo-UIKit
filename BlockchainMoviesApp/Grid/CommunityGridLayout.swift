@@ -10,7 +10,8 @@ import SwiftUI
 
 protocol CommunityGridLayoutDelegate: AnyObject {
     func layoutDidChangeVisibleCells()
-    func layoutDidChangeSize()
+    func layoutContentsDidChangeSize(size: CGSize)
+    func layoutContainerDidChangeSize(size: CGSize)
 }
 
 class CommunityGridLayout {
@@ -43,6 +44,7 @@ class CommunityGridLayout {
     private var _numberOfRows = 0
     private var _numberOfCols = 0
     
+    private var _maximumNumberOfVisibleCells = 0
     private var _cellXArray = [Int]()
     
     private var _containerSize = CGSize.zero
@@ -77,6 +79,9 @@ class CommunityGridLayout {
             _containerSize = newContainerSize
             _numberOfCells = numberOfCells
             layoutGrid()
+            calculateMaximumNumberOfVisibleCells()
+            refreshVisibleCells()
+            delegate?.layoutContainerDidChangeSize(size: newContainerSize)
         }
     }
     
@@ -140,7 +145,8 @@ class CommunityGridLayout {
         }
         
         if (previousWidth != width) || (previousHeight != height) {
-            delegate?.layoutDidChangeSize()
+            delegate?.layoutContentsDidChangeSize(size: CGSize(width: width,
+                                                               height: height))
         }
     }
     
@@ -192,6 +198,10 @@ class CommunityGridLayout {
     
     func getNumberOfCells() -> Int {
         _numberOfCells
+    }
+    
+    func getMaximumNumberOfVisibleCells() -> Int {
+        return _maximumNumberOfVisibleCells
     }
 }
 
@@ -363,5 +373,37 @@ extension CommunityGridLayout {
             _cellXArray.append(cellX)
             cellX += cellWidth + cellSpacingH
         }
+    }
+    
+    private func calculateMaximumNumberOfVisibleCells() {
+        
+        let totalSpace = Int(_containerSize.height + 0.5)
+        
+        if totalSpace <= 0 {
+            _maximumNumberOfVisibleCells = 0
+            return
+        }
+        
+        if _numberOfCols <= 0 {
+            _maximumNumberOfVisibleCells = 0
+            return
+        }
+        
+        if cellHeight <= 0 {
+            _maximumNumberOfVisibleCells = 0
+            return
+        }
+        
+        var y = -(cellHeight)
+        var numberOfRows = 1
+        
+        y += cellHeight
+        y += cellSpacingV
+        while y < totalSpace {
+            numberOfRows += 1
+            y += cellHeight
+            y += cellSpacingV
+        }
+        _maximumNumberOfVisibleCells = _numberOfCols * numberOfRows
     }
 }

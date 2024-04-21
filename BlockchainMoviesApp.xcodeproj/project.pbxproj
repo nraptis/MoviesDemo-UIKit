@@ -46,6 +46,7 @@
 		E8CDA0932BD57E10003A1C73 /* CellLoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8CDA0902BD57E0F003A1C73 /* CellLoadingView.swift */; };
 		E8CDA0942BD57E10003A1C73 /* DrawableButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8CDA0912BD57E10003A1C73 /* DrawableButton.swift */; };
 		E8CDA0952BD57E10003A1C73 /* ColoredButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8CDA0922BD57E10003A1C73 /* ColoredButton.swift */; };
+		E8CDA0972BD58CFF003A1C73 /* CellSuccessView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8CDA0962BD58CFF003A1C73 /* CellSuccessView.swift */; };
 		E8DFD92B2BCA037C00D2A107 /* MovieDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8DFD92A2BCA037C00D2A107 /* MovieDetailsView.swift */; };
 		E8E2D9642BC822E000A41EC0 /* CommunityCellData.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8E2D9622BC822E000A41EC0 /* CommunityCellData.swift */; };
 		E8E733A62BD30D5D0095A81A /* CellModelState.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8E733A52BD30D5D0095A81A /* CellModelState.swift */; };
@@ -94,6 +95,7 @@
 		E8CDA0902BD57E0F003A1C73 /* CellLoadingView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CellLoadingView.swift; sourceTree = "<group>"; };
 		E8CDA0912BD57E10003A1C73 /* DrawableButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DrawableButton.swift; sourceTree = "<group>"; };
 		E8CDA0922BD57E10003A1C73 /* ColoredButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ColoredButton.swift; sourceTree = "<group>"; };
+		E8CDA0962BD58CFF003A1C73 /* CellSuccessView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CellSuccessView.swift; sourceTree = "<group>"; };
 		E8DFD92A2BCA037C00D2A107 /* MovieDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovieDetailsView.swift; sourceTree = "<group>"; };
 		E8E2D9502BC74F1E00A41EC0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		E8E2D9622BC822E000A41EC0 /* CommunityCellData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommunityCellData.swift; sourceTree = "<group>"; };
@@ -213,6 +215,7 @@
 			isa = PBXGroup;
 			children = (
 				E8CDA08E2BD57DBB003A1C73 /* CommunityGridCellView.swift */,
+				E8CDA0962BD58CFF003A1C73 /* CellSuccessView.swift */,
 				E8CDA0902BD57E0F003A1C73 /* CellLoadingView.swift */,
 				E8CDA0922BD57E10003A1C73 /* ColoredButton.swift */,
 				E8CDA0912BD57E10003A1C73 /* DrawableButton.swift */,
@@ -349,6 +352,7 @@
 				E83EA6E22BC5B9840076D6BB /* DirtyImageDownloader.swift in Sources */,
 				E83EA6DF2BC5B2F80076D6BB /* DarkwingDuckTheme.swift in Sources */,
 				E8E733A62BD30D5D0095A81A /* CellModelState.swift in Sources */,
+				E8CDA0972BD58CFF003A1C73 /* CellSuccessView.swift in Sources */,
 				E867A0F62BC9FFFD003C77B4 /* UIImage+Resize.swift in Sources */,
 				E867A0DC2BC9FC20003C77B4 /* RootViewModel.swift in Sources */,
 				E8E2D9642BC822E000A41EC0 /* CommunityCellData.swift in Sources */,

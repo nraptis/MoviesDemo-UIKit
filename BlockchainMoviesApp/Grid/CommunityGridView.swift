@@ -90,101 +90,152 @@ class CommunityGridView: UIView {
     //CommunityCellData
     
     
-    func notifyContainerSizeMayHaveChanged(_ newContainerSize: CGSize) {
+    func worldNotifyContainerSizeMayHaveChanged(_ newContainerSize: CGSize) {
+        
+        // This is going to create a wild feedback cycle.
+        // The parent view changed sizes. So, we will update
+        // the layout. Then the layout will do some calcultions
+        // and post an update here for us in "layoutNotifyContainerSizeDidChanged"
+        
+        print("worldNotifyContainerSizeMayHaveChanged")
+        
         if newContainerSize.width != containerSize.width || newContainerSize.height != containerSize.height {
             containerSize = newContainerSize
             gridLayout.registerContainer(containerSize, communityViewModel.numberOfCells)
-            handleScrollContentOffsetMayHaveChanged()
-            refreshAllFrames()
+            refreshAllActiveFrames()
         }
     }
     
-    func notifyContentSizeMayHaveChanged(_ newContentSize: CGSize) {
+    func layoutNotifyContainerSizeDidChanged(_ newContainerSize: CGSize) {
+        
+        let maxxo = gridLayout.getMaximumNumberOfVisibleCells()
+        print("layoutNotifyContainerSizeDidChanged => \(maxxo)")
+        
+        
+    }
+    
+    func layoutNotifyotifyContentSizeMayHaveChanged(_ newContentSize: CGSize) {
+        
+        print("layoutNotifyotifyContentSizeMayHaveChanged")
+        
         if newContentSize.width != contentSize.width || newContentSize.height != contentSize.height {
             contentSize = newContentSize
             scrollContentHeightConstraint.constant = newContentSize.height
             handleScrollContentOffsetMayHaveChanged()
-            refreshAllFrames()
+            refreshAllActiveFrames()
         }
     }
     
     private var _communityGridCellViewsTemp = [CommunityGridCellView]()
-    func notifyVisibleCellsMayHaveChanged() {
+    func layoutNotifyotifyVisibleCellsMayHaveChanged() {
 
+        print("layoutNotifyotifyVisibleCellsMayHaveChanged")
+        
         _communityGridCellViewsTemp.removeAll(keepingCapacity: true)
         
         let visibleCommunityCellModels = communityViewModel.visibleCommunityCellModels
         
+        
+        var preExisted = 0
         // We can do a O(N ^ 2) loop.
         for communityGridCellView in communityGridCellViews {
-            var isVisible = false
-            for communityCellModel in visibleCommunityCellModels {
-                if communityGridCellView.communityCellModel === communityCellModel {
-                    isVisible = true
-                    break
+            if communityGridCellView.isActive {
+                var isVisible = false
+                for communityCellModel in visibleCommunityCellModels {
+                    if communityGridCellView.communityCellModel === communityCellModel {
+                        isVisible = true
+                        break
+                    }
                 }
-            }
-            if isVisible == false {
-                _communityGridCellViewsTemp.append(communityGridCellView)
+                if isVisible == false {
+                    _communityGridCellViewsTemp.append(communityGridCellView)
+                } else {
+                    preExisted += 1
+                }
             }
         }
         
+        var removez = 0
         // We can do a O(N ^ 2) loop.
         for communityGridCellView in _communityGridCellViewsTemp {
             var removeIndex = -1
             for communityGridCellViewIndex in 0..<communityGridCellViews.count {
-                if communityGridCellView === communityGridCellViews[communityGridCellViewIndex] {
-                    removeIndex = communityGridCellViewIndex
-                    break
+                if communityGridCellView.isActive {
+                    if communityGridCellView === communityGridCellViews[communityGridCellViewIndex] {
+                        removeIndex = communityGridCellViewIndex
+                        break
+                    }
                 }
             }
             if removeIndex != -1 {
+                removez += 1
                 depositCommunityGridCellView(communityGridCellView)
                 communityGridCellViews.remove(at: removeIndex)
             }
         }
         
+        print("We wanted to remove \(_communityGridCellViewsTemp.count) views, removed \(removez) views..")
+        
         // Now we add new cells to this.
         _communityGridCellViewsTemp.removeAll(keepingCapacity: true)
         
+        var ignoez = 0
         // We can do a O(N ^ 2) loop.
         var visibleCommunityCellModelIndex = 0
         while visibleCommunityCellModelIndex < visibleCommunityCellModels.count  {
-            let visibleCommunityCellModel = visibleCommunityCellModels[visibleCommunityCellModelIndex]
+            let communityCellModel = visibleCommunityCellModels[visibleCommunityCellModelIndex]
             var isVisible = false
             for communityGridCellView in communityGridCellViews {
-                if communityGridCellView.communityCellModel === visibleCommunityCellModel {
-                    isVisible = true
-                    break
+                if communityGridCellView.isActive {
+                    if communityGridCellView.communityCellModel === communityCellModel {
+                        isVisible = true
+                        break
+                    }
                 }
             }
             
             if isVisible == false {
-                let communityGridCellView = withdrawCommunityGridCellView(communityCellModel: visibleCommunityCellModel)
-                
+                let communityGridCellView = withdrawCommunityGridCellView(communityCellModel: communityCellModel)
+                communityGridCellView.show(communityCellModel: communityCellModel)
                 communityGridCellViews.append(communityGridCellView)
                 _communityGridCellViewsTemp.append(communityGridCellView)
-                
+            } else {
+                ignoez += 1
             }
             
             visibleCommunityCellModelIndex += 1
         }
         
-        refreshAllFrames()
+        print("🧯 Now we have \(communityGridCellViews.count) views..., we gathered up \(_communityGridCellViewsTemp.count) fresh, and hd \(ignoez) ignore")
+        
+        refreshAllActiveFrames()
         
         for communityGridCellView in _communityGridCellViewsTemp {
             notifyCellStateChange(communityGridCellView)
         }
-        
     }
     
     func notifyCellStateChange(_ communityCellModel: CommunityCellModel) {
         print("Now the Visible Cells: \(communityCellModel.index) haith ChanGeD")
+        
+        for communityGridCellView in communityGridCellViews {
+            if communityGridCellView.isActive {
+                if communityGridCellView.communityCellModel === communityCellModel {
+                    notifyCellStateChange(communityGridCellView)
+                }
+            }
+        }
     }
     
     func notifyCellStateChange(_ communityGridCellView: CommunityGridCellView) {
         let communityCellModel = communityGridCellView.communityCellModel
         communityGridCellView.indexLabel.text = "\(communityCellModel.index)"
+        communityGridCellView.updateState()
+        
+        communityGridCellView.updates += 1
+        communityGridCellView.statusLabel.text = "\(communityGridCellView.updates)"
+        
+        
         
     }
     
@@ -202,31 +253,27 @@ class CommunityGridView: UIView {
     // cells should be updated and registered
     // by the time we finish this function
     func handleScrollContentOffsetMayHaveChanged() {
-        print("handleScrollContentOffsetMayHaveChanged ==> Started")
         gridLayout.registerScrollContent(scrollView.contentOffset)
-        print("handleScrollContentOffsetMayHaveChanged ==> Finished")
     }
     
-    func refreshAllFrames() {
+    func refreshAllActiveFrames() {
         for communityGridCellView in communityGridCellViews {
-            refreshCommunityGridCellViewFrame(communityGridCellView)
+            if communityGridCellView.isActive {
+                refreshCommunityGridCellViewFrame(communityGridCellView)
+            }
         }
     }
     
     var communityGridCellViews = [CommunityGridCellView]()
     var communityGridCellViewsQueue = [CommunityGridCellView]()
     func depositCommunityGridCellView(_ communityGridCellView: CommunityGridCellView) {
-        communityGridCellView.isHidden = true
-        communityGridCellView.isUserInteractionEnabled = false
-        communityGridCellView.reset()
+        communityGridCellView.hide()
         communityGridCellViewsQueue.append(communityGridCellView)
     }
     
     func withdrawCommunityGridCellView(communityCellModel: CommunityCellModel) -> CommunityGridCellView {
         
         if let communityGridCellView = communityGridCellViewsQueue.popLast() {
-            communityGridCellView.isHidden = false
-            communityGridCellView.isUserInteractionEnabled = true
             communityGridCellView.communityCellModel = communityCellModel
             return communityGridCellView
         }

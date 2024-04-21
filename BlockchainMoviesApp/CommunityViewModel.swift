@@ -19,6 +19,7 @@ class CommunityViewModel {
     
     @MainActor let cellNeedsUpdatePublisher = PassthroughSubject<CommunityCellModel, Never>()
     @MainActor let layoutContainerSizeUpdatePublisher = PassthroughSubject<CGSize, Never>()
+    @MainActor let layoutContentsSizeUpdatePublisher = PassthroughSubject<CGSize, Never>()
     @MainActor let visibleCellsUpdatePublisher = PassthroughSubject<Void, Never>()
     
     private static let probeAheadOrBehindRangeForDownloads = 8
@@ -172,6 +173,35 @@ class CommunityViewModel {
         }
         
         
+        for visibleCommunityCellModel in visibleCommunityCellModels {
+            
+            if let communityCellData = getCommunityCellData(at: visibleCommunityCellModel.index) {
+                if let key = communityCellData.key {
+                    if _imageDict[key] === nil {
+                        await downloader.addDownloadTask(communityCellData)
+                    }
+                }
+            }
+        }
+        
+        await _computeDownloadPriorities()
+        await downloader.startTasksIfNecessary()
+        
+        for communityCellModel in visibleCommunityCellModels {
+            if let communityCellData = getCommunityCellData(at: communityCellModel.index) {
+             
+                if let key = communityCellData.key {
+                    
+                    if let image = _imageDict[key] {
+                        
+                        //if visibleCommunityCellModel.
+                        if communityCellModel.attemptUpdateStateToSuccess(communityCellData, key, image) {
+                            cellNeedsUpdatePublisher.send(communityCellModel)
+                        }
+                    }
+                }
+            }
+        }
         
         
         isOnPulse = false
@@ -190,8 +220,51 @@ class CommunityViewModel {
     // yet again in the other function...
     //
     @MainActor func refreshAllCellStatesForVisibleCellsChanged() {
-        
-        
+        for communityCellModel in visibleCommunityCellModels {
+            let index = communityCellModel.index
+            if let communityCellData = getCommunityCellData(at: index) {
+                if let key = communityCellData.key {
+                    if let image = _imageDict[key] {
+                        if communityCellModel.attemptUpdateStateToSuccess(communityCellData, key, image) {
+                            if Self.DEBUG_STATE_CHANGES {
+                                print("🧰 @{\(communityCellModel.index)} State => .Success (\(image.size.width) x \(image.size.height)) [Refresh VisibleCellsChanged]")
+                            }
+                        }
+                    } else if _imageFailedSet.contains(index) {
+                        if communityCellModel.attemptUpdateStateToError(communityCellData, key) {
+                            if Self.DEBUG_STATE_CHANGES {
+                                print("🧰 @{\(communityCellModel.index)} State => .Error [Refresh VisibleCellsChanged]")
+                            }
+                        }
+                    } else {
+                        
+                        // If we are downloading, let's stay there, otherwise go idle...
+                        switch communityCellModel.cellModelState {
+                        case .downloading, .downloadingActively:
+                            break
+                        default:
+                            if communityCellModel.attemptUpdateStateToIdle(communityCellData, key) {
+                                if Self.DEBUG_STATE_CHANGES {
+                                    print("🧰 @{\(communityCellModel.index)} State => .Idle [Refresh VisibleCellsChanged]")
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if communityCellModel.attemptUpdateStateToMisingKey(communityCellData) {
+                        if Self.DEBUG_STATE_CHANGES {
+                            print("🧰 @{\(communityCellModel.index)} State => .MisingKey [Refresh VisibleCellsChanged]")
+                        }
+                    }
+                }
+            } else {
+                if communityCellModel.attemptUpdateStateToMisingModel() {
+                    if Self.DEBUG_STATE_CHANGES {
+                        print("🧰 @{\(communityCellModel.index)} State => .MisingModel [Refresh VisibleCellsChanged]")
+                    }
+                }
+            }
+        }
     }
     
     // This is expected to be called often, controlled by heart
@@ -692,7 +765,7 @@ class CommunityViewModel {
     
     @MainActor private func _depositCommunityCellModel(_ cellModel: CommunityCellModel) {
         cellModel.index = -1
-        cellModel.cellModelState = .illegal
+        cellModel.cellModelState = .missingModel
         communityCellModelQueue.append(cellModel)
     }
     
@@ -899,14 +972,16 @@ class CommunityViewModel {
 }
 
 extension CommunityViewModel: CommunityGridLayoutDelegate {
+    func layoutContentsDidChangeSize(size: CGSize) {
+        layoutContentsSizeUpdatePublisher.send(size)
+    }
+    
+    func layoutContainerDidChangeSize(size: CGSize) {
+        layoutContainerSizeUpdatePublisher.send(size)
+    }
     
     @MainActor func layoutDidChangeVisibleCells() {
         handleVisibleCellsMayHaveChanged()
-    }
-    
-    @MainActor func layoutDidChangeSize() {
-        layoutContainerSizeUpdatePublisher.send(CGSize(width: gridLayout.width,
-                                                       height: gridLayout.height))
     }
 }
 
