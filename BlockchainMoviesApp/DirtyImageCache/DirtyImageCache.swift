@@ -38,7 +38,7 @@ class DirtyImageCache {
     
     private let name: String
     
-    private let DISABLED = false
+    var DISABLED = false
     
     @DirtyImageCacheActor
     private var fileRecycler = DirtyImageCacheFileRecycler(capacity: 4096)
@@ -57,6 +57,11 @@ class DirtyImageCache {
     @DirtyImageCacheActor func purge() async {
         try? await Task.sleep(nanoseconds: 100_000)
         fileRecycler.clear()
+    }
+    
+    @DirtyImageCacheActor func purgeRandomly() async {
+        try? await Task.sleep(nanoseconds: 100_000)
+        fileRecycler.clearRandomly()
     }
     
     @DirtyImageCacheActor func cacheImage(_ image: UIImage, _ key: String) async {
@@ -87,34 +92,49 @@ class DirtyImageCache {
         }
     }
     
-    @DirtyImageCacheActor func batchRetrieve(_ keyIndexs: [KeyIndex]) async -> [KeyIndex: UIImage] {
+    @DirtyImageCacheActor func retrieveBatch(_ keyIndexList: [KeyIndex]) async -> [KeyIndex: UIImage] {
         var result = [KeyIndex: UIImage]()
         
         if DISABLED { return result }
         
-        for keyIndex in keyIndexs {
-            var image: UIImage?
-            if let node = self.fileRecycler.get(keyIndex.key) {
-                image = node.loadImage()
+        // We load 4 images, then sleep for a short time
+        // repeating the process. If we load all the images
+        // at once, this can cause a lag thud. So, it's
+        // better to do them in little snips.
+        
+        var waveUpdateIndex = 0
+        while waveUpdateIndex < keyIndexList.count {
+            
+            var waveNumberOfUpdatesTriggered = 0
+            while waveUpdateIndex < keyIndexList.count && waveNumberOfUpdatesTriggered < 4 {
+                let keyIndex = keyIndexList[waveUpdateIndex]
+                
+                if let node = self.fileRecycler.get(keyIndex.key) {
+                    
+                    result[keyIndex] = node.loadImage()
+                    waveNumberOfUpdatesTriggered += 1
+                }
+                waveUpdateIndex += 1
             }
-            if let image = image {
-                result[keyIndex] = image
+            
+            if waveNumberOfUpdatesTriggered > 0 {
+                // The sleep should be a meaningful amount
+                // of time for a UI update to trickle through
+                // or there is no use for it. (0.015 seconds)
+                try? await Task.sleep(nanoseconds: 15_000_000)
             }
-            try? await Task.sleep(nanoseconds: 100_000)
         }
+        
         return result
     }
     
-    @DirtyImageCacheActor func singleRetrieve(_ keyIndex: KeyIndex) async -> UIImage? {
-        
+    // This really shouldn't be used unless it is
+    // for something like a banner or immutable
+    // content. For many thumbnails, use batchRetrieve.
+    @DirtyImageCacheActor func retrieve(_ keyIndex: KeyIndex) -> UIImage? {
         if DISABLED { return nil }
-        
-        var image: UIImage?
         if let node = self.fileRecycler.get(keyIndex.key) {
-            image = node.loadImage()
-        }
-        if let image = image {
-            return image
+            return node.loadImage()
         }
         return nil
     }

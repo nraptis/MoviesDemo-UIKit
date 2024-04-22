@@ -10,13 +10,8 @@ import UIKit
 class CommunityGridCellBottomContentView: UIView {
 
     lazy var button1: ColoredButton = {
-        let result = ColoredButton(upColor: DarkwingDuckTheme._naughtyYellow, downColor: DarkwingDuckTheme._silkyBlue)
-        result.translatesAutoresizingMaskIntoConstraints = false
-        return result
-    }()
-    
-    lazy var button2: ColoredButton = {
-        let result = ColoredButton(upColor: DarkwingDuckTheme._silkyBlue, downColor: DarkwingDuckTheme._naughtyYellow)
+        let result = ColoredButton(upColor: DarkwingDuckTheme._gray900, downColor: DarkwingDuckTheme._gray700)
+        result.setTitleColor(DarkwingDuckTheme._gray050, for: .normal)
         result.translatesAutoresizingMaskIntoConstraints = false
         return result
     }()
@@ -51,30 +46,13 @@ class CommunityGridCellBottomContentView: UIView {
                                attribute: .left, multiplier: 1.0, constant: 4.0),
             NSLayoutConstraint(item: button1, attribute: .top, relatedBy: .equal, toItem: self,
                                attribute: .top, multiplier: 1.0, constant: 4.0),
-            NSLayoutConstraint(item: button1, attribute: .right, relatedBy: .equal, toItem: centerView,
-                               attribute: .left, multiplier: 1.0, constant: 0.0),
+            NSLayoutConstraint(item: button1, attribute: .right, relatedBy: .equal, toItem: self,
+                               attribute: .right, multiplier: 1.0, constant: -4.0),
             NSLayoutConstraint(item: button1, attribute: .bottom, relatedBy: .equal, toItem: self,
                                attribute: .bottom, multiplier: 1.0, constant: -4.0)
         ])
         
         button1.addTarget(self, action: #selector(clickButton1), for: .touchUpInside)
-        
-        
-        addSubview(button2)
-        button2.layer.cornerRadius = CommunityCellConstants.innerRadius - 4
-        button2.clipsToBounds = true
-        addConstraints([
-            NSLayoutConstraint(item: button2, attribute: .left, relatedBy: .equal, toItem: centerView,
-                               attribute: .right, multiplier: 1.0, constant: 0.0),
-            NSLayoutConstraint(item: button2, attribute: .top, relatedBy: .equal, toItem: self,
-                               attribute: .top, multiplier: 1.0, constant: 4.0),
-            NSLayoutConstraint(item: button2, attribute: .right, relatedBy: .equal, toItem: self,
-                               attribute: .right, multiplier: 1.0, constant: -4.0),
-            NSLayoutConstraint(item: button2, attribute: .bottom, relatedBy: .equal, toItem: self,
-                               attribute: .bottom, multiplier: 1.0, constant: -4.0)
-        ])
-        
-        button2.addTarget(self, action: #selector(clickButton2), for: .touchUpInside)
     }
     
     @objc func clickButton1() {

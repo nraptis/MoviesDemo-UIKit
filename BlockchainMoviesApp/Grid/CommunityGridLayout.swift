@@ -20,7 +20,7 @@ class CommunityGridLayout {
 
     }
     
-    weak var delegate: CommunityGridLayoutDelegate?
+    @MainActor weak var delegate: CommunityGridLayoutDelegate?
     
     // The content (grid) entire width and height
     private(set) var width: CGFloat = 255
@@ -28,7 +28,7 @@ class CommunityGridLayout {
     
     // cell grid layout parameters
     //private let cellMaximumWidth = Device.isPad ? 170 : 100
-    private let cellMaximumWidth = Device.isPad ? 90 : 50
+    private let cellMaximumWidth = Device.isPad ? 90 : 70
     
     private var cellWidth = 100
     private var cellHeight = 100
@@ -66,7 +66,7 @@ class CommunityGridLayout {
         _numberOfRows
     }
     
-    func registerNumberOfCells(_ numberOfCells: Int) {
+    @MainActor func registerNumberOfCells(_ numberOfCells: Int) {
         if numberOfCells != _numberOfCells {
             _numberOfCells = numberOfCells
             layoutGrid()
@@ -74,7 +74,7 @@ class CommunityGridLayout {
         }
     }
     
-    func registerContainer(_ newContainerSize: CGSize, _ numberOfCells: Int) {
+    @MainActor func registerContainer(_ newContainerSize: CGSize, _ numberOfCells: Int) {
         if newContainerSize != _containerSize || numberOfCells != _numberOfCells {
             print("🤡 [CommunityGridLayout] registerContainer [\(newContainerSize.width) x \(newContainerSize.height)], #\(numberOfCells) cells.")
             _containerSize = newContainerSize
@@ -88,7 +88,7 @@ class CommunityGridLayout {
         }
     }
     
-    func registerScrollContent(_ newScrollContentOffset: CGPoint) {
+    @MainActor func registerScrollContent(_ newScrollContentOffset: CGPoint) {
         _scrollContentOffset = newScrollContentOffset
         refreshVisibleCells()
     }
@@ -124,7 +124,7 @@ class CommunityGridLayout {
     
     private var _previousFirstCellIndexOnScreen = -1
     private var _previousLastCellIndexOnScreen = -1
-    func refreshVisibleCells() {
+    @MainActor func refreshVisibleCells() {
         _calculateLastCellIndexOnScreen()
         _calculateLastCellIndexOnScreenNotClamped()
         _calculateFirstCellIndexOnScreen()
@@ -136,7 +136,7 @@ class CommunityGridLayout {
         }
     }
     
-    private func layoutGrid() {
+    @MainActor private func layoutGrid() {
         
         calculateNumberOfCols()
         calculateNumberOfRows()

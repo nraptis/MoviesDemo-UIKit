@@ -167,11 +167,11 @@ class DirtyImageDownloaderTask: NSObject, URLSessionDelegate {
             
             return
         }
-        
+
         //TODO: Remove
-        try? await Task.sleep(nanoseconds: 1_250_000_000)
         
-        if (item.index % 7 == 3) {
+        //try? await Task.sleep(nanoseconds: 100_000_000)
+        if ((Int.random(in: 0...8)) == 1) {
             isActive = false
             await MainActor.run {
                 self.downloader = nil
@@ -180,19 +180,6 @@ class DirtyImageDownloaderTask: NSObject, URLSessionDelegate {
             
             return
         }
-        
-        //TODO: Remove
-        /*
-        if Int.random(in: 0...3) == 1 {
-            isActive = false
-            await MainActor.run {
-                self.downloader = nil
-                downloader.handleDownloadTaskDidFail(task: self)
-            }
-            
-            return
-        }
-        */
         
         isActive = false
         await MainActor.run {

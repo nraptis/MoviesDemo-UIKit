@@ -128,8 +128,14 @@ struct CommunityView: View {
         let scale = fit.scale
         
         return ZStack {
-            Image(uiImage: DarkwingDuckTheme.logo)
-                .scaleEffect(scale)
+            Button(action: {
+                Task {
+                    await communityViewModel.debugInvalidateState()
+                }
+            }, label: {
+                Image(uiImage: DarkwingDuckTheme.logo)
+                    .scaleEffect(scale)
+            })
         }
         .frame(width: width, height: height)
         .background(DarkwingDuckTheme.gray100)

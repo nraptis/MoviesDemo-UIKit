@@ -57,7 +57,7 @@ class CommunityGridView: UIView {
         ])
         
         scrollView.addSubview(scrollContent)
-        scrollView.backgroundColor = DarkwingDuckTheme._gray100
+        scrollView.backgroundColor = DarkwingDuckTheme._gray050
         scrollView.indicatorStyle = .white
         
         let refreshControl = UIRefreshControl()
@@ -73,7 +73,7 @@ class CommunityGridView: UIView {
         ])
         
         scrollContent.addConstraint(scrollContentHeightConstraint)
-        scrollContent.backgroundColor = DarkwingDuckTheme._gray100
+        scrollContent.backgroundColor = DarkwingDuckTheme._gray050
     }
     
     required init?(coder: NSCoder) {
@@ -115,9 +115,6 @@ class CommunityGridView: UIView {
     }
     
     func layoutNotifyotifyContentSizeMayHaveChanged(_ newContentSize: CGSize) {
-        
-        print("layoutNotifyotifyContentSizeMayHaveChanged")
-        
         if newContentSize.width != contentSize.width || newContentSize.height != contentSize.height {
             contentSize = newContentSize
             scrollContentHeightConstraint.constant = newContentSize.height
@@ -126,19 +123,13 @@ class CommunityGridView: UIView {
         }
     }
     
-    
-    
     // @PreCondition: _visibleCommunityCellModelSet is populated. This should
     //                happen in layoutNotifyotifyVisibleCellsMayHaveChanged
     private func _reconcileNumberOfViewsWithMaximum() {
         let maximumNumberOfVisibleCells = gridLayout.getMaximumNumberOfVisibleCells()
-        let visibleCommunityCellModels = communityViewModel.visibleCommunityCellModels
         
         if maximumNumberOfVisibleCells < communityGridCellViews.count {
             let numberToDestroy = communityGridCellViews.count - maximumNumberOfVisibleCells
-            print("🧨 [GCCM] Need to Destroy \(numberToDestroy) cells!")
-            
-            var numberDestroyed = 0
             for _ in 0..<numberToDestroy {
                 
                 // Destroy one that is not visible...
@@ -159,10 +150,7 @@ class CommunityGridView: UIView {
             }
             
         } else if maximumNumberOfVisibleCells > communityGridCellViews.count {
-            
             let numberToCreate = maximumNumberOfVisibleCells - communityGridCellViews.count
-            print("🧨 [GCCM] Need to Create \(numberToCreate) cells!")
-            
             for _ in 0..<numberToCreate {
                 createCommunityGridCellView()
             }
@@ -212,7 +200,6 @@ class CommunityGridView: UIView {
                     _visibleCommunityGridCellViewSet.insert(index)
                     
                 } else {
-                    print("🪚 Decomissioned: \(index), No Longer On Screen")
                     communityGridCellView.communityCellModel = placeholderCommunityCellModel
                     communityGridCellView.hide()
                     _communityGridCellViewsToRecycle.append(communityGridCellView)
@@ -229,8 +216,6 @@ class CommunityGridView: UIView {
                 _communityCellModelsToAdd.append(communityCellModel)
             }
         }
-        
-        print("🪩 We Have \(_communityGridCellViewsToRecycle.count) Slots, For \(_communityCellModelsToAdd.count) Visible Cells...")
         
         _communityGridCellViewsToRefresh.removeAll(keepingCapacity: true)
         
@@ -257,7 +242,10 @@ class CommunityGridView: UIView {
         
         for communityGridCellView in communityGridCellViews {
             if communityGridCellView.isActive {
-                if communityGridCellView.communityCellModel === communityCellModel {
+                // The model may have swapped, so we may need to re-assign.
+                // We do everything based on index here, so just check index.
+                if communityGridCellView.communityCellModel.index == communityCellModel.index {
+                    communityGridCellView.communityCellModel = communityCellModel
                     notifyCellStateChange(communityGridCellView)
                 }
             }
@@ -265,20 +253,7 @@ class CommunityGridView: UIView {
     }
     
     func notifyCellStateChange(_ communityGridCellView: CommunityGridCellView) {
-        
-        print("notifyCellStateChange @ \(communityGridCellView.communityCellModel.index)")
-        
-        let communityCellModel = communityGridCellView.communityCellModel
-        
         communityGridCellView.updateState()
-        
-        var page = 0
-        if communityViewModel.pageSize > 1 {
-            page = communityGridCellView.communityCellModel.index / communityViewModel.pageSize
-        }
-        
-        communityGridCellView.updates += 1
-        communityGridCellView.bottomContentView.button2.setTitle("P\(page)", for: .normal)
     }
     
     func refreshCommunityGridCellViewFrame(_ communityGridCellView: CommunityGridCellView) {

@@ -46,8 +46,14 @@ class CommunityGridCellView: UIView {
     }()
     
     lazy var errorHostingViewController: UIViewController = {
-        let result = UIHostingController(rootView: CommunityCellErrorView(retryHandler: {
-            print("retry")
+        let result = UIHostingController(rootView: CommunityCellErrorView(retryHandler: { [weak self] in
+            if let self = self {
+                let communityViewModel = self.communityViewModel
+                let index = communityCellModel.index
+                Task { @MainActor in
+                    await communityViewModel.handleCellForceRetryDownload(at: index)
+                }
+            }
         }))
         result.view.translatesAutoresizingMaskIntoConstraints = false
         result.view.backgroundColor = UIColor.clear
@@ -297,9 +303,21 @@ class CommunityGridCellView: UIView {
         
         let cellModelState = communityCellModel.cellModelState
         
+        self.backgroundColor = UIColor(red: CGFloat.random(in: 0.0...1.0),
+                                       green: CGFloat.random(in: 0.0...1.0),
+                                       blue: CGFloat.random(in: 0.0...1.0),
+                                       alpha: 1.0)
         
         switch cellModelState {
         case .downloading, .downloadingActively:
+            
+            switch cellModelState {
+            case .downloadingActively:
+                fillView.backgroundColor = DarkwingDuckTheme._gray400
+            default:
+                fillView.backgroundColor = DarkwingDuckTheme._gray200
+            }
+            
             if imageView.isHidden == false {
                 imageView.isHidden = true
                 imageView.isUserInteractionEnabled = false
@@ -339,10 +357,11 @@ class CommunityGridCellView: UIView {
                 button.isUserInteractionEnabled = false
             }
         case .success(_, _, let image):
+            fillView.backgroundColor = DarkwingDuckTheme._gray200
+            imageView.image = image
             if (imageView.isHidden == true) || (imageView.image !== image) {
                 imageView.isHidden = false
                 imageView.isUserInteractionEnabled = true
-                imageView.image = image
             }
             if frameView.isHidden == true {
                 frameView.isHidden = false
@@ -379,6 +398,7 @@ class CommunityGridCellView: UIView {
                 button.isUserInteractionEnabled = true
             }
         case .error:
+            fillView.backgroundColor = DarkwingDuckTheme._gray200
             if imageView.isHidden == false {
                 imageView.isHidden = true
                 imageView.isUserInteractionEnabled = false
@@ -418,6 +438,7 @@ class CommunityGridCellView: UIView {
                 button.isUserInteractionEnabled = false
             }
         case .missingKey, .idle:
+            fillView.backgroundColor = DarkwingDuckTheme._gray200
             if imageView.isHidden == false {
                 imageView.isHidden = true
                 imageView.isUserInteractionEnabled = false
@@ -457,6 +478,7 @@ class CommunityGridCellView: UIView {
                 button.isUserInteractionEnabled = true
             }
         case .missingModel:
+            fillView.backgroundColor = DarkwingDuckTheme._gray200
             if imageView.isHidden == false {
                 imageView.isHidden = true
                 imageView.isUserInteractionEnabled = false

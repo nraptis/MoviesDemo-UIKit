@@ -68,6 +68,39 @@ class DirtyImageCacheFileRecycler {
         table.removeAll()
     }
     
+    func clearRandomly() {
+        
+        var nodesToAddBack = [DirtyImageCacheFileRecyclerNode]()
+        
+        var node: DirtyImageCacheFileRecyclerNode!
+        node = tail.prev
+        while node !== head {
+            if Bool.random() {
+                nodesToAddBack.append(node)
+            }
+            let next = node.prev
+            node.prev = nil
+            node = next
+        }
+        
+        node = head.next
+        while node !== tail {
+            let next = node.next
+            node.next = nil
+            node.purge()
+            node = next
+        }
+        head.next = tail
+        tail.prev = head
+        count = 0
+        table.removeAll()
+        
+        for node in nodesToAddBack {
+            put(node.key, node.imageNumber, node.imagePath)
+        }
+        
+    }
+    
     func dumpToNumberList() -> [Int] {
         var result = [Int]()
         var node: DirtyImageCacheFileRecyclerNode!

@@ -17,7 +17,9 @@ class CommunityCellModel {
     // has an index of 0, and cells[100] has an index of 100.
     var index: Int = -1
     
-    func attemptUpdateStateToSuccess(_ communityCellData: CommunityCellData, _ key: String, _ image: UIImage) -> Bool {
+    func attemptUpdateCellStateSuccess(_ communityCellData: CommunityCellData, 
+                                     _ key: String,
+                                     _ image: UIImage) -> Bool {
         switch cellModelState {
         case .success:
             // No update is needed
@@ -28,7 +30,7 @@ class CommunityCellModel {
         }
     }
     
-    func attemptUpdateStateToDownloading(_ communityCellData: CommunityCellData, _ key: String) -> Bool {
+    func attemptUpdateCellStateDownloading(_ communityCellData: CommunityCellData, _ key: String) -> Bool {
         switch cellModelState {
         case .downloading:
             // No update is needed
@@ -39,7 +41,7 @@ class CommunityCellModel {
         }
     }
     
-    func attemptUpdateStateToDownloadingActively(_ communityCellData: CommunityCellData, _ key: String) -> Bool {
+    func attemptUpdateCellStateDownloadingActively(_ communityCellData: CommunityCellData, _ key: String) -> Bool {
         switch cellModelState {
         case .downloadingActively:
             // No update is needed
@@ -50,7 +52,7 @@ class CommunityCellModel {
         }
     }
     
-    func attemptUpdateStateToError(_ communityCellData: CommunityCellData, _ key: String) -> Bool {
+    func attemptUpdateCellStateError(_ communityCellData: CommunityCellData, _ key: String) -> Bool {
         switch cellModelState {
         case .error:
             // No update is needed
@@ -61,7 +63,7 @@ class CommunityCellModel {
         }
     }
     
-    func attemptUpdateStateToIdle(_ communityCellData: CommunityCellData, _ key: String) -> Bool {
+    func attemptUpdateCellStateIdle(_ communityCellData: CommunityCellData, _ key: String) -> Bool {
         switch cellModelState {
         case .idle:
             // No update is needed
@@ -72,7 +74,7 @@ class CommunityCellModel {
         }
     }
     
-    func attemptUpdateStateToMisingKey(_ communityCellData: CommunityCellData) -> Bool {
+    func attemptUpdateCellStateMisingKey(_ communityCellData: CommunityCellData) -> Bool {
         switch cellModelState {
         case .missingKey:
             // No update is needed
@@ -83,7 +85,7 @@ class CommunityCellModel {
         }
     }
     
-    func attemptUpdateStateToMisingModel() -> Bool {
+    func attemptUpdateCellStateMisingModel() -> Bool {
         switch cellModelState {
         case .missingModel:
             // No update is needed

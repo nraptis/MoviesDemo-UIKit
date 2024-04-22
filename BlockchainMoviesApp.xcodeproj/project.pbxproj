@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E81BC6CD2BD6A0CE00CDB195 /* CommunityViewModel+CellUpdates.swift in Sources */ = {isa = PBXBuildFile; fileRef = E81BC6CC2BD6A0CE00CDB195 /* CommunityViewModel+CellUpdates.swift */; };
 		E83EA6A92BC4E9B20076D6BB /* BlockchainMoviesAppApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E83EA6A82BC4E9B20076D6BB /* BlockchainMoviesAppApp.swift */; };
 		E83EA6AD2BC4E9B30076D6BB /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E83EA6AC2BC4E9B30076D6BB /* Assets.xcassets */; };
 		E83EA6B02BC4E9B30076D6BB /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E83EA6AF2BC4E9B30076D6BB /* Preview Assets.xcassets */; };
@@ -15,7 +16,6 @@
 		E83EA6D52BC5A79E0076D6BB /* CommunityViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E83EA6D42BC5A79E0076D6BB /* CommunityViewModel.swift */; };
 		E83EA6DF2BC5B2F80076D6BB /* DarkwingDuckTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = E83EA6DE2BC5B2F80076D6BB /* DarkwingDuckTheme.swift */; };
 		E83EA6E22BC5B9840076D6BB /* DirtyImageDownloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = E83EA6E12BC5B9840076D6BB /* DirtyImageDownloader.swift */; };
-		E83EA6E42BC5B9A10076D6BB /* DirtyImageDownloaderType.swift in Sources */ = {isa = PBXBuildFile; fileRef = E83EA6E32BC5B9A10076D6BB /* DirtyImageDownloaderType.swift */; };
 		E83EA6E62BC5B9B30076D6BB /* DirtyImageDownloaderTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = E83EA6E52BC5B9B30076D6BB /* DirtyImageDownloaderTask.swift */; };
 		E83EA6E92BC5BE690076D6BB /* DirtyImageCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = E83EA6E82BC5BE690076D6BB /* DirtyImageCache.swift */; };
 		E83EA6EB2BC5BE770076D6BB /* DirtyImageCacheFileRecycler.swift in Sources */ = {isa = PBXBuildFile; fileRef = E83EA6EA2BC5BE770076D6BB /* DirtyImageCacheFileRecycler.swift */; };
@@ -58,6 +58,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		E81BC6CC2BD6A0CE00CDB195 /* CommunityViewModel+CellUpdates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CommunityViewModel+CellUpdates.swift"; sourceTree = "<group>"; };
 		E83EA6A52BC4E9B20076D6BB /* BlockchainMoviesApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BlockchainMoviesApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E83EA6A82BC4E9B20076D6BB /* BlockchainMoviesAppApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockchainMoviesAppApp.swift; sourceTree = "<group>"; };
 		E83EA6AC2BC4E9B30076D6BB /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -67,7 +68,6 @@
 		E83EA6D42BC5A79E0076D6BB /* CommunityViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommunityViewModel.swift; sourceTree = "<group>"; };
 		E83EA6DE2BC5B2F80076D6BB /* DarkwingDuckTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DarkwingDuckTheme.swift; sourceTree = "<group>"; };
 		E83EA6E12BC5B9840076D6BB /* DirtyImageDownloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirtyImageDownloader.swift; sourceTree = "<group>"; };
-		E83EA6E32BC5B9A10076D6BB /* DirtyImageDownloaderType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirtyImageDownloaderType.swift; sourceTree = "<group>"; };
 		E83EA6E52BC5B9B30076D6BB /* DirtyImageDownloaderTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirtyImageDownloaderTask.swift; sourceTree = "<group>"; };
 		E83EA6E82BC5BE690076D6BB /* DirtyImageCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirtyImageCache.swift; sourceTree = "<group>"; };
 		E83EA6EA2BC5BE770076D6BB /* DirtyImageCacheFileRecycler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirtyImageCacheFileRecycler.swift; sourceTree = "<group>"; };
@@ -147,10 +147,12 @@
 		E83EA6A72BC4E9B20076D6BB /* BlockchainMoviesApp */ = {
 			isa = PBXGroup;
 			children = (
+				E8CDA0882BD553B3003A1C73 /* CommunityView.swift */,
 				E867A0E92BC9FFFD003C77B4 /* Grid */,
 				E867A0F02BC9FFFD003C77B4 /* Reusable Views */,
 				E867A0E32BC9FFFD003C77B4 /* Utilities */,
 				E83EA6D42BC5A79E0076D6BB /* CommunityViewModel.swift */,
+				E81BC6CC2BD6A0CE00CDB195 /* CommunityViewModel+CellUpdates.swift */,
 				E8E2D9622BC822E000A41EC0 /* CommunityCellData.swift */,
 				E8CDA08C2BD5793A003A1C73 /* CommunityCellModel.swift */,
 				E8E733A52BD30D5D0095A81A /* CellModelState.swift */,
@@ -190,7 +192,6 @@
 			isa = PBXGroup;
 			children = (
 				E83EA6E12BC5B9840076D6BB /* DirtyImageDownloader.swift */,
-				E83EA6E32BC5B9A10076D6BB /* DirtyImageDownloaderType.swift */,
 				E83EA6E52BC5B9B30076D6BB /* DirtyImageDownloaderTask.swift */,
 			);
 			path = DirtyImageDownloader;
@@ -235,7 +236,6 @@
 				E8CDA0802BD54A41003A1C73 /* CommunityCellConstants.swift */,
 				E8CDA0822BD54CBF003A1C73 /* CommunityGridViewController.swift */,
 				E8CDA0862BD54D58003A1C73 /* CommunityGridViewControllerRepresentable.swift */,
-				E8CDA0882BD553B3003A1C73 /* CommunityView.swift */,
 				E8CDA08A2BD56EC7003A1C73 /* FirstAndLastIndex.swift */,
 				E8D30CE32BD5BCB400FBC658 /* CommunityCellSuccessView.swift */,
 				E8D30CE52BD5BCC100FBC658 /* CommunityCellLoadingView.swift */,
@@ -332,7 +332,6 @@
 				E83EA6E92BC5BE690076D6BB /* DirtyImageCache.swift in Sources */,
 				E8D30CE82BD5BE0F00FBC658 /* CommunityCellFrameView.swift in Sources */,
 				E83EA6ED2BC5BE810076D6BB /* DirtyImageCacheFileRecyclerNode.swift in Sources */,
-				E83EA6E42BC5B9A10076D6BB /* DirtyImageDownloaderType.swift in Sources */,
 				E860FDF42BD5DB80009EF7A1 /* CommunityGridCellBottomContentView.swift in Sources */,
 				E867A0F32BC9FFFD003C77B4 /* FileBuffer.swift in Sources */,
 				E8CDA0892BD553B3003A1C73 /* CommunityView.swift in Sources */,
@@ -372,6 +371,7 @@
 				E867A0F62BC9FFFD003C77B4 /* UIImage+Resize.swift in Sources */,
 				E867A0DC2BC9FC20003C77B4 /* RootViewModel.swift in Sources */,
 				E8E2D9642BC822E000A41EC0 /* CommunityCellData.swift in Sources */,
+				E81BC6CD2BD6A0CE00CDB195 /* CommunityViewModel+CellUpdates.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

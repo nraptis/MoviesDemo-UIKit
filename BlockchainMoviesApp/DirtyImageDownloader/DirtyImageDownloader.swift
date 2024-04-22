@@ -7,6 +7,19 @@
 
 import UIKit
 
+//
+// The most important thing to note about this downloader
+// is that it is PRIORITY based. It WILL NOT START a download
+// task until the priority has been set. This is to prevent
+// race conditions, such as the wrong item downloading first.
+//
+
+//
+// Note: This "DirtyImageDownloaderActor" is a high speed
+//       actor, it is only for protecting the mutable state
+//       of the internal dictionary. So all awaits are
+//       going to be lightning quick.
+//
 @globalActor actor DirtyImageDownloaderActor {
     static let shared = DirtyImageDownloaderActor()
 }
@@ -18,12 +31,17 @@ protocol DirtyImageDownloaderDelegate: AnyObject {
     func dataDownloadDidCancel(_ index: Int)
 }
 
+protocol DirtyImageDownloaderType: AnyObject, Hashable {
+    var index: Int { get }
+    var urlString: String? { get }
+}
+
 class DirtyImageDownloader {
     
     var isPaused = false
     var isBlocked = false
     
-    weak var delegate: DirtyImageDownloaderDelegate?
+    @MainActor weak var delegate: DirtyImageDownloaderDelegate?
     
     private let numberOfSimultaneousDownloads: Int
     init(numberOfSimultaneousDownloads: Int) {
@@ -47,10 +65,25 @@ class DirtyImageDownloader {
         taskDict.removeAll(keepingCapacity: true)
     }
     
+    @DirtyImageDownloaderActor func cancelAllRandomly() async {
+        for (_, task) in taskDict {
+            if Bool.random() {
+                await task.invalidate()
+            }
+        }
+        taskDict.removeAll(keepingCapacity: true)
+    }
+    
     @DirtyImageDownloaderActor private var _purgeList = [Int]()
     
     @DirtyImageDownloaderActor func cancelAllOutOfIndexRange(firstIndex: Int, lastIndex: Int) async {
-        
+        for (index, task) in taskDict {
+            if index >= firstIndex && index <= lastIndex {
+                
+            } else {
+                await task.invalidate()
+            }
+        }
     }
     
     @DirtyImageDownloaderActor func startTasksIfNecessary() async {
@@ -89,18 +122,19 @@ class DirtyImageDownloader {
         let tasksToStart = chooseTasksToStart(numberOfTasks: numberOfTasksToStart)
         
         for taskToStart in tasksToStart {
+            let index = taskToStart.index
             taskToStart.isActive = true
+            await MainActor.run {
+                delegate?.dataDownloadDidStart(index)
+            }
         }
         
-        await withTaskGroup(of: Void.self) { taskGroup in
-            for taskToStart in tasksToStart {
-                let index = taskToStart.index
-                await MainActor.run {
-                    delegate?.dataDownloadDidStart(index)
-                }
-                
-                taskGroup.addTask {
-                    await taskToStart.fire()
+        Task {
+            await withTaskGroup(of: Void.self) { taskGroup in
+                for taskToStart in tasksToStart {
+                    taskGroup.addTask {
+                        await taskToStart.fire()
+                    }
                 }
             }
         }
@@ -124,7 +158,9 @@ class DirtyImageDownloader {
             
             task.isActive = true
             
-            delegate?.dataDownloadDidStart(index)
+            await MainActor.run {
+                delegate?.dataDownloadDidStart(index)
+            }
             
             // For the sake of user feedback, let's
             // sleep for a second here...
@@ -182,6 +218,26 @@ class DirtyImageDownloader {
         }
     }
     
+    @DirtyImageDownloaderActor private var _setPriorityBatchUpdateSet = Set<Int>()
+    @DirtyImageDownloaderActor func setPriorityBatchAndSetAllOtherPrioritiesToZero(_ items: [any DirtyImageDownloaderType], _ priorities: [Int]) {
+        var index = 0
+        while index < items.count && index < priorities.count {
+            let item = items[index]
+            let priority = priorities[index]
+            if let task = taskDict[item.index] {
+                task.setPriority(priority)
+            }
+            _setPriorityBatchUpdateSet.insert(item.index)
+            index += 1
+        }
+        
+        for (key, task) in taskDict {
+            if !_setPriorityBatchUpdateSet.contains(key) {
+                task.setPriority(0)
+            }
+        }
+    }
+    
     @DirtyImageDownloaderActor func setPriority(_ item: any DirtyImageDownloaderType, _ priority: Int) {
         if let task = taskDict[item.index] {
             task.setPriority(priority)
@@ -223,8 +279,10 @@ class DirtyImageDownloader {
     
     @DirtyImageDownloaderActor func isDownloading(_ item: any DirtyImageDownloaderType) -> Bool {
         var result = false
-        if taskDict[item.index] != nil {
-            result = true
+        if let task = taskDict[item.index] {
+            if !task.isInvalidated {
+                result = true
+            }
         }
         return result
     }
@@ -232,7 +290,11 @@ class DirtyImageDownloader {
     @DirtyImageDownloaderActor func isDownloadingActively(_ item: any DirtyImageDownloaderType) -> Bool {
         var result = false
         if let task = taskDict[item.index] {
-            result = task.isActive
+            if !task.isInvalidated {
+                if task.isActive {
+                    result = true
+                }
+            }
         }
         return result
     }
@@ -242,24 +304,15 @@ extension DirtyImageDownloader {
     @MainActor func handleDownloadTaskDidInvalidate(task: DirtyImageDownloaderTask) {
         let index = task.index
         delegate?.dataDownloadDidCancel(index)
-        Task { @DirtyImageDownloaderActor in
-            await startTasksIfNecessary()
-        }
     }
     
     @MainActor func handleDownloadTaskDidSucceed(task: DirtyImageDownloaderTask, image: UIImage) {
         let index = task.index
         delegate?.dataDownloadDidSucceed(index, image: image)
-        Task { @DirtyImageDownloaderActor in
-            await startTasksIfNecessary()
-        }
     }
     
     @MainActor func handleDownloadTaskDidFail(task: DirtyImageDownloaderTask) {
         let index = task.index
         delegate?.dataDownloadDidFail(index)
-        Task { @DirtyImageDownloaderActor in
-            await startTasksIfNecessary()
-        }
     }
 }

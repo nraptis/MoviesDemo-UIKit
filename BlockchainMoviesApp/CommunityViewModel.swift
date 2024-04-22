@@ -12,10 +12,104 @@ import Combine
 
 class CommunityViewModel {
     
-    private static let DEBUG_STATE_CHANGES = false
+    private static let DEBUG_STATE_CHANGES = true
     
     typealias NWMovie = BlockChainNetworking.NWMovie
     typealias DBMovie = BlockChainDatabase.DBMovie
+    
+    @MainActor func debugInvalidateState() async {
+        
+        imageCache.DISABLED = Bool.random()
+        let cacheAction = Int.random(in: 0...2)
+        if cacheAction == 0 {
+            await imageCache.purge()
+        } else if cacheAction == 1 {
+            await imageCache.purgeRandomly()
+        } else {
+            // Leave the cache as is...
+        }
+        
+        let downloaderAction = Int.random(in: 0...2)
+        if downloaderAction == 0 {
+            await downloader.cancelAll()
+        } else if downloaderAction == 1 {
+            await downloader.cancelAllRandomly()
+        } else {
+            // Leave the downloader as is...
+        }
+        
+        if Bool.random() {
+            // Punch random holes in the data
+            for index in communityCellDatas.indices {
+                if Int.random(in: 0...5) == 3 {
+                    communityCellDatas[index] = nil
+                }
+            }
+        }
+        
+        if Bool.random() {
+            
+            for index in communityCellDatas.indices {
+                // Blank out random keys in the data
+                if Int.random(in: 0...8) == 3 {
+                    if let communityCellData = communityCellDatas[index] {
+                        communityCellData.poster_path = nil
+                        communityCellData.urlString = nil
+                    }
+                }
+                
+                // Make wrong random keys in the data
+                if Int.random(in: 0...8) == 6 {
+                    if let communityCellData = communityCellDatas[index] {
+                        communityCellData.poster_path = "abc"
+                        communityCellData.urlString = "abc"
+                    }
+                }
+            }
+        }
+        
+        let imageDictionaryAction = Int.random(in: 0...2)
+        if imageDictionaryAction == 0 {
+            _imageDict.removeAll(keepingCapacity: true)
+        } else if imageDictionaryAction == 1 {
+            
+            var _newImageDict = [String: UIImage]()
+            
+            for (key, value) in _imageDict {
+                if Bool.random() {
+                    _newImageDict[key] = value
+                }
+            }
+            _imageDict.removeAll(keepingCapacity: true)
+            for (key, value) in _newImageDict {
+                 _newImageDict[key] = value
+            }
+        } else {
+            // leave the image dict alone
+        }
+        
+        let failDictionaryAction = Int.random(in: 0...2)
+        if failDictionaryAction == 0 {
+            _imageFailedSet.removeAll(keepingCapacity: true)
+        } else if failDictionaryAction == 1 {
+            var newList = [Int]()
+            for number in _imageFailedSet {
+                if Bool.random() {
+                    newList.append(number)
+                }
+            }
+            _imageFailedSet.removeAll(keepingCapacity: true)
+            for number in newList {
+                _imageFailedSet.insert(number)
+            }
+        }
+        
+        // We will always blank out _imageDidCheckCacheSet.
+        // Otherwise, deleting random elements from the
+        // cache and here is not going to jibe...
+        _imageDidCheckCacheSet.removeAll(keepingCapacity: true)
+        
+    }
     
     @MainActor let cellNeedsUpdatePublisher = PassthroughSubject<CommunityCellModel, Never>()
     @MainActor let layoutContainerSizeUpdatePublisher = PassthroughSubject<CGSize, Never>()
@@ -25,7 +119,7 @@ class CommunityViewModel {
     private static let probeAheadOrBehindRangeForDownloads = 8
     
     private var databaseController = BlockChainDatabase.DBDatabaseController()
-    private let downloader = DirtyImageDownloader(numberOfSimultaneousDownloads: 2)
+    private let downloader = DirtyImageDownloader(numberOfSimultaneousDownloads: 3)
     
     @MainActor fileprivate var _imageDict  = [String: UIImage]()
     @MainActor fileprivate var _imageFailedSet = Set<Int>()
@@ -36,6 +130,8 @@ class CommunityViewModel {
     
     @MainActor private(set) var visibleCommunityCellModels = [CommunityCellModel]()
     @MainActor private(set) var communityCellModels = [CommunityCellModel]()
+    
+    @MainActor private(set) var _downloadCommunityCellDatas = [CommunityCellData]()
     
     var pageSize = 0
     
@@ -125,19 +221,35 @@ class CommunityViewModel {
     //
     
     @MainActor func heartbeat() async {
-        
         await pulse()
-        
-        Task { [weak self] in
-            
-            try? await Task.sleep(nanoseconds: 50_000_000)
-            
-            Task { @MainActor in
+        Task {
+            try? await Task.sleep(nanoseconds: 20_000_000)
+            Task { @MainActor [weak self] in
                 if let self = self {
                     await self.heartbeat()
                 }
             }
         }
+    }
+    
+    @MainActor private var _batchUpdateCommunityCellModels = [CommunityCellModel]()
+    @MainActor private func getBatchUpdateChunkNumberOfCells() -> Int {
+        var result = gridLayout.getNumberOfCols()
+        if result < 4 {
+            result = 4
+        }
+        if result > 8 {
+            result = 8
+        }
+        return result
+    }
+    
+    @MainActor private func getBatchUpdateChunkSleepDuration() -> UInt64 {
+        //0.01 seconds
+        return 10_000_000
+        
+        // 0.5 seconds
+        //return 500_000_000
     }
     
     @MainActor private var isOnPulse = false
@@ -155,57 +267,14 @@ class CommunityViewModel {
             pulseNumber = 1
         }
         
-        // 1.) Get the cells which are currently displayed.
-        var firstCellIndexOnScreen = gridLayout.getFirstCellIndexOnScreen() - Self.probeAheadOrBehindRangeForDownloads
-        if firstCellIndexOnScreen < 0 {
-            firstCellIndexOnScreen = 0
-        }
+        await refreshAllCellStatesAndReconcile()
         
-        var lastCellIndexOnScreen = gridLayout.getLastCellIndexOnScreen() + Self.probeAheadOrBehindRangeForDownloads
-        if lastCellIndexOnScreen >= numberOfCells {
-            lastCellIndexOnScreen = numberOfCells - 1
-        }
-        
-        // 2.) Make sure we talking about a valid range of cells.
-        if (numberOfCells <= 0) || (firstCellIndexOnScreen > lastCellIndexOnScreen) {
-            isOnPulse = false
-            return
-        }
-        
-        
-        for visibleCommunityCellModel in visibleCommunityCellModels {
-            
-            if let communityCellData = getCommunityCellData(at: visibleCommunityCellModel.index) {
-                if let key = communityCellData.key {
-                    if _imageDict[key] === nil {
-                        await downloader.addDownloadTask(communityCellData)
-                    }
-                }
-            }
-        }
-        
-        await _computeDownloadPriorities()
-        await downloader.startTasksIfNecessary()
-        
-        for communityCellModel in visibleCommunityCellModels {
-            if let communityCellData = getCommunityCellData(at: communityCellModel.index) {
-             
-                if let key = communityCellData.key {
-                    
-                    if let image = _imageDict[key] {
-                        
-                        //if visibleCommunityCellModel.
-                        if communityCellModel.attemptUpdateStateToSuccess(communityCellData, key, image) {
-                            cellNeedsUpdatePublisher.send(communityCellModel)
-                        }
-                    }
-                }
-            }
-        }
+        fetchMorePagesIfNecessary()
         
         isOnPulse = false
     }
     
+    //
     // This will be 100% synchronous, essentially a simple check.
     // For example, if the image is in the image dictionary, we will
     // update the states appropriately. We should *NOT* add anything
@@ -219,49 +288,67 @@ class CommunityViewModel {
     // yet again in the other function...
     //
     @MainActor func refreshAllCellStatesForVisibleCellsChanged() {
+        
+        // We are going to immediately update all the cells, we are only
+        // checking the visible cells. So, this is a bit of a nombo breaker
+        // in that, we just use an empty set of visible cells.
+        //_visibleCommunityCellModelIndices.removeAll(keepingCapacity: true)
+        _refreshVisibleCommunityCellModelIndices()
+        
         for communityCellModel in visibleCommunityCellModels {
             let index = communityCellModel.index
             if let communityCellData = getCommunityCellData(at: index) {
                 if let key = communityCellData.key {
                     if let image = _imageDict[key] {
-                        if communityCellModel.attemptUpdateStateToSuccess(communityCellData, key, image) {
-                            if Self.DEBUG_STATE_CHANGES {
-                                print("🧰 @{\(communityCellModel.index)} State => .Success (\(image.size.width) x \(image.size.height)) [Refresh VisibleCellsChanged]")
-                            }
-                        }
+                        _ = attemptUpdateCellStateSuccess(communityCellModel: communityCellModel,
+                                                          communityCellData: communityCellData,
+                                                          visibleCellIndices: _visibleCommunityCellModelIndices, 
+                                                          isFromRefresh: false,
+                                                          key: key,
+                                                          image: image,
+                                                          debug: "VisibleCellsChanged, Have Image", 
+                                                          emoji: "🧰")
                     } else if _imageFailedSet.contains(index) {
-                        if communityCellModel.attemptUpdateStateToError(communityCellData, key) {
-                            if Self.DEBUG_STATE_CHANGES {
-                                print("🧰 @{\(communityCellModel.index)} State => .Error [Refresh VisibleCellsChanged]")
-                            }
-                        }
+                        _ = attemptUpdateCellStateError(communityCellModel: communityCellModel,
+                                                        communityCellData: communityCellData,
+                                                        visibleCellIndices: _visibleCommunityCellModelIndices,
+                                                        isFromRefresh: false,
+                                                        key: key,
+                                                        debug: "VisibleCellsChanged, FailSet", 
+                                                        emoji: "🧰")
                     } else {
                         
-                        // If we are downloading, let's stay there, otherwise go idle...
+                        // If we are downloading, let's stay there, otherwise go downloading...
                         switch communityCellModel.cellModelState {
                         case .downloading, .downloadingActively:
+                            // We are already in a downloading state
                             break
                         default:
-                            if communityCellModel.attemptUpdateStateToIdle(communityCellData, key) {
-                                if Self.DEBUG_STATE_CHANGES {
-                                    print("🧰 @{\(communityCellModel.index)} State => .Idle [Refresh VisibleCellsChanged]")
-                                }
-                            }
+                            // We are already in the idle state, this is
+                            // an illegal configuration.
+                            _ = attemptUpdateCellStateDownloading(communityCellModel: communityCellModel,
+                                                                  communityCellData: communityCellData,
+                                                                  visibleCellIndices: _visibleCommunityCellModelIndices,
+                                                                  isFromRefresh: false,
+                                                                  key: key,
+                                                                  debug: "VisibleCellsChanged, Mock Downloading",
+                                                                  emoji: "🧰")
                         }
                     }
                 } else {
-                    if communityCellModel.attemptUpdateStateToMisingKey(communityCellData) {
-                        if Self.DEBUG_STATE_CHANGES {
-                            print("🧰 @{\(communityCellModel.index)} State => .MisingKey [Refresh VisibleCellsChanged]")
-                        }
-                    }
+                    _ = attemptUpdateCellStateMissingKey(communityCellModel: communityCellModel,
+                                                         communityCellData: communityCellData,
+                                                         visibleCellIndices: _visibleCommunityCellModelIndices,
+                                                         isFromRefresh: false,
+                                                         debug: "Key Not Found",
+                                                         emoji: "🧰")
                 }
             } else {
-                if communityCellModel.attemptUpdateStateToMisingModel() {
-                    if Self.DEBUG_STATE_CHANGES {
-                        print("🧰 @{\(communityCellModel.index)} State => .MisingModel [Refresh VisibleCellsChanged]")
-                    }
-                }
+                _ = attemptUpdateCellStateMisingModel(communityCellModel: communityCellModel,
+                                                      visibleCellIndices: _visibleCommunityCellModelIndices,
+                                                      isFromRefresh: false,
+                                                      debug: "Model Not Found",
+                                                      emoji: "🧰")
             }
         }
     }
@@ -293,10 +380,541 @@ class CommunityViewModel {
     // will be 100% managed by this function. No other function
     // should add anything to the downloader.
     //
-    @MainActor func refreshAllCellStatesAndReconcile() async {
+    
+    @MainActor private func refreshAllCellStatesAndReconcile() async {
+        
+        let batchUpdateChunkNumberOfCells = getBatchUpdateChunkNumberOfCells()
+        let batchUpdateChunkSleepDuration = getBatchUpdateChunkSleepDuration()
         
         
+        // See if we have images in dictionary with wrong
+        // state on the cell model. This can happen in between
+        // awaits. Since we are not checking every single cell
+        // after every single await (not practical), we do this.
+        if true {
+            
+            // This loop, which is repeated several times, ensures that only
+            // "batchUpdateChunkNumberOfCells" cells are updated between each
+            // sleep. If we update ALL of the cells, this can cause a lag spike.
+            // We leverage "attemptUpdate..." which will return true if, both the
+            // a.) state changed
+            // b.) combine publisher updated a cell
+            // In this case, we consider this an "update"... Once we get
+            // "batchUpdateChunkNumberOfCells" "updates" then we sleep, to
+            // allow UI to catch up, to not interrupt the scrolling.
+            var waveUpdateIndex = 0
+            while waveUpdateIndex < visibleCommunityCellModels.count {
+                
+                // After each sleep, we need to reconcile this state.
+                // This is a little overboard, though techncally correct.
+                _refreshVisibleCommunityCellModelIndices()
+                
+                var waveNumberOfUpdatesTriggered = 0
+                while waveUpdateIndex < visibleCommunityCellModels.count && waveNumberOfUpdatesTriggered < batchUpdateChunkNumberOfCells {
+                    let communityCellModel = visibleCommunityCellModels[waveUpdateIndex]
+                    switch communityCellModel.cellModelState {
+                    case .success:
+                        // No need to check again.
+                        break
+                    default:
+                        let index = communityCellModel.index
+                        if let communityCellData = getCommunityCellData(at: index) {
+                            if let key = communityCellData.key {
+                                if let image = _imageDict[key] {
+                                    // Try to update the cell. Only if we cause a UI
+                                    // update do we consider that an update is triggered.
+                                    if attemptUpdateCellStateSuccess(communityCellModel: communityCellModel,
+                                                                     communityCellData: communityCellData,
+                                                                     visibleCellIndices: _visibleCommunityCellModelIndices,
+                                                                     isFromRefresh: false,
+                                                                     key: key,
+                                                                     image: image,
+                                                                     debug: "Reconcile, Recovered From Master Dict",
+                                                                     emoji: "🎰") {
+                                        waveNumberOfUpdatesTriggered += 1
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    waveUpdateIndex += 1
+                }
+                if waveNumberOfUpdatesTriggered > 0 {
+                    try? await Task.sleep(nanoseconds: batchUpdateChunkSleepDuration)
+                }
+            }
+        }
+        
+        // See if anything can be checked from the image cache.
+        // We store the KeyIndex pairs in _checkCacheKeys.
+        // We only want to do this once per each cell (until refresh)
+        // So, we store in _imageDidCheckCacheSet which ones we check.
+        _checkCacheKeys.removeAll(keepingCapacity: true)
+        for communityCellModel in visibleCommunityCellModels {
+            let index = communityCellModel.index
+            if _imageFailedSet.contains(index) { continue }
+            if _imageDidCheckCacheSet.contains(index) { continue }
+            if let communityCellData = getCommunityCellData(at: index) {
+                if let key = communityCellData.key {
+                    _imageDidCheckCacheSet.insert(index)
+                    _checkCacheKeys.append(KeyIndex(key: key, index: index))
+                }
+            }
+        }
+        
+        if _checkCacheKeys.count > 0 {
+            
+            print("🔧 Reconcile Process: We check \(_checkCacheKeys.count) key/index pairs in image cache.")
+            
+            // Batch fetch these "need to check cache". This batch fetch
+            // automatically will sleep after loading several images, so
+            // we are not starving the processor. When this finishes,
+            // we'll have the whole dictionary of [KeyIndex: UIImage]
+            // from the cache, so we can inject.
+            let keyIndexImageDict = await imageCache.retrieveBatch(_checkCacheKeys)
+            
+            
+            // This loop, which is repeated several times, ensures that only
+            // "batchUpdateChunkNumberOfCells" cells are updated between each
+            // sleep. If we update ALL of the cells, this can cause a lag spike.
+            // We leverage "attemptUpdate..." which will return true if, both the
+            // a.) state changed
+            // b.) combine publisher updated a cell
+            // In this case, we consider this an "update"... Once we get
+            // "batchUpdateChunkNumberOfCells" "updates" then we sleep, to
+            // allow UI to catch up, to not interrupt the scrolling.
+            var waveUpdateIndex = 0
+            while waveUpdateIndex < visibleCommunityCellModels.count {
+                
+                // After each sleep, we need to reconcile this state.
+                // This is a little overboard, though techncally correct.
+                _refreshVisibleCommunityCellModelIndices()
+                
+                var waveNumberOfUpdatesTriggered = 0
+                while waveUpdateIndex < visibleCommunityCellModels.count && waveNumberOfUpdatesTriggered < batchUpdateChunkNumberOfCells {
+                    let communityCellModel = visibleCommunityCellModels[waveUpdateIndex]
+                    let index = communityCellModel.index
+                    if let communityCellData = getCommunityCellData(at: index) {
+                        if let key = communityCellData.key {
+                            let keyIndex = KeyIndex(key: key, index: index)
+                            if let image = keyIndexImageDict[keyIndex] {
+                                
+                                // Insert this image into our master dictionary.
+                                _imageDict[key] = image
+                                
+                                if attemptUpdateCellStateSuccess(communityCellModel: communityCellModel,
+                                                                 communityCellData: communityCellData,
+                                                                 visibleCellIndices: _visibleCommunityCellModelIndices,
+                                                                 isFromRefresh: false,
+                                                                 key: key,
+                                                                 image: image,
+                                                                 debug: "Reconcile, Batch Cache Hit",
+                                                                 emoji: "🎰") {
+                                    waveNumberOfUpdatesTriggered += 1
+                                }
+                            }
+                        }
+                    }
+                    waveUpdateIndex += 1
+                }
+                if waveNumberOfUpdatesTriggered > 0 {
+                    try? await Task.sleep(nanoseconds: batchUpdateChunkSleepDuration)
+                }
+            }
+        }
+        
+        // Now we will add everything to the downloader, which should be downloaded.
+        // This is the ONLY point in code which will add tasks to the downloader,
+        // so we do not need to worry about asynchronous boundaries in checking
+        // whether an item is downloading or not... So, first, we load up everything
+        // that needs to be downloaded into a big list...
+        
+        _downloadCommunityCellDatas.removeAll(keepingCapacity: true)
+        if true {
+            var firstCellIndexOnScreen = gridLayout.getFirstCellIndexOnScreen() - Self.probeAheadOrBehindRangeForDownloads
+            if firstCellIndexOnScreen < 0 {
+                firstCellIndexOnScreen = 0
+            }
+            
+            var lastCellIndexOnScreen = gridLayout.getLastCellIndexOnScreen() + Self.probeAheadOrBehindRangeForDownloads
+            if lastCellIndexOnScreen >= numberOfCells {
+                lastCellIndexOnScreen = numberOfCells - 1
+            }
+            
+            var communityCellModelIndex = firstCellIndexOnScreen
+            while communityCellModelIndex <= lastCellIndexOnScreen {
+                if communityCellModelIndex >= 0 && communityCellModelIndex < communityCellModels.count {
+                    let communityCellModel = communityCellModels[communityCellModelIndex]
+                    let index = communityCellModel.index
+                    if !_imageFailedSet.contains(index) {
+                        if let communityCellData = getCommunityCellData(at: index) {
+                            if let key = communityCellData.key {
+                                if _imageDict[key] === nil {
+                                    if await downloader.isDownloading(communityCellData) {
+                                        // We are already downloading this...
+                                    } else {
+                                        // This we should add to the downloader.
+                                        _downloadCommunityCellDatas.append(communityCellData)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                communityCellModelIndex += 1
+            }
+        }
+        
+        // Now, we hand them off to the downloader...
+        if _downloadCommunityCellDatas.count > 0 {
+            print("🔧 Reconcile Process: We hand \(_downloadCommunityCellDatas.count) cell models to downloader.")
+            await downloader.addDownloadTaskBatch(_downloadCommunityCellDatas)
+        }
+        
+        // Before we start the download tasks, compute the
+        // priorities. In our current scheme, we can ONLY
+        // start a download task if the priority is set.
+        await _computeDownloadPriorities()
+        
+        // This will be the ONLY place we start the download
+        // tasks. So, the priorities should always be set ahead of time.
+        await downloader.startTasksIfNecessary()
+        
+        // Now, we are going to see if cell model states
+        // should be updated, or are out of sync.
+        // We do this in a single pass. We do not re-check
+        // each and every relevant state update after each
+        // await. Instead, we allow the next heartbeat pass
+        // to correct the state.
+        if true {
+            
+            // This loop, which is repeated several times, ensures that only
+            // "batchUpdateChunkNumberOfCells" cells are updated between each
+            // sleep. If we update ALL of the cells, this can cause a lag spike.
+            // We leverage "attemptUpdate..." which will return true if, both the
+            // a.) state changed
+            // b.) combine publisher updated a cell
+            // In this case, we consider this an "update"... Once we get
+            // "batchUpdateChunkNumberOfCells" "updates" then we sleep, to
+            // allow UI to catch up, to not interrupt the scrolling.
+            var waveUpdateIndex = 0
+            while waveUpdateIndex < visibleCommunityCellModels.count {
+                
+                var waveNumberOfUpdatesTriggered = 0
+                while waveUpdateIndex < visibleCommunityCellModels.count && waveNumberOfUpdatesTriggered < batchUpdateChunkNumberOfCells {
+                    let communityCellModel = visibleCommunityCellModels[waveUpdateIndex]
+                    if await _refreshAllCellStatesAndReconcile_ExhaustiveCheck(communityCellModel: communityCellModel) {
+                        waveNumberOfUpdatesTriggered += 1
+                    }
+                    waveUpdateIndex += 1
+                }
+                
+                if waveNumberOfUpdatesTriggered > 0 {
+                    try? await Task.sleep(nanoseconds: batchUpdateChunkSleepDuration)
+                }
+            }
+        }
     }
+    
+    // This returns true if state was changed.
+    @MainActor private func _refreshAllCellStatesAndReconcile_ExhaustiveCheck(communityCellModel: CommunityCellModel) async -> Bool {
+        
+        guard let communityCellData = getCommunityCellData(at: communityCellModel.index) else {
+            switch communityCellModel.cellModelState {
+            case .missingModel:
+                return false
+            default:
+                _visibleCommunityCellModelIndices.removeAll(keepingCapacity: true)
+                _visibleCommunityCellModelIndices.insert(communityCellModel.index)
+                if attemptUpdateCellStateMisingModel(communityCellModel: communityCellModel,
+                                                     visibleCellIndices: _visibleCommunityCellModelIndices,
+                                                     isFromRefresh: false,
+                                                     debug: "ExhaustiveCheck, Missing Model",
+                                                     emoji: "📚") {
+                    return true
+                } else {
+                    return false
+                }
+            }
+        }
+        
+        guard let key = communityCellData.key else {
+            switch communityCellModel.cellModelState {
+            case .missingKey:
+                return false
+            default:
+                _visibleCommunityCellModelIndices.removeAll(keepingCapacity: true)
+                _visibleCommunityCellModelIndices.insert(communityCellModel.index)
+                if attemptUpdateCellStateMissingKey(communityCellModel: communityCellModel,
+                                                    communityCellData: communityCellData,
+                                                    visibleCellIndices: _visibleCommunityCellModelIndices,
+                                                    isFromRefresh: false,
+                                                    debug: "ExhaustiveCheck, Missing Key",
+                                                    emoji: "📚") {
+                    return true
+                } else {
+                    return false
+                }
+            }
+        }
+        
+        if let image = _imageDict[key] {
+            // We *DO* have an image in _imageDict.
+            
+            switch communityCellModel.cellModelState {
+            case .success:
+                // This is the expected state.
+                // We have an image, we are already
+                // in the success state.
+                return false
+            default:
+                _visibleCommunityCellModelIndices.removeAll(keepingCapacity: true)
+                _visibleCommunityCellModelIndices.insert(communityCellModel.index)
+                if attemptUpdateCellStateSuccess(communityCellModel: communityCellModel,
+                                                 communityCellData: communityCellData,
+                                                 visibleCellIndices: _visibleCommunityCellModelIndices,
+                                                 isFromRefresh: false,
+                                                 key: key,
+                                                 image: image,
+                                                 debug: "ExhaustiveCheck, Image From Dict (Normal)",
+                                                 emoji: "📚") {
+                    return true
+                } else {
+                    return false
+                }
+            }
+        } else {
+            // We *DO NOT* have an image in _imageDict.
+            
+            switch communityCellModel.cellModelState {
+            case .success:
+                // This is the oddball state. The cell
+                // has an image, but we do not have one
+                // in the dictionary. This is an illegal state.
+                
+                switch communityCellModel.cellModelState {
+                case .idle:
+                    // We are already in the idle state.
+                    return false
+                default:
+                    // Update to idle state.
+                    _visibleCommunityCellModelIndices.removeAll(keepingCapacity: true)
+                    _visibleCommunityCellModelIndices.insert(communityCellModel.index)
+                    if attemptUpdateCellStateIdle(communityCellModel: communityCellModel,
+                                                  communityCellData: communityCellData,
+                                                  visibleCellIndices: _visibleCommunityCellModelIndices,
+                                                  isFromRefresh: false,
+                                                  key: key,
+                                                  debug: "ExhaustiveCheck, Oddball Image State",
+                                                  emoji: "🎱") {
+                        return true
+                    } else {
+                        return false
+                    }
+                }
+            default:
+                if await _refreshAllCellStatesAndReconcile_ExhaustiveCheck_A(communityCellModel: communityCellModel,
+                                                                             communityCellData: communityCellData,
+                                                                             key: key) {
+                    return true
+                } else {
+                    return false
+                }
+            }
+        }
+    }
+    
+    @MainActor private func _refreshAllCellStatesAndReconcile_ExhaustiveCheck_A(communityCellModel: CommunityCellModel,
+                                                                                communityCellData: CommunityCellData,
+                                                                                key: String) async -> Bool {
+        
+        // It could be that we are incorrectly in the download state...
+        switch communityCellModel.cellModelState {
+        case .downloading, .downloadingActively:
+            if await downloader.isDownloading(communityCellData) {
+                // This is the expected case,
+                // we will stay in this state
+                return false
+            } else {
+                // This is an illegal state.
+                // Let's see if we can reconcile
+                // either a success or failure.
+                // then if we can't, it will be
+                // in the illegal (idle) state.
+                
+                if let image = _imageDict[key] {
+                    // Update to idle state.
+                    _visibleCommunityCellModelIndices.removeAll(keepingCapacity: true)
+                    _visibleCommunityCellModelIndices.insert(communityCellModel.index)
+                    if attemptUpdateCellStateSuccess(communityCellModel: communityCellModel,
+                                                     communityCellData: communityCellData,
+                                                     visibleCellIndices: _visibleCommunityCellModelIndices,
+                                                     isFromRefresh: false,
+                                                     key: key,
+                                                     image: image,
+                                                     debug: "ExhaustiveCheck, Downloading Oddball Image State",
+                                                     emoji: "🎱") {
+                        return true
+                    } else {
+                        return false
+                    }
+                } else if _imageFailedSet.contains(communityCellModel.index) {
+                    _visibleCommunityCellModelIndices.removeAll(keepingCapacity: true)
+                    _visibleCommunityCellModelIndices.insert(communityCellModel.index)
+                    if attemptUpdateCellStateError(communityCellModel: communityCellModel,
+                                                   communityCellData: communityCellData,
+                                                   visibleCellIndices: _visibleCommunityCellModelIndices,
+                                                   isFromRefresh: false,
+                                                   key: key,
+                                                   debug: "ExhaustiveCheck, Downloading Oddball Error State",
+                                                   emoji: "🎱") {
+                        return true
+                    } else {
+                        return false
+                    }
+                } else {
+                    _visibleCommunityCellModelIndices.removeAll(keepingCapacity: true)
+                    _visibleCommunityCellModelIndices.insert(communityCellModel.index)
+                    if attemptUpdateCellStateIdle(communityCellModel: communityCellModel,
+                                                  communityCellData: communityCellData,
+                                                  visibleCellIndices: _visibleCommunityCellModelIndices,
+                                                  isFromRefresh: false,
+                                                  key: key,
+                                                  debug: "ExhaustiveCheck, Downloading Oddball Idle State",
+                                                  emoji: "🎱") {
+                        return true
+                    } else {
+                        return false
+                    }
+                }
+            }
+        default:
+            if await _refreshAllCellStatesAndReconcile_ExhaustiveCheck_B(communityCellModel: communityCellModel,
+                                                                         communityCellData: communityCellData,
+                                                                         key: key) {
+                return true
+            } else {
+                return false
+            }
+        }
+    }
+    @MainActor private func _refreshAllCellStatesAndReconcile_ExhaustiveCheck_B(communityCellModel: CommunityCellModel,
+                                                                                communityCellData: CommunityCellData,
+                                                                                key: String) async -> Bool {
+        if await downloader.isDownloading(communityCellData) {
+            if await downloader.isDownloadingActively(communityCellData) {
+                print("Cell # \(communityCellData.index) downloading ACTIVELY")
+                switch communityCellModel.cellModelState {
+                case .downloadingActively:
+                    // We are already in the downloading actively state
+                    return false
+                default:
+                    // Update to downloading actively state.
+                    _visibleCommunityCellModelIndices.removeAll(keepingCapacity: true)
+                    _visibleCommunityCellModelIndices.insert(communityCellModel.index)
+                    if attemptUpdateCellStateDownloadingActively(communityCellModel: communityCellModel,
+                                                                 communityCellData: communityCellData,
+                                                                 visibleCellIndices: _visibleCommunityCellModelIndices,
+                                                                 isFromRefresh: false,
+                                                                 key: key,
+                                                                 debug: "ExhaustiveCheck, Downloading Actively",
+                                                                 emoji: "📚") {
+                        return true
+                    } else {
+                        return false
+                    }
+                }
+            } else {
+                switch communityCellModel.cellModelState {
+                case .downloading:
+                    // We are already in the downloading state
+                    return false
+                default:
+                    // Update to downloading state.
+                    _visibleCommunityCellModelIndices.removeAll(keepingCapacity: true)
+                    _visibleCommunityCellModelIndices.insert(communityCellModel.index)
+                    if attemptUpdateCellStateDownloading(communityCellModel: communityCellModel,
+                                                         communityCellData: communityCellData,
+                                                         visibleCellIndices: _visibleCommunityCellModelIndices,
+                                                         isFromRefresh: false,
+                                                         key: key,
+                                                         debug: "ExhaustiveCheck, Downloading Pasively",
+                                                         emoji: "📚") {
+                        return true
+                    } else {
+                        return false
+                    }
+                }
+            }
+        }
+        
+        return _refreshAllCellStatesAndReconcile_ExhaustiveCheck_C(communityCellModel: communityCellModel,
+                                                                   communityCellData: communityCellData,
+                                                                   key: key)
+    }
+    
+    @MainActor private func _refreshAllCellStatesAndReconcile_ExhaustiveCheck_C(communityCellModel: CommunityCellModel,
+                                                                                communityCellData: CommunityCellData,
+                                                                                key: String) -> Bool {
+        if _imageFailedSet.contains(communityCellModel.index) {
+            switch communityCellModel.cellModelState {
+            case .error:
+                // We are already in the error state
+                return false
+            default:
+                // Update to error state.
+                _visibleCommunityCellModelIndices.removeAll(keepingCapacity: true)
+                _visibleCommunityCellModelIndices.insert(communityCellModel.index)
+                if attemptUpdateCellStateError(communityCellModel: communityCellModel,
+                                               communityCellData: communityCellData,
+                                               visibleCellIndices: _visibleCommunityCellModelIndices,
+                                               isFromRefresh: false,
+                                               key: key,
+                                               debug: "ExhaustiveCheck, Oddball Image State",
+                                               emoji: "📚") {
+                    return true
+                } else {
+                    return false
+                }
+            }
+        } else {
+            
+            // This is the oddball state. We likely
+            // had circumstances update during an
+            // await. This is a rare event.
+            // Temporary illegal state.
+            switch communityCellModel.cellModelState {
+            case .idle:
+                // We are already in the idle state.
+                return false
+            default:
+                // Update to idle state.
+                _visibleCommunityCellModelIndices.removeAll(keepingCapacity: true)
+                _visibleCommunityCellModelIndices.insert(communityCellModel.index)
+                if attemptUpdateCellStateIdle(communityCellModel: communityCellModel,
+                                              communityCellData: communityCellData,
+                                              visibleCellIndices: _visibleCommunityCellModelIndices,
+                                              isFromRefresh: false,
+                                              key: key,
+                                              debug: "ExhaustiveCheck, Oddball Exhausted State",
+                                              emoji: "🎱") {
+                    return true
+                } else {
+                    return false
+                }
+            }
+        }
+    }
+    
+    @MainActor private var _visibleCommunityCellModelIndices = Set<Int>()
+    
+    @MainActor private func _refreshVisibleCommunityCellModelIndices() {
+        _visibleCommunityCellModelIndices.removeAll(keepingCapacity: true)
+        for communityCellModel in visibleCommunityCellModels {
+            _visibleCommunityCellModelIndices.insert(communityCellModel.index)
+        }
+    }
+    
     
     @MainActor func refresh() async {
         
@@ -324,37 +942,7 @@ class CommunityViewModel {
                     return
                 }
             }
-            
-            // After we block the downloader, we cancel the tasks.
-            // Supposing "block" works as expected, even the pulse
-            // process should *NOT* be able to add a new download.
-            //
-            // It wouldn't hurt anything to cancel it again. However,
-            // it shouldn't be required. That would be misunderstood.
-            //
-            // await downloader.cancelAll()
         }
-        
-        // handleVisibleCellsMayHaveChanged is not asynchronounous;
-        // we are asynchronous. So, the visible cells could change
-        // after every single await statement. This function should
-        // be invulnerable against visible cells changing.
-        /*
-        if isOnVisibleCellsMayHaveChanged {
-            
-            var fudge = 0
-            while isOnVisibleCellsMayHaveChanged {
-                try? await Task.sleep(nanoseconds: 1_000_000)
-                fudge += 1
-                if fudge >= 2048 {
-                    print("🧛🏻‍♂️ Terminating refresh, we are visible cells-locked.")
-                    downloader.isBlocked = false
-                    isRefreshing = false
-                    return
-                }
-            }
-        }
-        */
         
         // If there is an active fetch, wait for it to stop.
         // Likewise, fetch will not trigger during a refresh.
@@ -374,16 +962,29 @@ class CommunityViewModel {
         
         // For the sake of UX, let's throw everything into the
         // "missing model" state and sleep for 1s.
-        for communityCellModel in visibleCommunityCellModels {
-            switch communityCellModel.cellModelState {
-            case .missingModel:
-                break
-            default:
-                if Self.DEBUG_STATE_CHANGES {
-                    print("🧰 @{\(communityCellModel.index)} State => .missingModel [Refresh, Initial Setting]")
+        let batchUpdateChunkNumberOfCells = getBatchUpdateChunkNumberOfCells()
+        let batchUpdateChunkSleepDuration = getBatchUpdateChunkSleepDuration()
+        var waveUpdateIndex = 0
+        while waveUpdateIndex < communityCellModels.count {
+            
+            // After each sleep, we need to reconcile this state.
+            // This is a little overboard, though techncally correct.
+            _refreshVisibleCommunityCellModelIndices()
+            
+            var waveNumberOfUpdatesTriggered = 0
+            while waveUpdateIndex < communityCellModels.count && waveNumberOfUpdatesTriggered < batchUpdateChunkNumberOfCells {
+                let communityCellModel = communityCellModels[waveUpdateIndex]
+                if attemptUpdateCellStateMisingModel(communityCellModel: communityCellModel,
+                                                     visibleCellIndices: _visibleCommunityCellModelIndices,
+                                                     isFromRefresh: true,
+                                                     debug: "Refresh, Set All Missing Model",
+                                                     emoji: "🔩") {
+                    waveNumberOfUpdatesTriggered += 1
                 }
-                communityCellModel.cellModelState = .missingModel
-                cellNeedsUpdatePublisher.send(communityCellModel)
+                waveUpdateIndex += 1
+            }
+            if waveNumberOfUpdatesTriggered > 0 {
+                try? await Task.sleep(nanoseconds: batchUpdateChunkSleepDuration)
             }
         }
         
@@ -614,24 +1215,13 @@ class CommunityViewModel {
         cellModelIndex = index
         while itemIndex < newCommunityCellDatas.count {
             
-            if (cellModelIndex % 7 == 2) {
-                //TODO: Remove. This tests missing model.
-            } else if (cellModelIndex % 7 == 5) {
-                //TODO: Remove. This tests missing "key".
-                var communityCellData = newCommunityCellDatas[itemIndex]
-                communityCellData.urlString = nil
-                communityCellData.poster_path = nil
-                communityCellDatas[cellModelIndex] = communityCellData
-            } else {
-                let communityCellData = newCommunityCellDatas[itemIndex]
-                communityCellDatas[cellModelIndex] = communityCellData
-            }
+            let communityCellData = newCommunityCellDatas[itemIndex]
+            communityCellDatas[cellModelIndex] = communityCellData
             
             itemIndex += 1
             cellModelIndex += 1
         }
     }
-    
     
     struct RecentNetworkFetch {
         let date: Date
@@ -680,14 +1270,6 @@ class CommunityViewModel {
             recentFetches.removeAll(keepingCapacity: true)
             recentFetches.append(contentsOf: recentFetchesTemp)
         }
-        
-        let mppq = recentFetches.map { RecentNetworkFetch in
-            let ds = "\(RecentNetworkFetch.date)"
-            let id = "\(RecentNetworkFetch.page)"
-            return id + ds
-        }
-        
-        print("Recent Fetches: \(mppq)")
         
         var _isNetworkErrorPresent = false
         
@@ -741,11 +1323,11 @@ class CommunityViewModel {
     }
     
     @MainActor func registerScrollContent(frame: CGRect) {
-        /*
-        Task { @MainActor in
-            await _computeDownloadPriorities()
-        }
-        */
+        // Here we could update the download priorities.
+        // This is called SUPER OFTEN. Becuase of race
+        // conditions in downloading the wrong item
+        // out of order, we are restricting the priority
+        // updates to ONLY happedn on heart beat / reconcile
     }
     
     @MainActor var communityCellDatas = [CommunityCellData?]()
@@ -816,7 +1398,7 @@ class CommunityViewModel {
             lastPageToCheck = numberOfPages
         }
         
-        print("🧻 [FMP] Searching from \(firstPageToCheck) to \(lastPageToCheck) for possible page to fetch...")
+        //print("🧻 [FMP] Searching from \(firstPageToCheck) to \(lastPageToCheck) for possible page to fetch...")
         
         var pageIndexOfLastTwoRecentFetches = -1
         if recentFetches.count >= 2 {
@@ -824,7 +1406,7 @@ class CommunityViewModel {
                 let timeElapsed = Date().timeIntervalSince(recentFetches[recentFetches.count - 1].date)
                 if timeElapsed <= 120 {
                     pageIndexOfLastTwoRecentFetches = recentFetches[recentFetches.count - 1].page
-                    print("🖼️ [FMP] Within last \(timeElapsed) seconds, page \(pageIndexOfLastTwoRecentFetches) fetched twice...")
+                    //print("🖼️ [FMP] Within last \(timeElapsed) seconds, page \(pageIndexOfLastTwoRecentFetches) fetched twice...")
                 }
             }
         }
@@ -846,18 +1428,18 @@ class CommunityViewModel {
             while cellIndex < ceiling {
                 if getCommunityCellData(at: cellIndex) !== nil {
                     isEveryCellMissing = false
-                    print("🖼️ [FMP] It looks \(cellIndex) is not blank, so this page is not all blank...")
+                    //print("🖼️ [FMP] It looks \(cellIndex) is not blank, so this page is not all blank...")
                     break
                 }
                 cellIndex += 1
             }
             
             if isEveryCellMissing {
-                print("🖼️ [FMP] Every cell is missing on page \(pageToCheck), we can fetch... pageIndexOfLastTwoRecentFetches = \(pageIndexOfLastTwoRecentFetches)")
+                //print("🖼️ [FMP] Every cell is missing on page \(pageToCheck), we can fetch... pageIndexOfLastTwoRecentFetches = \(pageIndexOfLastTwoRecentFetches)")
                 if pageIndexOfLastTwoRecentFetches == pageToCheck {
                     
                 } else {
-                    print("🖼️ [FMP] Executing [A] On \(pageToCheck)")
+                    //print("🖼️ [FMP] Executing [A] On \(pageToCheck)")
                     Task {
                         await fetchPopularMovies(page: pageToCheck)
                     }
@@ -867,8 +1449,7 @@ class CommunityViewModel {
             pageToCheck += 1
         }
         
-
-        print("🧻 [FMP] No \"All Cell Missing\" \(firstPageToCheck) to \(lastPageToCheck) for possible page to fetch...")
+        //print("🧻 [FMP] No \"All Cell Missing\" \(firstPageToCheck) to \(lastPageToCheck) for possible page to fetch...")
         
         // Last, let's do a pessimistic pass. If *anything* on the page is missing,
         // then we should fetch that page... Unless pageIndexOfLastTwoRecentFetches is
@@ -886,18 +1467,18 @@ class CommunityViewModel {
             while cellIndex < ceiling {
                 if getCommunityCellData(at: cellIndex) === nil {
                     isAnyCellMissing = true
-                    print("🖼️ [FMP] It looks \(cellIndex) *is* blank, so this page is not all filled...")
+                    //print("🖼️ [FMP] It looks \(cellIndex) *is* blank, so this page is not all filled...")
                     break
                 }
                 cellIndex += 1
             }
             
             if isAnyCellMissing {
-                print("🖼️ [FMP] At least one cell is missing on page \(pageToCheck), we can fetch... pageIndexOfLastTwoRecentFetches = \(pageIndexOfLastTwoRecentFetches)")
+                //print("🖼️ [FMP] At least one cell is missing on page \(pageToCheck), we can fetch... pageIndexOfLastTwoRecentFetches = \(pageIndexOfLastTwoRecentFetches)")
                 if pageIndexOfLastTwoRecentFetches == pageToCheck {
                     
                 } else {
-                    print("🖼️ [FMP] Executing [B] On \(pageToCheck)")
+                    //print("🖼️ [FMP] Executing [B] On \(pageToCheck)")
                     Task {
                         await fetchPopularMovies(page: pageToCheck)
                     }
@@ -938,9 +1519,31 @@ class CommunityViewModel {
             print("🚦 Force download restart @ \(index)")
             _imageFailedSet.remove(index)
             await downloader.forceRestart(communityCellData)
+            if index >= 0 && index < communityCellModels.count {
+                let communityCellModel = communityCellModels[index]
+                switch communityCellModel.cellModelState {
+                case .downloadingActively:
+                    // We are already downloding actively
+                    break
+                default:
+                    // We jump straight to downloading actively
+                    if let communityCellData = getCommunityCellData(at: index) {
+                        if let key = communityCellData.key {
+                            _visibleCommunityCellModelIndices.removeAll(keepingCapacity: true)
+                            _visibleCommunityCellModelIndices.insert(index)
+                            _ = attemptUpdateCellStateDownloadingActively(communityCellModel: communityCellModel,
+                                                                          communityCellData: communityCellData,
+                                                                          visibleCellIndices: _visibleCommunityCellModelIndices,
+                                                                          isFromRefresh: false,
+                                                                          key: key,
+                                                                          debug: "Force Retry",
+                                                                          emoji: "🍩")
+                        }
+                    }
+                }
+            }
         }
     }
-    
     
     @MainActor func getFirstAndLastCellIndexOnScreen() -> FirstAndLastIndex {
         @MainActor func getFirstCellIndexOnScreen() -> Int {
@@ -995,7 +1598,18 @@ class CommunityViewModel {
         refreshAllCellStatesForVisibleCellsChanged()
         
         Task {
-            await downloader.cancelAllOutOfIndexRange(firstIndex: onScreen.firstIndex, lastIndex: onScreen.lastIndex)
+            
+            var firstCellIndexOnScreen = gridLayout.getFirstCellIndexOnScreen() - Self.probeAheadOrBehindRangeForDownloads
+            if firstCellIndexOnScreen < 0 {
+                firstCellIndexOnScreen = 0
+            }
+            
+            var lastCellIndexOnScreen = gridLayout.getLastCellIndexOnScreen() + Self.probeAheadOrBehindRangeForDownloads
+            if lastCellIndexOnScreen >= numberOfCells {
+                lastCellIndexOnScreen = numberOfCells - 1
+            }
+            
+            await downloader.cancelAllOutOfIndexRange(firstIndex: firstCellIndexOnScreen, lastIndex: lastCellIndexOnScreen)
         }
         
         fetchMorePagesIfNecessary()
@@ -1049,7 +1663,6 @@ class CommunityViewModel {
                 let overlap = containerRangeY.overlaps(cellRangeY)
                 
                 if overlap {
-                    
                     let distX = cellLeftX
                     let distY = max(cellTopY - containerTopY, 0)
                     let priority = priority(distX: distX, distY: distY)
@@ -1062,7 +1675,7 @@ class CommunityViewModel {
                 }
             }
         }
-        await downloader.setPriorityBatch(_priorityCommunityCellDatas, _priorityList)
+        await downloader.setPriorityBatchAndSetAllOtherPrioritiesToZero(_priorityCommunityCellDatas, _priorityList)
     }
 }
 
@@ -1099,6 +1712,7 @@ extension CommunityViewModel: DirtyImageDownloaderDelegate {
     
     @MainActor func dataDownloadDidCancel(_ index: Int) {
         print("🧩 We had an image cancel its download @ \(index)")
+        //_imageFailedSet.remove(index)
     }
     
     @MainActor func dataDownloadDidFail(_ index: Int) {
