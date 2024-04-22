@@ -169,8 +169,17 @@ class DirtyImageDownloaderTask: NSObject, URLSessionDelegate {
         }
         
         //TODO: Remove
-        //try? await Task.sleep(nanoseconds: 1_250_000_000)
+        try? await Task.sleep(nanoseconds: 1_250_000_000)
         
+        if (item.index % 7 == 3) {
+            isActive = false
+            await MainActor.run {
+                self.downloader = nil
+                downloader.handleDownloadTaskDidFail(task: self)
+            }
+            
+            return
+        }
         
         //TODO: Remove
         /*

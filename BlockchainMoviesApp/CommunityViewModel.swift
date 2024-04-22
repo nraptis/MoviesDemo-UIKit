@@ -140,9 +140,8 @@ class CommunityViewModel {
         }
     }
     
-    @ObservationIgnored private var isOnPulse = false
-    @ObservationIgnored private var pulseNumber = 0
-    
+    @MainActor private var isOnPulse = false
+    @MainActor private var pulseNumber = 0
     @MainActor func pulse() async {
         
         if isRefreshing {
@@ -203,7 +202,6 @@ class CommunityViewModel {
                 }
             }
         }
-        
         
         isOnPulse = false
     }
@@ -615,8 +613,20 @@ class CommunityViewModel {
         itemIndex = 0
         cellModelIndex = index
         while itemIndex < newCommunityCellDatas.count {
-            let communityCellData = newCommunityCellDatas[itemIndex]
-            communityCellDatas[cellModelIndex] = communityCellData
+            
+            if (cellModelIndex % 7 == 2) {
+                //TODO: Remove. This tests missing model.
+            } else if (cellModelIndex % 7 == 5) {
+                //TODO: Remove. This tests missing "key".
+                var communityCellData = newCommunityCellDatas[itemIndex]
+                communityCellData.urlString = nil
+                communityCellData.poster_path = nil
+                communityCellDatas[cellModelIndex] = communityCellData
+            } else {
+                let communityCellData = newCommunityCellDatas[itemIndex]
+                communityCellDatas[cellModelIndex] = communityCellData
+            }
+            
             itemIndex += 1
             cellModelIndex += 1
         }
@@ -628,7 +638,9 @@ class CommunityViewModel {
         let page: Int
     }
     
-    @ObservationIgnored @MainActor private var recentFetches = [RecentNetworkFetch]()
+    @MainActor private var recentFetches = [RecentNetworkFetch]()
+    @MainActor private var recentFetchesTemp = [RecentNetworkFetch]()
+    
     @MainActor private func _fetchPopularMoviesWithNetwork(page: Int) async -> [NWMovie] {
         
         //
@@ -636,9 +648,19 @@ class CommunityViewModel {
         // stuck in a fetch loop, we will throttle it to every 120 seconds.
         //
         if recentFetches.count >= 3 {
-            let lastFetch = recentFetches[recentFetches.count - 1]
-            if lastFetch.page == page {
+            
+            var areLastThreeSamePage = true
+            for index in 1...3 {
+                if recentFetches[recentFetches.count - index].page != page {
+                    areLastThreeSamePage = false
+                }
+            }
+            
+            if areLastThreeSamePage {
+                
+                let lastFetch = recentFetches[recentFetches.count - 1]
                 let timeElapsed = Date().timeIntervalSince(lastFetch.date)
+                print("🛍️ [NtWrK] The last 3 fetches were all page \(page)... \(timeElapsed) seconds since last attempt...")
                 if timeElapsed <= 120 {
                     print("💭 Stalling fetch. Only \(timeElapsed) seconds went by since last fetch of page \(page)")
                     isNetworkErrorPresent = true
@@ -648,9 +670,24 @@ class CommunityViewModel {
         }
         
         recentFetches.append(RecentNetworkFetch(date: Date(), page: page))
-        if recentFetches.count > 3 {
-            _ = recentFetches.removeFirst()
+        if recentFetches.count >= 100 {
+            recentFetchesTemp.removeAll(keepingCapacity: true)
+            var index = 50
+            while index < recentFetches.count {
+                recentFetchesTemp.append(recentFetches[index])
+                index += 1
+            }
+            recentFetches.removeAll(keepingCapacity: true)
+            recentFetches.append(contentsOf: recentFetchesTemp)
         }
+        
+        let mppq = recentFetches.map { RecentNetworkFetch in
+            let ds = "\(RecentNetworkFetch.date)"
+            let id = "\(RecentNetworkFetch.page)"
+            return id + ds
+        }
+        
+        print("Recent Fetches: \(mppq)")
         
         var _isNetworkErrorPresent = false
         
@@ -746,6 +783,7 @@ class CommunityViewModel {
         return nil
     }
     
+    @MainActor private var _fetchMorePagesPagesToCheck = [Int]()
     @MainActor func fetchMorePagesIfNecessary() {
         
         if isFetching { return }
@@ -754,45 +792,119 @@ class CommunityViewModel {
         // They have to pull-to-refresh when the network comes back on...
         if isNetworkErrorPresent { return }
         
-        //
-        // This needs a valid page size...
-        // It sucks they chose "page" instead of (index, limit)
-        //
         if pageSize < 1 { return }
         
-        let firstCellIndexOnScreen = gridLayout.getFirstCellIndexOnScreen()
-        let lastCellIndexOnScreen = gridLayout.getLastCellIndexOnScreen()
-        if firstCellIndexOnScreen >= lastCellIndexOnScreen { return }
-        
         let numberOfCols = gridLayout.getNumberOfCols()
+        let firstCellIndexToConsider = gridLayout.getFirstCellIndexOnScreen() - numberOfCols
+        let lastCellIndexToConsider = gridLayout.getLastCellIndexOnScreenNotClamped() + (numberOfCols * 2)
         
-        var _lowest = firstCellIndexOnScreen
-        var _highest = lastCellIndexOnScreen
-        
-        _lowest -= numberOfCols
-        _highest += (numberOfCols * 2)
-        
-        if _lowest < 0 {
-            _lowest = 0
+        let firstPageIndexToCheck = (firstCellIndexToConsider / pageSize)
+        var firstPageToCheck = firstPageIndexToCheck + 1
+        if firstPageToCheck < 1 {
+            firstPageToCheck = 1
+        }
+        if firstPageToCheck > numberOfPages {
+            return
         }
         
-        // These don't change after these lines. Indicated as such with grace.
-        let lowest = _lowest
-        let highest = _highest
+        let lastPageIndexToCheck = (lastCellIndexToConsider / pageSize)
+        var lastPageToCheck = lastPageIndexToCheck + 1
+        if lastPageToCheck < 1 {
+            lastPageToCheck = 1
+        }
+        if lastPageToCheck > numberOfPages {
+            lastPageToCheck = numberOfPages
+        }
         
-        var checkIndex = lowest
-        while checkIndex < highest {
-            if getCommunityCellData(at: checkIndex) === nil {
-                let pageIndexToFetch = (checkIndex / pageSize)
-                let pageToFetch = pageIndexToFetch + 1
-                if pageToFetch < numberOfPages {
-                    Task {
-                        await fetchPopularMovies(page: pageToFetch)
-                    }
-                    return
+        print("🧻 [FMP] Searching from \(firstPageToCheck) to \(lastPageToCheck) for possible page to fetch...")
+        
+        var pageIndexOfLastTwoRecentFetches = -1
+        if recentFetches.count >= 2 {
+            if recentFetches[recentFetches.count - 1].page == recentFetches[recentFetches.count - 2].page {
+                let timeElapsed = Date().timeIntervalSince(recentFetches[recentFetches.count - 1].date)
+                if timeElapsed <= 120 {
+                    pageIndexOfLastTwoRecentFetches = recentFetches[recentFetches.count - 1].page
+                    print("🖼️ [FMP] Within last \(timeElapsed) seconds, page \(pageIndexOfLastTwoRecentFetches) fetched twice...")
                 }
             }
-            checkIndex += 1
+        }
+        
+        // First let's do a semi-optimistic pass. If everything on the page is missing,
+        // then we should fetch that page... Unless pageIndexOfLastTwoRecentFetches is
+        // that page. If pageIndexOfLastTwoRecentFetches is that page, we should simply
+        // exit out of the process, something is seriously wrong with the web results.
+        
+        var pageToCheck = firstPageToCheck
+        while pageToCheck <= lastPageToCheck {
+            
+            var isEveryCellMissing = true
+            
+            let firstCellIndex = (pageToCheck - 1) * pageSize
+            let ceiling = firstCellIndex + pageSize
+            
+            var cellIndex = firstCellIndex
+            while cellIndex < ceiling {
+                if getCommunityCellData(at: cellIndex) !== nil {
+                    isEveryCellMissing = false
+                    print("🖼️ [FMP] It looks \(cellIndex) is not blank, so this page is not all blank...")
+                    break
+                }
+                cellIndex += 1
+            }
+            
+            if isEveryCellMissing {
+                print("🖼️ [FMP] Every cell is missing on page \(pageToCheck), we can fetch... pageIndexOfLastTwoRecentFetches = \(pageIndexOfLastTwoRecentFetches)")
+                if pageIndexOfLastTwoRecentFetches == pageToCheck {
+                    
+                } else {
+                    print("🖼️ [FMP] Executing [A] On \(pageToCheck)")
+                    Task {
+                        await fetchPopularMovies(page: pageToCheck)
+                    }
+                }
+                return
+            }
+            pageToCheck += 1
+        }
+        
+
+        print("🧻 [FMP] No \"All Cell Missing\" \(firstPageToCheck) to \(lastPageToCheck) for possible page to fetch...")
+        
+        // Last, let's do a pessimistic pass. If *anything* on the page is missing,
+        // then we should fetch that page... Unless pageIndexOfLastTwoRecentFetches is
+        // that page. If pageIndexOfLastTwoRecentFetches is that page, we should simply
+        // exit out of the process, something is seriously wrong with the web results.
+        pageToCheck = firstPageToCheck
+        while pageToCheck <= lastPageToCheck {
+            
+            var isAnyCellMissing = false
+            
+            let firstCellIndex = (pageToCheck - 1) * pageSize
+            let ceiling = firstCellIndex + pageSize
+            
+            var cellIndex = firstCellIndex
+            while cellIndex < ceiling {
+                if getCommunityCellData(at: cellIndex) === nil {
+                    isAnyCellMissing = true
+                    print("🖼️ [FMP] It looks \(cellIndex) *is* blank, so this page is not all filled...")
+                    break
+                }
+                cellIndex += 1
+            }
+            
+            if isAnyCellMissing {
+                print("🖼️ [FMP] At least one cell is missing on page \(pageToCheck), we can fetch... pageIndexOfLastTwoRecentFetches = \(pageIndexOfLastTwoRecentFetches)")
+                if pageIndexOfLastTwoRecentFetches == pageToCheck {
+                    
+                } else {
+                    print("🖼️ [FMP] Executing [B] On \(pageToCheck)")
+                    Task {
+                        await fetchPopularMovies(page: pageToCheck)
+                    }
+                }
+                return
+            }
+            pageToCheck += 1
         }
     }
     

@@ -13,7 +13,7 @@ class CommunityGridCellView: UIView {
     var updates = 0
     
     lazy var imageView: UIImageView = {
-        let result = UIImageView(frame: CGRect(x: 0.0, y: 0.0, width: 256.0, height: 256.0))
+        let result = UIImageView(frame: CGRect(x: 0.0, y: 0.0, width: 512.0, height: 512.0))
         result.translatesAutoresizingMaskIntoConstraints = false
         result.contentMode = .scaleAspectFill
         return result
@@ -28,12 +28,10 @@ class CommunityGridCellView: UIView {
     }()
     
     lazy var frameView: CommunityCellFrameView = {
-        let result = CommunityCellFrameView(frame: .zero)
+        let result = CommunityCellFrameView(frame: CGRect(x: 0.0, y: 0.0, width: 256.0, height: 256.0))
         result.translatesAutoresizingMaskIntoConstraints = false
         return result
     }()
-    
-    
     
     lazy var loadingView: CommunityCellLoadingView = {
         let result = CommunityCellLoadingView(isShowing: false)
@@ -125,6 +123,7 @@ class CommunityGridCellView: UIView {
         addSubview(imageView)
         imageView.layer.cornerRadius = CommunityCellConstants.innerRadius
         imageView.clipsToBounds = true
+        imageView.backgroundColor = UIColor.red
         addConstraints([
             NSLayoutConstraint(item: imageView, attribute: .left, relatedBy: .equal, toItem: self,
                                attribute: .left, multiplier: 1.0, constant: CommunityCellConstants.outlineThickness),
@@ -139,7 +138,6 @@ class CommunityGridCellView: UIView {
         addSubview(frameView)
         frameView.layer.cornerRadius = CommunityCellConstants.innerRadius
         frameView.clipsToBounds = true
-        //loadingView.show()
         addConstraints([
             NSLayoutConstraint(item: frameView, attribute: .left, relatedBy: .equal, toItem: self,
                                attribute: .left, multiplier: 1.0, constant: CommunityCellConstants.outlineThickness),
@@ -309,6 +307,7 @@ class CommunityGridCellView: UIView {
             if frameView.isHidden == false {
                 frameView.isHidden = true
                 frameView.isUserInteractionEnabled = false
+                frameView.setNeedsDisplay()
             }
             if loadingView.isHidden == true {
                 loadingView.show()
@@ -348,6 +347,7 @@ class CommunityGridCellView: UIView {
             if frameView.isHidden == true {
                 frameView.isHidden = false
                 frameView.isUserInteractionEnabled = true
+                frameView.setNeedsDisplay()
             }
             if loadingView.isHidden == false {
                 loadingView.hide()
@@ -386,6 +386,7 @@ class CommunityGridCellView: UIView {
             if frameView.isHidden == true {
                 frameView.isHidden = false
                 frameView.isUserInteractionEnabled = true
+                frameView.setNeedsDisplay()
             }
             if loadingView.isHidden == false {
                 loadingView.hide()
@@ -424,6 +425,7 @@ class CommunityGridCellView: UIView {
             if frameView.isHidden == true {
                 frameView.isHidden = false
                 frameView.isUserInteractionEnabled = true
+                frameView.setNeedsDisplay()
             }
             if loadingView.isHidden == false {
                 loadingView.hide()

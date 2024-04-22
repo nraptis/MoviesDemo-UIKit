@@ -27,8 +27,8 @@ class CommunityGridLayout {
     private(set) var height: CGFloat = 255
     
     // cell grid layout parameters
-    private let cellMaximumWidth = Device.isPad ? 170 : 100
-    //private let cellMaximumWidth = Device.isPad ? 120 : 60
+    //private let cellMaximumWidth = Device.isPad ? 170 : 100
+    private let cellMaximumWidth = Device.isPad ? 90 : 50
     
     private var cellWidth = 100
     private var cellHeight = 100
@@ -111,6 +111,13 @@ class CommunityGridLayout {
         return row
     }
     
+    func getBottomRowIndexNotClamped() -> Int {
+        let containerBottom = getContainerBottom()
+        var row = containerBottom - cellPaddingTop
+        row = (row / (cellHeight + cellSpacingV))
+        return row
+    }
+    
     var isAnyItemPresent: Bool {
         _numberOfCells > 0
     }
@@ -119,6 +126,7 @@ class CommunityGridLayout {
     private var _previousLastCellIndexOnScreen = -1
     func refreshVisibleCells() {
         _calculateLastCellIndexOnScreen()
+        _calculateLastCellIndexOnScreenNotClamped()
         _calculateFirstCellIndexOnScreen()
         if (_previousFirstCellIndexOnScreen != _firstCellIndexOnScreen) ||
             (_previousLastCellIndexOnScreen != _lastCellIndexOnScreen) {
@@ -135,7 +143,7 @@ class CommunityGridLayout {
         calculateCellWidth()
         calculateCellXArray()
         
-        cellHeight = (cellWidth) + (cellWidth >> 2)
+        cellHeight = (cellWidth) + (cellWidth >> 1)
         
         let previousWidth = width
         let previousHeight = height
@@ -197,6 +205,17 @@ class CommunityGridLayout {
     func _calculateLastCellIndexOnScreen() {
         let bottomRowIndex = getBottomRowIndex()
         _lastCellIndexOnScreen = getLastCellIndex(rowIndex: bottomRowIndex)
+    }
+    
+    
+    private var _lastCellIndexOnScreenNotClamped = -1
+    func getLastCellIndexOnScreenNotClamped() -> Int {
+        _lastCellIndexOnScreenNotClamped
+    }
+    
+    func _calculateLastCellIndexOnScreenNotClamped() {
+        let bottomRowIndex = getBottomRowIndexNotClamped()
+        _lastCellIndexOnScreenNotClamped = getLastCellIndex(rowIndex: bottomRowIndex)
     }
     
     func getNumberOfCells() -> Int {

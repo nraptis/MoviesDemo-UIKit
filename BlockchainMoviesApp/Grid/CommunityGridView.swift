@@ -272,8 +272,13 @@ class CommunityGridView: UIView {
         
         communityGridCellView.updateState()
         
+        var page = 0
+        if communityViewModel.pageSize > 1 {
+            page = communityGridCellView.communityCellModel.index / communityViewModel.pageSize
+        }
+        
         communityGridCellView.updates += 1
-        communityGridCellView.bottomContentView.button2.setTitle("\(communityGridCellView.updates)", for: .normal)
+        communityGridCellView.bottomContentView.button2.setTitle("P\(page)", for: .normal)
     }
     
     func refreshCommunityGridCellViewFrame(_ communityGridCellView: CommunityGridCellView) {
