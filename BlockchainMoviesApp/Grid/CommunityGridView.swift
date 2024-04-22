@@ -273,8 +273,7 @@ class CommunityGridView: UIView {
         communityGridCellView.updateState()
         
         communityGridCellView.updates += 1
-        communityGridCellView.statusLabel.text = "\(communityGridCellView.updates)"
-        
+        communityGridCellView.bottomContentView.button2.setTitle("\(communityGridCellView.updates)", for: .normal)
     }
     
     func refreshCommunityGridCellViewFrame(_ communityGridCellView: CommunityGridCellView) {
@@ -303,7 +302,7 @@ class CommunityGridView: UIView {
         
         for communityGridCellView in communityGridCellViews {
             if communityGridCellView.isActive {
-                communityGridCellView.indexLabel.text = "\(communityGridCellView.communityCellModel.index)"
+                communityGridCellView.bottomContentView.button1.setTitle("\(communityGridCellView.communityCellModel.index)", for: .normal)
             }
         }
     }
@@ -326,9 +325,9 @@ class CommunityGridView: UIView {
         let constraintTop = NSLayoutConstraint(item: communityGridCellView, attribute: .top, relatedBy: .equal,
                                                toItem: scrollContent, attribute: .top, multiplier: 1.0, constant: 0.0)
         let constraintWidth = NSLayoutConstraint(item: communityGridCellView, attribute: .width, relatedBy: .equal,
-                                                 toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: 32.0)
+                                                 toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: 256.0)
         let constraintHeight = NSLayoutConstraint(item: communityGridCellView, attribute: .height, relatedBy: .equal,
-                                                  toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: 32.0)
+                                                  toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: 256.0)
         
         communityGridCellView.constraintLeft = constraintLeft
         communityGridCellView.constraintTop = constraintTop

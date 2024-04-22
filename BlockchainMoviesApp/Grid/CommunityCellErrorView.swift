@@ -15,15 +15,6 @@ struct CommunityCellErrorView: View {
             VStack(spacing: 0.0) {
                 
                 Spacer(minLength: 0.0)
-                
-                ZStack {
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .font(.system(size: Device.isPad ? 32 : 24))
-                        .foregroundStyle(DarkwingDuckTheme.naughtyYellow)
-                        
-                }
-                .frame(width: Device.isPad ? 56.0 : 44.0,
-                       height: Device.isPad ? 56.0 : 44.0)
                 Button {
                     
                     retryHandler()
@@ -38,9 +29,16 @@ struct CommunityCellErrorView: View {
                     VStack(spacing: 0.0) {
                         
                         ZStack {
-                            Image(systemName: "arrow.clockwise")
+                            
+                            /*Image(systemName: "arrow.clockwise")
                                 .font(.system(size: Device.isPad ? 32 : 24))
                                 .foregroundStyle(DarkwingDuckTheme.gray800)
+                            */
+                            
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .font(.system(size: Device.isPad ? 32 : 24))
+                                .foregroundStyle(DarkwingDuckTheme.naughtyYellow)
+                            
                         }
                         .frame(width: Device.isPad ? 56.0 : 44.0,
                                height: Device.isPad ? 56.0 : 44.0)
@@ -54,13 +52,6 @@ struct CommunityCellErrorView: View {
                         })
                     }
                 }
-                
-                ZStack {
-                    
-                }
-                .frame(width: Device.isPad ? 56.0 : 44.0,
-                       height: Device.isPad ? 56.0 : 44.0)
-                
                 Spacer(minLength: 0.0)
             }
             .frame(width: geometry.size.width,

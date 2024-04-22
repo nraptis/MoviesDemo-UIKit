@@ -20,6 +20,8 @@
 		E83EA6E92BC5BE690076D6BB /* DirtyImageCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = E83EA6E82BC5BE690076D6BB /* DirtyImageCache.swift */; };
 		E83EA6EB2BC5BE770076D6BB /* DirtyImageCacheFileRecycler.swift in Sources */ = {isa = PBXBuildFile; fileRef = E83EA6EA2BC5BE770076D6BB /* DirtyImageCacheFileRecycler.swift */; };
 		E83EA6ED2BC5BE810076D6BB /* DirtyImageCacheFileRecyclerNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = E83EA6EC2BC5BE810076D6BB /* DirtyImageCacheFileRecyclerNode.swift */; };
+		E860FDF42BD5DB80009EF7A1 /* CommunityGridCellBottomContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E860FDF32BD5DB80009EF7A1 /* CommunityGridCellBottomContentView.swift */; };
+		E860FDF62BD5E6E2009EF7A1 /* CommunityCellNullImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E860FDF52BD5E6E2009EF7A1 /* CommunityCellNullImageView.swift */; };
 		E867A0D62BC9F071003C77B4 /* Router.swift in Sources */ = {isa = PBXBuildFile; fileRef = E867A0D52BC9F071003C77B4 /* Router.swift */; };
 		E867A0D82BC9F173003C77B4 /* MovieDetailsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E867A0D72BC9F173003C77B4 /* MovieDetailsViewModel.swift */; };
 		E867A0DA2BC9F820003C77B4 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E867A0D92BC9F820003C77B4 /* RootView.swift */; };
@@ -46,7 +48,6 @@
 		E8CDA0932BD57E10003A1C73 /* CellLoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8CDA0902BD57E0F003A1C73 /* CellLoadingView.swift */; };
 		E8CDA0942BD57E10003A1C73 /* DrawableButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8CDA0912BD57E10003A1C73 /* DrawableButton.swift */; };
 		E8CDA0952BD57E10003A1C73 /* ColoredButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8CDA0922BD57E10003A1C73 /* ColoredButton.swift */; };
-		E8CDA0972BD58CFF003A1C73 /* CellSuccessView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8CDA0962BD58CFF003A1C73 /* CellSuccessView.swift */; };
 		E8D30CE42BD5BCB400FBC658 /* CommunityCellSuccessView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8D30CE32BD5BCB400FBC658 /* CommunityCellSuccessView.swift */; };
 		E8D30CE62BD5BCC100FBC658 /* CommunityCellLoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8D30CE52BD5BCC100FBC658 /* CommunityCellLoadingView.swift */; };
 		E8D30CE82BD5BE0F00FBC658 /* CommunityCellFrameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8D30CE72BD5BE0F00FBC658 /* CommunityCellFrameView.swift */; };
@@ -71,6 +72,8 @@
 		E83EA6E82BC5BE690076D6BB /* DirtyImageCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirtyImageCache.swift; sourceTree = "<group>"; };
 		E83EA6EA2BC5BE770076D6BB /* DirtyImageCacheFileRecycler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirtyImageCacheFileRecycler.swift; sourceTree = "<group>"; };
 		E83EA6EC2BC5BE810076D6BB /* DirtyImageCacheFileRecyclerNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirtyImageCacheFileRecyclerNode.swift; sourceTree = "<group>"; };
+		E860FDF32BD5DB80009EF7A1 /* CommunityGridCellBottomContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommunityGridCellBottomContentView.swift; sourceTree = "<group>"; };
+		E860FDF52BD5E6E2009EF7A1 /* CommunityCellNullImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommunityCellNullImageView.swift; sourceTree = "<group>"; };
 		E867A0D52BC9F071003C77B4 /* Router.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Router.swift; sourceTree = "<group>"; };
 		E867A0D72BC9F173003C77B4 /* MovieDetailsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovieDetailsViewModel.swift; sourceTree = "<group>"; };
 		E867A0D92BC9F820003C77B4 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
@@ -98,7 +101,6 @@
 		E8CDA0902BD57E0F003A1C73 /* CellLoadingView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CellLoadingView.swift; sourceTree = "<group>"; };
 		E8CDA0912BD57E10003A1C73 /* DrawableButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DrawableButton.swift; sourceTree = "<group>"; };
 		E8CDA0922BD57E10003A1C73 /* ColoredButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ColoredButton.swift; sourceTree = "<group>"; };
-		E8CDA0962BD58CFF003A1C73 /* CellSuccessView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CellSuccessView.swift; sourceTree = "<group>"; };
 		E8D30CE32BD5BCB400FBC658 /* CommunityCellSuccessView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommunityCellSuccessView.swift; sourceTree = "<group>"; };
 		E8D30CE52BD5BCC100FBC658 /* CommunityCellLoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommunityCellLoadingView.swift; sourceTree = "<group>"; };
 		E8D30CE72BD5BE0F00FBC658 /* CommunityCellFrameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommunityCellFrameView.swift; sourceTree = "<group>"; };
@@ -222,12 +224,13 @@
 			children = (
 				E8CDA0842BD54CD1003A1C73 /* CommunityGridView.swift */,
 				E8CDA08E2BD57DBB003A1C73 /* CommunityGridCellView.swift */,
-				E8CDA0962BD58CFF003A1C73 /* CellSuccessView.swift */,
+				E860FDF32BD5DB80009EF7A1 /* CommunityGridCellBottomContentView.swift */,
 				E8CDA0902BD57E0F003A1C73 /* CellLoadingView.swift */,
 				E8CDA0922BD57E10003A1C73 /* ColoredButton.swift */,
 				E8CDA0912BD57E10003A1C73 /* DrawableButton.swift */,
 				E8E733A92BD3177D0095A81A /* CommunityGridLayout.swift */,
 				E8CDA0782BD547FB003A1C73 /* CommunityCellErrorView.swift */,
+				E860FDF52BD5E6E2009EF7A1 /* CommunityCellNullImageView.swift */,
 				E8CDA07E2BD5483A003A1C73 /* CommunityCellMissingContentView.swift */,
 				E8CDA0802BD54A41003A1C73 /* CommunityCellConstants.swift */,
 				E8CDA0822BD54CBF003A1C73 /* CommunityGridViewController.swift */,
@@ -330,6 +333,7 @@
 				E8D30CE82BD5BE0F00FBC658 /* CommunityCellFrameView.swift in Sources */,
 				E83EA6ED2BC5BE810076D6BB /* DirtyImageCacheFileRecyclerNode.swift in Sources */,
 				E83EA6E42BC5B9A10076D6BB /* DirtyImageDownloaderType.swift in Sources */,
+				E860FDF42BD5DB80009EF7A1 /* CommunityGridCellBottomContentView.swift in Sources */,
 				E867A0F32BC9FFFD003C77B4 /* FileBuffer.swift in Sources */,
 				E8CDA0892BD553B3003A1C73 /* CommunityView.swift in Sources */,
 				E8E733AA2BD3177D0095A81A /* CommunityGridLayout.swift in Sources */,
@@ -342,6 +346,7 @@
 				E8CDA0832BD54CBF003A1C73 /* CommunityGridViewController.swift in Sources */,
 				E867A0FF2BC9FFFD003C77B4 /* LoadingView.swift in Sources */,
 				E83EA6D52BC5A79E0076D6BB /* CommunityViewModel.swift in Sources */,
+				E860FDF62BD5E6E2009EF7A1 /* CommunityCellNullImageView.swift in Sources */,
 				E8CDA07F2BD5483A003A1C73 /* CommunityCellMissingContentView.swift in Sources */,
 				E8CDA0932BD57E10003A1C73 /* CellLoadingView.swift in Sources */,
 				E8CDA08D2BD5793A003A1C73 /* CommunityCellModel.swift in Sources */,
@@ -364,7 +369,6 @@
 				E83EA6DF2BC5B2F80076D6BB /* DarkwingDuckTheme.swift in Sources */,
 				E8E733A62BD30D5D0095A81A /* CellModelState.swift in Sources */,
 				E8D30CE62BD5BCC100FBC658 /* CommunityCellLoadingView.swift in Sources */,
-				E8CDA0972BD58CFF003A1C73 /* CellSuccessView.swift in Sources */,
 				E867A0F62BC9FFFD003C77B4 /* UIImage+Resize.swift in Sources */,
 				E867A0DC2BC9FC20003C77B4 /* RootViewModel.swift in Sources */,
 				E8E2D9642BC822E000A41EC0 /* CommunityCellData.swift in Sources */,

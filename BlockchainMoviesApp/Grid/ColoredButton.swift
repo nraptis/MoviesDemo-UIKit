@@ -16,6 +16,7 @@ class ColoredButton: DrawableButton {
         self.upColor = upColor
         self.downColor = downColor
         super.init(frame: .zero)
+        backgroundColor = upColor
     }
     
     required init?(coder aDecoder: NSCoder) {

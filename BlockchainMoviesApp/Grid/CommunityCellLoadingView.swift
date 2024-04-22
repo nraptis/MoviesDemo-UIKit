@@ -25,8 +25,6 @@ class CommunityCellLoadingView: UIView {
         
         super.init(frame: .zero)
         
-        backgroundColor = DarkwingDuckTheme._gray200
-        
         addSubview(activityIndicatorView)
         
         addConstraints([

@@ -13,18 +13,15 @@ class CommunityGridCellView: UIView {
     var updates = 0
     
     lazy var imageView: UIImageView = {
-        let result = UIImageView(frame: CGRect(x: 0.0, y: 0.0, width: 32.0, height: 32.0))
+        let result = UIImageView(frame: CGRect(x: 0.0, y: 0.0, width: 256.0, height: 256.0))
         result.translatesAutoresizingMaskIntoConstraints = false
         result.contentMode = .scaleAspectFill
-        result.backgroundColor = UIColor(red: CGFloat.random(in: 0.0...1.0),
-                                         green: CGFloat.random(in: 0.0...1.0),
-                                         blue: CGFloat.random(in: 0.0...1.0),
-                                         alpha: 1.0)
         return result
     }()
     
+    
     lazy var fillView: UIView = {
-        let result = UIView(frame: CGRect(x: 0.0, y: 0.0, width: 32.0, height: 32.0))
+        let result = UIView(frame: CGRect(x: 0.0, y: 0.0, width: 256.0, height: 256.0))
         result.translatesAutoresizingMaskIntoConstraints = false
         result.backgroundColor = DarkwingDuckTheme._gray200
         return result
@@ -37,8 +34,15 @@ class CommunityGridCellView: UIView {
     }()
     
     
+    
     lazy var loadingView: CommunityCellLoadingView = {
         let result = CommunityCellLoadingView(isShowing: false)
+        result.translatesAutoresizingMaskIntoConstraints = false
+        return result
+    }()
+    
+    lazy var bottomContentView: CommunityGridCellBottomContentView = {
+        let result = CommunityGridCellBottomContentView(a: 1000)
         result.translatesAutoresizingMaskIntoConstraints = false
         return result
     }()
@@ -59,41 +63,19 @@ class CommunityGridCellView: UIView {
         return result
     }()
     
+    lazy var nullImageHostingViewController: UIViewController = {
+        let result = UIHostingController(rootView: CommunityCellNullImageView())
+        result.view.translatesAutoresizingMaskIntoConstraints = false
+        result.view.backgroundColor = UIColor.clear
+        return result
+    }()
+    
+    
+    
+    
     lazy var button: ColoredButton = {
         let result = ColoredButton(upColor: UIColor.clear, downColor: UIColor.black.withAlphaComponent(0.4))
         result.translatesAutoresizingMaskIntoConstraints = false
-        return result
-    }()
-    
-    lazy var indexLabel: UILabel = {
-        let result = UILabel(frame: CGRect(x: 0.0, y: 0.0, width: 32.0, height: 32.0))
-        result.translatesAutoresizingMaskIntoConstraints = false
-        result.backgroundColor = UIColor.black.withAlphaComponent(0.75)
-        result.textColor = UIColor.white
-        result.font = UIFont.systemFont(ofSize: 22.0, weight: .semibold)
-        result.textAlignment = .center
-        result.layer.cornerRadius = 4.0
-        result.clipsToBounds = true
-        
-        //TODO:
-        //result.isHidden = true
-        
-        return result
-    }()
-    
-    lazy var statusLabel: UILabel = {
-        let result = UILabel(frame: CGRect(x: 0.0, y: 0.0, width: 32.0, height: 32.0))
-        result.translatesAutoresizingMaskIntoConstraints = false
-        result.backgroundColor = UIColor.black.withAlphaComponent(0.75)
-        result.textColor = UIColor.red
-        result.font = UIFont.systemFont(ofSize: 22.0, weight: .semibold)
-        result.textAlignment = .center
-        result.layer.cornerRadius = 12.0
-        result.clipsToBounds = true
-        
-        //TODO:
-        //result.isHidden = true
-        
         return result
     }()
     
@@ -109,9 +91,15 @@ class CommunityGridCellView: UIView {
     required init(communityViewModel: CommunityViewModel, communityCellModel: CommunityCellModel) {
         self.communityViewModel = communityViewModel
         self.communityCellModel = communityCellModel
-        super.init(frame: CGRect(x: 0.0, y: 0.0, width: 32.0, height: 32.0))
+        super.init(frame: CGRect(x: 0.0, y: 0.0, width: 256.0, height: 256.0))
         self.translatesAutoresizingMaskIntoConstraints = false
-        self.backgroundColor = DarkwingDuckTheme._gray900
+        //self.backgroundColor = DarkwingDuckTheme._gray900
+        
+        self.backgroundColor = UIColor(red: CGFloat.random(in: 0.0...1.0),
+                                       green: CGFloat.random(in: 0.0...1.0),
+                                       blue: CGFloat.random(in: 0.0...1.0),
+                                       alpha: 1.0)
+        
         layer.cornerRadius = CommunityCellConstants.outerRadius
         clipsToBounds = true
         
@@ -120,10 +108,7 @@ class CommunityGridCellView: UIView {
         let frameFillRight = -(CommunityCellConstants.outlineThickness + CommunityCellConstants.frameThickness)
         let frameFillBottom = -(CommunityCellConstants.outlineThickness + CommunityCellConstants.bottomAreaHeight - CommunityCellConstants.outlineThickness)
         
-        
-        
         addSubview(fillView)
-        //imageView.backgroundColor = DarkwingDuckTheme._gray200
         fillView.layer.cornerRadius = CommunityCellConstants.innerRadius
         fillView.clipsToBounds = true
         addConstraints([
@@ -138,10 +123,8 @@ class CommunityGridCellView: UIView {
         ])
         
         addSubview(imageView)
-        //imageView.backgroundColor = DarkwingDuckTheme._gray200
         imageView.layer.cornerRadius = CommunityCellConstants.innerRadius
         imageView.clipsToBounds = true
-        imageView.alpha = 0.5
         addConstraints([
             NSLayoutConstraint(item: imageView, attribute: .left, relatedBy: .equal, toItem: self,
                                attribute: .left, multiplier: 1.0, constant: CommunityCellConstants.outlineThickness),
@@ -153,25 +136,6 @@ class CommunityGridCellView: UIView {
                                attribute: .bottom, multiplier: 1.0, constant: -CommunityCellConstants.outlineThickness)
         ])
         
-        
-        
-        
-        addSubview(loadingView)
-        loadingView.layer.cornerRadius = CommunityCellConstants.innerRadius
-        loadingView.clipsToBounds = true
-        //loadingView.show()
-        addConstraints([
-            NSLayoutConstraint(item: loadingView, attribute: .left, relatedBy: .equal, toItem: self,
-                               attribute: .left, multiplier: 1.0, constant: CommunityCellConstants.outlineThickness),
-            NSLayoutConstraint(item: loadingView, attribute: .top, relatedBy: .equal, toItem: self,
-                               attribute: .top, multiplier: 1.0, constant: CommunityCellConstants.outlineThickness),
-            NSLayoutConstraint(item: loadingView, attribute: .right, relatedBy: .equal, toItem: self,
-                               attribute: .right, multiplier: 1.0, constant: -CommunityCellConstants.outlineThickness),
-            NSLayoutConstraint(item: loadingView, attribute: .bottom, relatedBy: .equal, toItem: self,
-                               attribute: .bottom, multiplier: 1.0, constant: -CommunityCellConstants.outlineThickness)
-        ])
-        
-        /*
         addSubview(frameView)
         frameView.layer.cornerRadius = CommunityCellConstants.innerRadius
         frameView.clipsToBounds = true
@@ -189,10 +153,6 @@ class CommunityGridCellView: UIView {
         
         if let errorView = errorHostingViewController.view {
             addSubview(errorView)
-            
-            //errorView.clipsToBounds = true
-            //errorView.layer.cornerRadius = CommunityCellConstants.frameRadius
-            
             addConstraints([
                 NSLayoutConstraint(item: errorView, attribute: .left, relatedBy: .equal, toItem: self,
                                    attribute: .left, multiplier: 1.0, constant: frameFillLeft),
@@ -209,118 +169,70 @@ class CommunityGridCellView: UIView {
             addSubview(missingContentView)
             addConstraints([
                 NSLayoutConstraint(item: missingContentView, attribute: .left, relatedBy: .equal, toItem: self,
-                                   attribute: .left, multiplier: 1.0, constant: frameFillLeft),
+                                   attribute: .left, multiplier: 1.0, constant: CommunityCellConstants.outlineThickness),
                 NSLayoutConstraint(item: missingContentView, attribute: .top, relatedBy: .equal, toItem: self,
-                                   attribute: .top, multiplier: 1.0, constant: frameFillTop),
+                                   attribute: .top, multiplier: 1.0, constant: CommunityCellConstants.outlineThickness),
                 NSLayoutConstraint(item: missingContentView, attribute: .right, relatedBy: .equal, toItem: self,
-                                   attribute: .right, multiplier: 1.0, constant: frameFillRight),
+                                   attribute: .right, multiplier: 1.0, constant: -CommunityCellConstants.outlineThickness),
                 NSLayoutConstraint(item: missingContentView, attribute: .bottom, relatedBy: .equal, toItem: self,
+                                   attribute: .bottom, multiplier: 1.0, constant: -CommunityCellConstants.outlineThickness)
+            ])
+        }
+        
+        if let nullImageView = nullImageHostingViewController.view {
+            addSubview(nullImageView)
+            addConstraints([
+                NSLayoutConstraint(item: nullImageView, attribute: .left, relatedBy: .equal, toItem: self,
+                                   attribute: .left, multiplier: 1.0, constant: frameFillLeft),
+                NSLayoutConstraint(item: nullImageView, attribute: .top, relatedBy: .equal, toItem: self,
+                                   attribute: .top, multiplier: 1.0, constant: frameFillTop),
+                NSLayoutConstraint(item: nullImageView, attribute: .right, relatedBy: .equal, toItem: self,
+                                   attribute: .right, multiplier: 1.0, constant: frameFillRight),
+                NSLayoutConstraint(item: nullImageView, attribute: .bottom, relatedBy: .equal, toItem: self,
                                    attribute: .bottom, multiplier: 1.0, constant: frameFillBottom)
             ])
         }
-        */
         
+        addSubview(loadingView)
+        addConstraints([
+            NSLayoutConstraint(item: loadingView, attribute: .left, relatedBy: .equal, toItem: self,
+                               attribute: .left, multiplier: 1.0, constant: CommunityCellConstants.outlineThickness),
+            NSLayoutConstraint(item: loadingView, attribute: .top, relatedBy: .equal, toItem: self,
+                               attribute: .top, multiplier: 1.0, constant: CommunityCellConstants.outlineThickness),
+            NSLayoutConstraint(item: loadingView, attribute: .right, relatedBy: .equal, toItem: self,
+                               attribute: .right, multiplier: 1.0, constant: -CommunityCellConstants.outlineThickness),
+            NSLayoutConstraint(item: loadingView, attribute: .bottom, relatedBy: .equal, toItem: self,
+                               attribute: .bottom, multiplier: 1.0, constant: -CommunityCellConstants.outlineThickness)
+        ])
         
         addSubview(button)
         button.layer.cornerRadius = CommunityCellConstants.innerRadius
         button.clipsToBounds = true
         addConstraints([
-            NSLayoutConstraint(item: button,
-                               attribute: .left,
-                               relatedBy: .equal,
-                               toItem: self,
-                               attribute: .left,
-                               multiplier: 1.0,
-                               constant: 2.0),
-            NSLayoutConstraint(item: button,
-                               attribute: .top,
-                               relatedBy: .equal,
-                               toItem: self,
-                               attribute: .top,
-                               multiplier: 1.0,
-                               constant: 2.0),
-            NSLayoutConstraint(item: button,
-                               attribute: .right,
-                               relatedBy: .equal,
-                               toItem: self,
-                               attribute: .right,
-                               multiplier: 1.0,
-                               constant: -2.0),
-            NSLayoutConstraint(item: button,
-                               attribute: .bottom,
-                               relatedBy: .equal,
-                               toItem: self,
-                               attribute: .bottom,
-                               multiplier: 1.0,
-                               constant: -2.0)
+            NSLayoutConstraint(item: button, attribute: .left, relatedBy: .equal, toItem: self,
+                               attribute: .left, multiplier: 1.0, constant: CommunityCellConstants.outlineThickness),
+            NSLayoutConstraint(item: button, attribute: .top, relatedBy: .equal, toItem: self,
+                               attribute: .top, multiplier: 1.0, constant: CommunityCellConstants.outlineThickness),
+            NSLayoutConstraint(item: button, attribute: .right, relatedBy: .equal, toItem: self,
+                               attribute: .right, multiplier: 1.0, constant: -CommunityCellConstants.outlineThickness),
+            NSLayoutConstraint(item: button, attribute: .bottom, relatedBy: .equal, toItem: self,
+                               attribute: .bottom, multiplier: 1.0, constant: -CommunityCellConstants.outlineThickness)
         ])
         
         button.addTarget(self, action: #selector(clickButton), for: .touchUpInside)
         
-        addSubview(indexLabel)
+        addSubview(bottomContentView)
         addConstraints([
-            NSLayoutConstraint(item: indexLabel,
-                               attribute: .left,
-                               relatedBy: .equal,
-                               toItem: self,
-                               attribute: .left,
-                               multiplier: 1.0,
-                               constant: 8.0),
-            NSLayoutConstraint(item: indexLabel,
-                               attribute: .right,
-                               relatedBy: .equal,
-                               toItem: self,
-                               attribute: .right,
-                               multiplier: 1.0,
-                               constant: -8.0),
-            NSLayoutConstraint(item: indexLabel,
-                               attribute: .bottom,
-                               relatedBy: .equal,
-                               toItem: self,
-                               attribute: .bottom,
-                               multiplier: 1.0,
-                               constant: -8.0),
-            NSLayoutConstraint(item: indexLabel,
-                               attribute: .height,
-                               relatedBy: .equal,
-                               toItem: nil,
-                               attribute: .notAnAttribute,
-                               multiplier: 1.0,
-                               constant: 36.0)
+            NSLayoutConstraint(item: bottomContentView, attribute: .left, relatedBy: .equal, toItem: self,
+                               attribute: .left, multiplier: 1.0, constant: CommunityCellConstants.outlineThickness),
+            NSLayoutConstraint(item: bottomContentView, attribute: .height, relatedBy: .equal, toItem: nil,
+                               attribute: .notAnAttribute, multiplier: 1.0, constant: CommunityCellConstants.bottomAreaHeight),
+            NSLayoutConstraint(item: bottomContentView, attribute: .right, relatedBy: .equal, toItem: self,
+                               attribute: .right, multiplier: 1.0, constant: -CommunityCellConstants.outlineThickness),
+            NSLayoutConstraint(item: bottomContentView, attribute: .bottom, relatedBy: .equal, toItem: self,
+                               attribute: .bottom, multiplier: 1.0, constant: -CommunityCellConstants.outlineThickness)
         ])
         
-        
-        addSubview(statusLabel)
-        addConstraints([
-            NSLayoutConstraint(item: statusLabel,
-                               attribute: .left,
-                               relatedBy: .equal,
-                               toItem: self,
-                               attribute: .left,
-                               multiplier: 1.0,
-                               constant: 8.0),
-            NSLayoutConstraint(item: statusLabel,
-                               attribute: .right,
-                               relatedBy: .equal,
-                               toItem: self,
-                               attribute: .right,
-                               multiplier: 1.0,
-                               constant: -8.0),
-            NSLayoutConstraint(item: statusLabel,
-                               attribute: .bottom,
-                               relatedBy: .equal,
-                               toItem: indexLabel,
-                               attribute: .top,
-                               multiplier: 1.0,
-                               constant: -8.0),
-            NSLayoutConstraint(item: statusLabel,
-                               attribute: .height,
-                               relatedBy: .equal,
-                               toItem: nil,
-                               attribute: .notAnAttribute,
-                               multiplier: 1.0,
-                               constant: 36.0)
-        ])
     }
     
     required init?(coder: NSCoder) {
@@ -387,105 +299,199 @@ class CommunityGridCellView: UIView {
         
         let cellModelState = communityCellModel.cellModelState
         
+        
         switch cellModelState {
-        case .missingModel:
-            statusLabel.text = "No Model"
-            statusLabel.textColor = UIColor.yellow
-        case .idle:
-            statusLabel.text = "Idle"
-            statusLabel.textColor = UIColor.systemMint
-        case .success(_, _, let image):
-            statusLabel.text = "Success"
-            statusLabel.textColor = UIColor.green
-            imageView.image = image
-        case .downloading:
-            statusLabel.text = "D-Load (Q)"
-            statusLabel.textColor = UIColor.gray
-        case .downloadingActively:
-            statusLabel.text = "D-Load (A)"
-            statusLabel.textColor = UIColor.white
-        case .error:
-            statusLabel.text = "Error"
-            statusLabel.textColor = UIColor.red
-        case .missingKey:
-            statusLabel.text = "No Key"
-            statusLabel.textColor = UIColor.red
-        }
-        
-        
-        
-        /*
-        switch state {
-        case .uninitialized, .error, .missingKey:
-            
-            imageView.isHidden = true
-            imageView.isUserInteractionEnabled = false
-            
-            button.isHidden = true
-            button.isUserInteractionEnabled = false
-            
-            errorView.isHidden = false
-            errorView.isUserInteractionEnabled = true
-            
-            loadingView.isHidden = true
-            loadingView.isUserInteractionEnabled = false
-        case .missingModel:
-            
-            imageView.isHidden = true
-            imageView.isUserInteractionEnabled = false
-            
-            button.isHidden = true
-            button.isUserInteractionEnabled = false
-            
-            errorView.isHidden = false
-            errorView.isUserInteractionEnabled = true
-            
-            loadingView.isHidden = true
-            loadingView.isUserInteractionEnabled = false
-            
-        case .success(let image):
-            imageView.image = image
-            
-            imageView.isHidden = false
-            imageView.isUserInteractionEnabled = true
-            
-            button.isHidden = false
-            button.isUserInteractionEnabled = true
-            
-            errorView.isHidden = true
-            errorView.isUserInteractionEnabled = false
-            
-            loadingView.isHidden = true
-            loadingView.isUserInteractionEnabled = false
-        case .downloading, .downloadingActively, .hittingCache, .illegal:
-            
-            imageView.isHidden = true
-            imageView.isUserInteractionEnabled = false
-            
-            button.isHidden = true
-            button.isUserInteractionEnabled = false
-            
-            errorView.isHidden = true
-            errorView.isUserInteractionEnabled = false
-            
-            loadingView.isHidden = false
-            loadingView.isUserInteractionEnabled = true
-            
-            switch state {
-            case .downloading:
-                loadingView.backgroundColor = DarkwingDuckTheme._gray400
-            case .downloadingActively:
-                loadingView.backgroundColor = DarkwingDuckTheme._gray200
-            case .hittingCache:
-                loadingView.backgroundColor = DarkwingDuckTheme._gray300
-            default:
-                loadingView.backgroundColor = UIColor.red
+        case .downloading, .downloadingActively:
+            if imageView.isHidden == false {
+                imageView.isHidden = true
+                imageView.isUserInteractionEnabled = false
             }
-            
-            loadingView.backgroundColor = DarkwingDuckTheme._gray300
+            if frameView.isHidden == false {
+                frameView.isHidden = true
+                frameView.isUserInteractionEnabled = false
+            }
+            if loadingView.isHidden == true {
+                loadingView.show()
+            }
+            if bottomContentView.isHidden == false {
+                bottomContentView.isHidden = true
+                bottomContentView.isUserInteractionEnabled = false
+            }
+            if let errorView = errorHostingViewController.view {
+                if errorView.isHidden == false {
+                    errorView.isHidden = true
+                    errorView.isUserInteractionEnabled = false
+                }
+            }
+            if let missingContentView = missingContentHostingViewController.view {
+                if missingContentView.isHidden == false {
+                    missingContentView.isHidden = true
+                    missingContentView.isUserInteractionEnabled = false
+                }
+            }
+            if let nullImageView = nullImageHostingViewController.view {
+                if nullImageView.isHidden == false {
+                    nullImageView.isHidden = true
+                    nullImageView.isUserInteractionEnabled = false
+                }
+            }
+            if button.isHidden == false {
+                button.isHidden = true
+                button.isUserInteractionEnabled = false
+            }
+        case .success(_, _, let image):
+            if (imageView.isHidden == true) || (imageView.image !== image) {
+                imageView.isHidden = false
+                imageView.isUserInteractionEnabled = true
+                imageView.image = image
+            }
+            if frameView.isHidden == true {
+                frameView.isHidden = false
+                frameView.isUserInteractionEnabled = true
+            }
+            if loadingView.isHidden == false {
+                loadingView.hide()
+            }
+            if bottomContentView.isHidden == true {
+                bottomContentView.isHidden = false
+                bottomContentView.isUserInteractionEnabled = true
+            }
+            if let errorView = errorHostingViewController.view {
+                if errorView.isHidden == false {
+                    errorView.isHidden = true
+                    errorView.isUserInteractionEnabled = false
+                }
+            }
+            if let missingContentView = missingContentHostingViewController.view {
+                if missingContentView.isHidden == false {
+                    missingContentView.isHidden = true
+                    missingContentView.isUserInteractionEnabled = false
+                }
+            }
+            if let nullImageView = nullImageHostingViewController.view {
+                if nullImageView.isHidden == false {
+                    nullImageView.isHidden = true
+                    nullImageView.isUserInteractionEnabled = false
+                }
+            }
+            if button.isHidden == true {
+                button.isHidden = false
+                button.isUserInteractionEnabled = true
+            }
+        case .error:
+            if imageView.isHidden == false {
+                imageView.isHidden = true
+                imageView.isUserInteractionEnabled = false
+            }
+            if frameView.isHidden == true {
+                frameView.isHidden = false
+                frameView.isUserInteractionEnabled = true
+            }
+            if loadingView.isHidden == false {
+                loadingView.hide()
+            }
+            if bottomContentView.isHidden == true {
+                bottomContentView.isHidden = false
+                bottomContentView.isUserInteractionEnabled = true
+            }
+            if let errorView = errorHostingViewController.view {
+                if errorView.isHidden == true {
+                    errorView.isHidden = false
+                    errorView.isUserInteractionEnabled = true
+                }
+            }
+            if let missingContentView = missingContentHostingViewController.view {
+                if missingContentView.isHidden == false {
+                    missingContentView.isHidden = true
+                    missingContentView.isUserInteractionEnabled = false
+                }
+            }
+            if let nullImageView = nullImageHostingViewController.view {
+                if nullImageView.isHidden == false {
+                    nullImageView.isHidden = true
+                    nullImageView.isUserInteractionEnabled = false
+                }
+            }
+            if button.isHidden == false {
+                button.isHidden = true
+                button.isUserInteractionEnabled = false
+            }
+        case .missingKey, .idle:
+            if imageView.isHidden == false {
+                imageView.isHidden = true
+                imageView.isUserInteractionEnabled = false
+            }
+            if frameView.isHidden == true {
+                frameView.isHidden = false
+                frameView.isUserInteractionEnabled = true
+            }
+            if loadingView.isHidden == false {
+                loadingView.hide()
+            }
+            if bottomContentView.isHidden == true {
+                bottomContentView.isHidden = false
+                bottomContentView.isUserInteractionEnabled = true
+            }
+            if let errorView = errorHostingViewController.view {
+                if errorView.isHidden == false {
+                    errorView.isHidden = true
+                    errorView.isUserInteractionEnabled = false
+                }
+            }
+            if let missingContentView = missingContentHostingViewController.view {
+                if missingContentView.isHidden == false {
+                    missingContentView.isHidden = true
+                    missingContentView.isUserInteractionEnabled = false
+                }
+            }
+            if let nullImageView = nullImageHostingViewController.view {
+                if nullImageView.isHidden == true {
+                    nullImageView.isHidden = false
+                    nullImageView.isUserInteractionEnabled = true
+                }
+            }
+            if button.isHidden == true {
+                button.isHidden = false
+                button.isUserInteractionEnabled = true
+            }
+        case .missingModel:
+            if imageView.isHidden == false {
+                imageView.isHidden = true
+                imageView.isUserInteractionEnabled = false
+            }
+            if frameView.isHidden == false {
+                frameView.isHidden = true
+                frameView.isUserInteractionEnabled = false
+            }
+            if loadingView.isHidden == false {
+                loadingView.hide()
+            }
+            if bottomContentView.isHidden == false {
+                bottomContentView.isHidden = true
+                bottomContentView.isUserInteractionEnabled = false
+            }
+            if let errorView = errorHostingViewController.view {
+                if errorView.isHidden == false {
+                    errorView.isHidden = true
+                    errorView.isUserInteractionEnabled = false
+                }
+            }
+            if let missingContentView = missingContentHostingViewController.view {
+                if missingContentView.isHidden == true {
+                    missingContentView.isHidden = false
+                    missingContentView.isUserInteractionEnabled = true
+                }
+            }
+            if let nullImageView = nullImageHostingViewController.view {
+                if nullImageView.isHidden == false {
+                    nullImageView.isHidden = true
+                    nullImageView.isUserInteractionEnabled = false
+                }
+            }
+            if button.isHidden == false {
+                button.isHidden = true
+                button.isUserInteractionEnabled = false
+            }
         }
-        */
-        
     }
-
 }

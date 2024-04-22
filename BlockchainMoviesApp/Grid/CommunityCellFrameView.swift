@@ -28,7 +28,7 @@ class CommunityCellFrameView: UIView {
         let cutOutRect = CGRect(x: bounds.origin.x + CommunityCellConstants.frameThickness,
                                 y: bounds.origin.y + CommunityCellConstants.frameThickness,
                                 width: bounds.size.width - (CommunityCellConstants.frameThickness + CommunityCellConstants.frameThickness),
-                                height: bounds.size.height - (CommunityCellConstants.bottomAreaHeight))
+                                height: bounds.size.height - (CommunityCellConstants.bottomAreaHeight + CommunityCellConstants.frameThickness))
         let rectPath = UIBezierPath(rect: bounds)
         let cutOutPath = UIBezierPath(roundedRect: cutOutRect, cornerRadius: CommunityCellConstants.frameRadius)
         context.saveGState()
