@@ -138,7 +138,6 @@ class DirtyImageDownloader {
         // on this part. No real right answer, it works.
         _killList.removeAll(keepingCapacity: true)
         for (_, task) in taskDict {
-            let index = task.index
             if task.isInvalidated == true {
                 _killList.append(task)
             } else {
@@ -186,8 +185,6 @@ class DirtyImageDownloader {
         }
         
         let index = item.index
-        
-        
         if let previousTask = taskDict[index] {
             if !previousTask.isInvalidated {
                 previousTask.invalidate()
@@ -226,37 +223,23 @@ class DirtyImageDownloader {
     }
     
     @DirtyImageDownloaderActor func addDownloadTaskBatch(_ items: [any DirtyImageDownloaderType]) {
-        
         if isBlocked {
             return
         }
-        
         for item in items {
             addDownloadTask(item)
         }
     }
     
     @DirtyImageDownloaderActor func addDownloadTask(_ item: any DirtyImageDownloaderType) {
-        
         if isBlocked {
             return
         }
-        
         if taskDict[item.index] === nil {
             let newTask = DirtyImageDownloaderTask(downloader: self, item: item)
             taskDict[item.index] = newTask
         }
     }
-    
-    // Have to be vry careful with this...
-    /*
-    @DirtyImageDownloaderActor func removeDownloadTask(_ item: any DirtyImageDownloaderType) async {
-        if let task = taskDict[item.index] {
-            await task.invalidate()
-        }
-        taskDict.removeValue(forKey: item.index)
-    }
-    */
     
     @DirtyImageDownloaderActor func setPriorityBatch(_ items: [any DirtyImageDownloaderType], _ priorities: [Int]) {
         var index = 0

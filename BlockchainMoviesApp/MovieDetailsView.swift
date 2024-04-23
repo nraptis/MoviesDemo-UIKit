@@ -25,7 +25,6 @@ struct MovieDetailsView: View {
         }
         .toolbarBackground(DarkwingDuckTheme.gray200, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
-        
     }
     
     @MainActor func outerGuts(geometry: GeometryProxy) -> some View {
@@ -65,7 +64,7 @@ struct MovieDetailsView: View {
         let imageSize = fit.size
         
         var imageScale = CGFloat(1.0)
-        if fit.scale > Math.epsilon {
+        if fit.scale > CGSize.epsilon {
             imageScale = 1.0 / fit.scale
         }
         

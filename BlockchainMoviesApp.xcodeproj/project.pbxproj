@@ -35,7 +35,6 @@
 		E867A0F22BC9FFFD003C77B4 /* Device.swift in Sources */ = {isa = PBXBuildFile; fileRef = E867A0DE2BC9FFFD003C77B4 /* Device.swift */; };
 		E867A0F32BC9FFFD003C77B4 /* FileBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E867A0DF2BC9FFFD003C77B4 /* FileBuffer.swift */; };
 		E867A0F42BC9FFFD003C77B4 /* FileUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = E867A0E02BC9FFFD003C77B4 /* FileUtils.swift */; };
-		E867A0F52BC9FFFD003C77B4 /* Math.swift in Sources */ = {isa = PBXBuildFile; fileRef = E867A0E12BC9FFFD003C77B4 /* Math.swift */; };
 		E867A0F62BC9FFFD003C77B4 /* UIImage+Resize.swift in Sources */ = {isa = PBXBuildFile; fileRef = E867A0E22BC9FFFD003C77B4 /* UIImage+Resize.swift */; };
 		E8CDA0792BD547FB003A1C73 /* CommunityCellErrorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8CDA0782BD547FB003A1C73 /* CommunityCellErrorView.swift */; };
 		E8CDA07F2BD5483A003A1C73 /* CommunityCellMissingContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8CDA07E2BD5483A003A1C73 /* CommunityCellMissingContentView.swift */; };
@@ -91,7 +90,6 @@
 		E867A0DE2BC9FFFD003C77B4 /* Device.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Device.swift; sourceTree = "<group>"; };
 		E867A0DF2BC9FFFD003C77B4 /* FileBuffer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileBuffer.swift; sourceTree = "<group>"; };
 		E867A0E02BC9FFFD003C77B4 /* FileUtils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileUtils.swift; sourceTree = "<group>"; };
-		E867A0E12BC9FFFD003C77B4 /* Math.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Math.swift; sourceTree = "<group>"; };
 		E867A0E22BC9FFFD003C77B4 /* UIImage+Resize.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIImage+Resize.swift"; sourceTree = "<group>"; };
 		E87CC02A2BCA32F100BE42C3 /* BlockchainMoviesApp.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = BlockchainMoviesApp.xctestplan; sourceTree = "<group>"; };
 		E8CDA0782BD547FB003A1C73 /* CommunityCellErrorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommunityCellErrorView.swift; sourceTree = "<group>"; };
@@ -168,7 +166,6 @@
 				E8CDA08C2BD5793A003A1C73 /* CommunityCellModel.swift */,
 				E8E733A52BD30D5D0095A81A /* CellModelState.swift */,
 				E867A0D72BC9F173003C77B4 /* MovieDetailsViewModel.swift */,
-				E83EA6A62BC4E9B20076D6BB /* Products */,
 				E8E2D9502BC74F1E00A41EC0 /* Info.plist */,
 				E83EA6A82BC4E9B20076D6BB /* BlockchainMoviesAppApp.swift */,
 				E83EA6AC2BC4E9B30076D6BB /* Assets.xcassets */,
@@ -181,6 +178,7 @@
 				E867A0DB2BC9FC20003C77B4 /* RootViewModel.swift */,
 				E8DFD92A2BCA037C00D2A107 /* MovieDetailsView.swift */,
 				E8CDA08A2BD56EC7003A1C73 /* FirstAndLastIndex.swift */,
+				E83EA6A62BC4E9B20076D6BB /* Products */,
 			);
 			path = BlockchainMoviesApp;
 			sourceTree = "<group>";
@@ -226,7 +224,6 @@
 				E867A0DE2BC9FFFD003C77B4 /* Device.swift */,
 				E867A0DF2BC9FFFD003C77B4 /* FileBuffer.swift */,
 				E867A0E02BC9FFFD003C77B4 /* FileUtils.swift */,
-				E867A0E12BC9FFFD003C77B4 /* Math.swift */,
 				E867A0E22BC9FFFD003C77B4 /* UIImage+Resize.swift */,
 			);
 			path = Utilities;
@@ -354,7 +351,6 @@
 				E8CDA08D2BD5793A003A1C73 /* CommunityCellModel.swift in Sources */,
 				E83EA6E62BC5B9B30076D6BB /* DirtyImageDownloaderTask.swift in Sources */,
 				E83EA6EB2BC5BE770076D6BB /* DirtyImageCacheFileRecycler.swift in Sources */,
-				E867A0F52BC9FFFD003C77B4 /* Math.swift in Sources */,
 				E8CDA0952BD57E10003A1C73 /* ColoredButton.swift in Sources */,
 				E867A0D82BC9F173003C77B4 /* MovieDetailsViewModel.swift in Sources */,
 				E8CDA0852BD54CD1003A1C73 /* CommunityGridView.swift in Sources */,

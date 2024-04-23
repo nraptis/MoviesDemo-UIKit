@@ -135,11 +135,7 @@ class CommunityViewModel {
     
     @MainActor func getBatchUpdateChunkSleepDuration() -> UInt64 {
         //0.015 seconds
-        //return 15_000_000
-        
-        //0.215 seconds
-        return 215_000_000
-        
+        return 15_000_000
     }
     
     //
@@ -371,7 +367,6 @@ class CommunityViewModel {
         }
         
         isFetching = true
-        
         let nwMovies = await _fetchPopularMoviesWithNetwork(page: page)
         
         // We either fetched nothing, or got an error.
@@ -402,13 +397,14 @@ class CommunityViewModel {
             fetchPopularMovies_synchronize(nwMovies: nwMovies, page: page)
         }
         
-        isFetching = false
-        
         // On the very first fetch, we want to wait a minute.
         // We will use this value to drive UI state..
         if isFirstFetchComplete == false {
             try? await Task.sleep(nanoseconds: 1_250_000_000)
+            isFetching = false
             isFirstFetchComplete = true
+        } else {
+            isFetching = false
         }
         
         gridLayout.registerNumberOfCells(numberOfCells)
@@ -607,7 +603,6 @@ class CommunityViewModel {
         return result
     }
     
-    
     @MainActor func _withdrawCommunityCellData(index: Int, nwMovie: BlockChainNetworking.NWMovie) -> CommunityCellData {
         if communityCellDataQueue.count > 0 {
             let result = communityCellDataQueue.removeLast()
@@ -640,10 +635,6 @@ class CommunityViewModel {
         }
         return nil
     }
-    
-    
-    
-    
     
     @MainActor func handleCellClicked(at index: Int) async {
         

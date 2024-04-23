@@ -8,9 +8,12 @@
 import UIKit
 
 extension CGSize {
+    
+    static let epsilon: CGFloat = 0.00001
+    
     func getAspectFit(_ size: CGSize) -> (size: CGSize, scale: CGFloat) {
         var result = (size: CGSize(width: width, height: height), scale: CGFloat(1.0))
-        let epsilon = CGFloat(Math.epsilon)
+        let epsilon = CGFloat(Self.epsilon)
         if width > epsilon && height > epsilon && size.width > epsilon && size.height > epsilon {
             if (size.width / size.height) > (width / height) {
                 result.scale = width / size.width
@@ -27,7 +30,7 @@ extension CGSize {
     
     func getAspectFill(_ size: CGSize) -> (size: CGSize, scale: CGFloat) {
         var result = (size: CGSize(width: width, height: height), scale: CGFloat(1.0))
-        let epsilon = CGFloat(Math.epsilon)
+        let epsilon = CGFloat(Self.epsilon)
         if width > epsilon && height > epsilon && size.width > epsilon && size.height > epsilon {
             if (size.width / size.height) < (width / height) {
                 result.scale = width / size.width
