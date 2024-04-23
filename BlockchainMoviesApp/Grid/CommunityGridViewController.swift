@@ -2,7 +2,7 @@
 //  CommunityGridViewController.swift
 //  BlockchainMoviesApp
 //
-//  Created by Nicky Taylor on 4/21/24.
+//  Created by Nameless Bastard on 4/21/24.
 //
 
 import UIKit
@@ -62,7 +62,6 @@ class CommunityGridViewController: UIViewController {
     var layoutContainerSizeUpdateSubscriber: AnyCancellable?
     var layoutContentsSizeUpdateSubscriber: AnyCancellable?
     var visibleCellsUpdateSubscriber: AnyCancellable?
-    var isNetworkErrorPresentSubscriber: AnyCancellable?
     var isAnyItemPresentSubscriber: AnyCancellable?
     
     
@@ -109,20 +108,17 @@ class CommunityGridViewController: UIViewController {
                 }
             }
         
-        
-        isNetworkErrorPresentSubscriber = communityViewModel.$isNetworkErrorPresent
-            .sink { [weak self] _ in
-                if let self = self {
-                    self.communityGridView.notifyAnyItemPresentChanged()
-                }
-            }
-        
+        // This is REALLY dumb. The value in the view model will
+        // *NOT* be updated. Only the value passed in here. Therefore
+        // we will need 2 sources of truth to manage proper like.
         isAnyItemPresentSubscriber = communityViewModel.$isAnyItemPresent
-            .sink { [weak self] _ in
+            .sink { [weak self] isAnyItemPresent in
                 if let self = self {
-                    self.communityGridView.notifyNetworkErrorPresentChanged()
+                    self.communityGridView.notifyAnyItemPresentChanged(isAnyItemPresent)
                 }
             }
+        
+        communityGridView.viewControllerDidLinkSubscribers()
         
     }
 }

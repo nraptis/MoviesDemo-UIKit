@@ -9,9 +9,9 @@ import UIKit
 import SwiftUI
 
 protocol CommunityGridLayoutDelegate: AnyObject {
-    func layoutDidChangeVisibleCells()
-    func layoutContentsDidChangeSize(size: CGSize)
-    func layoutContainerDidChangeSize(size: CGSize)
+    @MainActor func layoutDidChangeVisibleCells()
+    @MainActor func layoutContentsDidChangeSize(size: CGSize)
+    @MainActor func layoutContainerDidChangeSize(size: CGSize)
 }
 
 class CommunityGridLayout {

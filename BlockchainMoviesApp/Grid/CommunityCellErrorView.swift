@@ -2,39 +2,23 @@
 //  CommunityCellErrorView.swift
 //  BlockchainMoviesApp
 //
-//  Created by Nicky Taylor on 4/21/24.
+//  Created by Nameless Bastard on 4/21/24.
 //
 
 import SwiftUI
 
 struct CommunityCellErrorView: View {
-    
     var retryHandler: () -> Void
     var body: some View {
         GeometryReader { geometry in
             VStack(spacing: 0.0) {
-                
                 Spacer(minLength: 0.0)
                 Button {
-                    
                     retryHandler()
-                    
-                    /*
-                    Task { @MainActor in
-                        await communityViewModel.handleCellForceRetryDownload(at: gridCellModel.layoutIndex)
-                    }
-                    */
-                    
                 } label: {
                     VStack(spacing: 0.0) {
                         
                         ZStack {
-                            
-                            /*Image(systemName: "arrow.clockwise")
-                                .font(.system(size: Device.isPad ? 32 : 24))
-                                .foregroundStyle(DarkwingDuckTheme.gray800)
-                            */
-                            
                             Image(systemName: "exclamationmark.triangle.fill")
                                 .font(.system(size: Device.isPad ? 32 : 24))
                                 .foregroundStyle(DarkwingDuckTheme.naughtyYellow)
@@ -56,7 +40,6 @@ struct CommunityCellErrorView: View {
             }
             .frame(width: geometry.size.width,
                    height: geometry.size.height)
-            //.background(DarkwingDuckTheme.gray200)
         }
     }
 }

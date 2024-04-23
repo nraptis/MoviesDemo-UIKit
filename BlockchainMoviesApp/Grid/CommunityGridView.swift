@@ -2,7 +2,7 @@
 //  CommunityGridView.swift
 //  BlockchainMoviesApp
 //
-//  Created by Nicky Taylor on 4/21/24.
+//  Created by Nameless Bastard on 4/21/24.
 //
 
 import UIKit
@@ -11,8 +11,7 @@ class CommunityGridView: UIView {
     
     enum GridState {
         case noItems
-        case error
-        case normal
+        case yesItems
     }
     
     private var gridState = GridState.noItems
@@ -36,12 +35,6 @@ class CommunityGridView: UIView {
         return result
     }()
     
-    lazy var errorView: CommunityGridErrorView = {
-        let result = CommunityGridErrorView(frame: CGRect(x: 0.0, y: 0.0, width: 512.0, height: 512.0))
-        result.translatesAutoresizingMaskIntoConstraints = false
-        return result
-    }()
-    
     lazy var noContentView: CommunityGridNoContentView = {
         let result = CommunityGridNoContentView(frame: CGRect(x: 0.0, y: 0.0, width: 512.0, height: 512.0))
         result.translatesAutoresizingMaskIntoConstraints = false
@@ -57,6 +50,8 @@ class CommunityGridView: UIView {
                            multiplier: 1.0,
                            constant: containerSize.height)
     }()
+    
+    
     
     let communityViewModel: CommunityViewModel
     let communityGridViewController: CommunityGridViewController
@@ -75,7 +70,6 @@ class CommunityGridView: UIView {
         
         addSubview(scrollView)
         addConstraints([
-            
             NSLayoutConstraint(item: scrollView, attribute: .top, relatedBy: .equal, toItem: self, attribute: .top, multiplier: 1.0, constant: 0.0),
             NSLayoutConstraint(item: scrollView, attribute: .right, relatedBy: .equal, toItem: self, attribute: .right, multiplier: 1.0, constant: 0.0),
             NSLayoutConstraint(item: scrollView, attribute: .bottom, relatedBy: .equal, toItem: self, attribute: .bottom, multiplier: 1.0, constant: 0.0),
@@ -111,20 +105,6 @@ class CommunityGridView: UIView {
         cellContainer.isHidden = true
         cellContainer.isUserInteractionEnabled = false
         
-        scrollContent.addSubview(errorView)
-        scrollContent.addConstraints([
-            NSLayoutConstraint(item: errorView, attribute: .top, relatedBy: .equal, toItem: scrollContent, attribute: .top,
-                               multiplier: 1.0, constant: 0.0),
-            NSLayoutConstraint(item: errorView, attribute: .left, relatedBy: .equal, toItem: scrollContent, attribute: .left,
-                               multiplier: 1.0, constant: 0.0),
-            NSLayoutConstraint(item: errorView, attribute: .right, relatedBy: .equal, toItem: scrollContent, attribute: .right,
-                               multiplier: 1.0, constant: 0.0),
-        ])
-        addConstraint(NSLayoutConstraint(item: errorView, attribute: .height, relatedBy: .equal, toItem: self,
-                                         attribute: .height, multiplier: 1.0, constant: 0.0))
-        errorView.hide()
-        
-        
         scrollContent.addSubview(noContentView)
         scrollContent.addConstraints([
             NSLayoutConstraint(item: noContentView, attribute: .top, relatedBy: .equal, toItem: scrollContent, attribute: .top,
@@ -152,36 +132,30 @@ class CommunityGridView: UIView {
     
     private func _updateContentHeightConstraint() {
         switch gridState {
-        case .error, .noItems:
+        case .noItems:
             print("Updated Height to Container, gridState = \(gridState)")
             scrollContentHeightConstraint.constant = containerSize.height
-        case .normal:
+        case .yesItems:
             print("Updated Height to Content, gridState = \(gridState)")
             scrollContentHeightConstraint.constant = contentSize.height
         }
     }
     
     private func _calculateGridState() {
+        
         if _storedAnyItemPresent {
-            gridState = .normal
-        } else if _storedNetworkErrorPresent {
-            gridState = .error
+            gridState = .yesItems
         } else {
             gridState = .noItems
         }
+        
         _updateContentHeightConstraint()
-        
-        print("Updated gridState = \(gridState)")
-        
         
         switch gridState {
         case .noItems:
             if noContentView.isHidden == true {
                 noContentView.show()
             }
-            if errorView.isHidden == false {
-                errorView.hide()
-            }
             if cellContainer.isHidden == false {
                 cellContainer.isHidden = true
                 cellContainer.isUserInteractionEnabled = false
@@ -192,29 +166,9 @@ class CommunityGridView: UIView {
                     }
                 }
             }
-        case .error:
+        case .yesItems:
             if noContentView.isHidden == false {
                 noContentView.hide()
-            }
-            if errorView.isHidden == true {
-                errorView.show()
-            }
-            if cellContainer.isHidden == false {
-                cellContainer.isHidden = true
-                cellContainer.isUserInteractionEnabled = false
-                for communityGridCellView in communityGridCellViews {
-                    if communityGridCellView.isActive {
-                        communityGridCellView.isHidden = true
-                        communityGridCellView.isUserInteractionEnabled = false
-                    }
-                }
-            }
-        case .normal:
-            if noContentView.isHidden == false {
-                noContentView.hide()
-            }
-            if errorView.isHidden == false {
-                errorView.hide()
             }
             if cellContainer.isHidden == true {
                 cellContainer.isHidden = false
@@ -248,18 +202,21 @@ class CommunityGridView: UIView {
         }
     }
     
-    private var _storedAnyItemPresent = false
-    func notifyAnyItemPresentChanged() {
-        if communityViewModel.isAnyItemPresent != _storedAnyItemPresent {
-            _storedAnyItemPresent = communityViewModel.isAnyItemPresent
-            _calculateGridState()
-        }
+    // In practice, this is not even used. It's mainly just
+    // to precent a hypthetical data race. It is called one
+    // time after the view controller finished linking
+    // up the combine publishers to subscribers.
+    func viewControllerDidLinkSubscribers() {
+        notifyAnyItemPresentChanged(communityViewModel.isAnyItemPresent)
     }
     
-    private var _storedNetworkErrorPresent = false
-    func notifyNetworkErrorPresentChanged() {
-        if communityViewModel.isNetworkErrorPresent != _storedNetworkErrorPresent {
-            _storedNetworkErrorPresent = communityViewModel.isNetworkErrorPresent
+    // This is REALLY dumb. The value in the view model will
+    // *NOT* be updated. Only the value passed in here. Therefore
+    // we will need 2 sources of truth to manage proper like.
+    private var _storedAnyItemPresent = false
+    func notifyAnyItemPresentChanged(_ isAnyItemPresent: Bool) {
+        if isAnyItemPresent != _storedAnyItemPresent {
+            _storedAnyItemPresent = isAnyItemPresent
             _calculateGridState()
         }
     }

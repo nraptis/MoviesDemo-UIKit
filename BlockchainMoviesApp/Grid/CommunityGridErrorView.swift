@@ -2,12 +2,21 @@
 //  CommunityGridErrorView.swift
 //  BlockchainMoviesApp
 //
-//  Created by Nicky Taylor on 4/22/24.
+//  Created by Nameless Bastard on 4/22/24.
 //
 
-import UIKit
 import SwiftUI
 
+//
+// This is not used, but it looks pretty good.
+// I am keeping it in case we want to use it.
+//
+// I tried this and didn't see much benefit
+// since the lightning bolt exists on the
+// bottom bar. The lightning bolt is enough
+// of an indicator of error. The popcorn is
+// a more light hearted graphic.
+//
 class CommunityGridErrorView: UIView {
 
     lazy var errorHostingViewController: UIViewController = {

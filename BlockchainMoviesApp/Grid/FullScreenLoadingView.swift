@@ -2,11 +2,13 @@
 //  FullScreenLoadingView.swift
 //  BlockchainMoviesApp
 //
-//  Created by Nicky Taylor on 4/22/24.
+//  Created by Nameless Bastard on 4/22/24.
 //
 
 import SwiftUI
 
+// Note: This one looks AWESOME!
+//       use this one.
 struct FullScreenLoadingView: View {
     var body: some View {
         VStack {
@@ -37,8 +39,4 @@ struct FullScreenLoadingView: View {
         }
         .background(DarkwingDuckTheme.gray050)
     }
-}
-
-#Preview {
-    FullScreenLoadingView()
 }

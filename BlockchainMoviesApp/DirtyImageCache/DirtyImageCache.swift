@@ -166,19 +166,14 @@ class DirtyImageCache {
             _isSavingEnqueued = true
             return
         }
-        
         let filePath = filePath
-        
         _isSaving = true
-        
         let fileBuffer = FileBuffer()
-        
         fileRecycler.save(fileBuffer: fileBuffer)
-        
         fileBuffer.save(filePath: filePath)
         
-        // Sleep for 5 seconds...
-        try? await Task.sleep(nanoseconds: 5_000_000_000)
+        // Sleep for 3 seconds...
+        try? await Task.sleep(nanoseconds: 3_000_000_000)
         
         _isSaving = false
         

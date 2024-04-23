@@ -2,13 +2,16 @@
 //  ErrorView.swift
 //  BlockchainMoviesApp
 //
-//  Created by Nicky Taylor on 4/22/24.
+//  Created by Nameless Bastard on 4/22/24.
 //
 
 import SwiftUI
 
+//
+// This is not used, but it looks pretty good.
+// I am keeping it in case we want to use it.
+//
 struct FullScreenErrorView: View {
-    
     let text: String
     var body: some View {
         VStack {
@@ -30,12 +33,9 @@ struct FullScreenErrorView: View {
                 .frame(width: Device.isPad ? 320.0 : 220.0,
                        height: Device.isPad ? 320.0 : 220.0)
                 .background(RoundedRectangle(cornerRadius: 16.0).foregroundStyle(DarkwingDuckTheme.gray150))
-                
-                
                 Spacer()
             }
             Spacer()
         }
-        
     }
 }

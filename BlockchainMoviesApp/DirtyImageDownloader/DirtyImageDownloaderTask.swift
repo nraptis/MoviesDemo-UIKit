@@ -160,8 +160,7 @@ class DirtyImageDownloaderTask: NSObject, URLSessionDelegate {
 
         //TODO: Remove
         
-        /*
-        if Bool.random() {
+        if Bool.random() && Bool.random() {
             isInvalidated = true
             isActive = false
             self.item = nil
@@ -169,7 +168,7 @@ class DirtyImageDownloaderTask: NSObject, URLSessionDelegate {
             downloader.handleDownloadTaskDidFail(task: self)
             return
         }
-        */
+        
         
         isInvalidated = true
         isActive = false

@@ -2,7 +2,7 @@
 //  CommunityGridCellBottomContentView.swift
 //  BlockchainMoviesApp
 //
-//  Created by Nicky Taylor on 4/21/24.
+//  Created by Nameless Bastard on 4/21/24.
 //
 
 import UIKit

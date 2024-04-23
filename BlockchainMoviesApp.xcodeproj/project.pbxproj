@@ -49,13 +49,16 @@
 		E8CDA08F2BD57DBB003A1C73 /* CommunityGridCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8CDA08E2BD57DBB003A1C73 /* CommunityGridCellView.swift */; };
 		E8CDA0942BD57E10003A1C73 /* DrawableButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8CDA0912BD57E10003A1C73 /* DrawableButton.swift */; };
 		E8CDA0952BD57E10003A1C73 /* ColoredButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8CDA0922BD57E10003A1C73 /* ColoredButton.swift */; };
-		E8D30CE42BD5BCB400FBC658 /* CommunityCellSuccessView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8D30CE32BD5BCB400FBC658 /* CommunityCellSuccessView.swift */; };
 		E8D30CE62BD5BCC100FBC658 /* CommunityCellLoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8D30CE52BD5BCC100FBC658 /* CommunityCellLoadingView.swift */; };
 		E8D30CE82BD5BE0F00FBC658 /* CommunityCellFrameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8D30CE72BD5BE0F00FBC658 /* CommunityCellFrameView.swift */; };
 		E8DFD92B2BCA037C00D2A107 /* MovieDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8DFD92A2BCA037C00D2A107 /* MovieDetailsView.swift */; };
 		E8E2D9642BC822E000A41EC0 /* CommunityCellData.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8E2D9622BC822E000A41EC0 /* CommunityCellData.swift */; };
 		E8E733A62BD30D5D0095A81A /* CellModelState.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8E733A52BD30D5D0095A81A /* CellModelState.swift */; };
 		E8E733AA2BD3177D0095A81A /* CommunityGridLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8E733A92BD3177D0095A81A /* CommunityGridLayout.swift */; };
+		E8F1C5D82BD7E726007456B9 /* CommunityViewModel+Debug.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8F1C5D72BD7E726007456B9 /* CommunityViewModel+Debug.swift */; };
+		E8F1C5DA2BD7F57B007456B9 /* CommunityViewModel+Reconcile.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8F1C5D92BD7F57B007456B9 /* CommunityViewModel+Reconcile.swift */; };
+		E8F1C5DC2BD80BD1007456B9 /* CommunityViewModel+VisibleCellStateChange.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8F1C5DB2BD80BD1007456B9 /* CommunityViewModel+VisibleCellStateChange.swift */; };
+		E8F1C5E02BD810E4007456B9 /* CommunityViewModel+FetchMorePages.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8F1C5DF2BD810E4007456B9 /* CommunityViewModel+FetchMorePages.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -103,7 +106,6 @@
 		E8CDA08E2BD57DBB003A1C73 /* CommunityGridCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommunityGridCellView.swift; sourceTree = "<group>"; };
 		E8CDA0912BD57E10003A1C73 /* DrawableButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DrawableButton.swift; sourceTree = "<group>"; };
 		E8CDA0922BD57E10003A1C73 /* ColoredButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ColoredButton.swift; sourceTree = "<group>"; };
-		E8D30CE32BD5BCB400FBC658 /* CommunityCellSuccessView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommunityCellSuccessView.swift; sourceTree = "<group>"; };
 		E8D30CE52BD5BCC100FBC658 /* CommunityCellLoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommunityCellLoadingView.swift; sourceTree = "<group>"; };
 		E8D30CE72BD5BE0F00FBC658 /* CommunityCellFrameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommunityCellFrameView.swift; sourceTree = "<group>"; };
 		E8DFD92A2BCA037C00D2A107 /* MovieDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovieDetailsView.swift; sourceTree = "<group>"; };
@@ -111,6 +113,10 @@
 		E8E2D9622BC822E000A41EC0 /* CommunityCellData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommunityCellData.swift; sourceTree = "<group>"; };
 		E8E733A52BD30D5D0095A81A /* CellModelState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CellModelState.swift; sourceTree = "<group>"; };
 		E8E733A92BD3177D0095A81A /* CommunityGridLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommunityGridLayout.swift; sourceTree = "<group>"; };
+		E8F1C5D72BD7E726007456B9 /* CommunityViewModel+Debug.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CommunityViewModel+Debug.swift"; sourceTree = "<group>"; };
+		E8F1C5D92BD7F57B007456B9 /* CommunityViewModel+Reconcile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CommunityViewModel+Reconcile.swift"; sourceTree = "<group>"; };
+		E8F1C5DB2BD80BD1007456B9 /* CommunityViewModel+VisibleCellStateChange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CommunityViewModel+VisibleCellStateChange.swift"; sourceTree = "<group>"; };
+		E8F1C5DF2BD810E4007456B9 /* CommunityViewModel+FetchMorePages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CommunityViewModel+FetchMorePages.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -154,6 +160,10 @@
 				E8CDA0882BD553B3003A1C73 /* CommunityView.swift */,
 				E83EA6D42BC5A79E0076D6BB /* CommunityViewModel.swift */,
 				E81BC6CC2BD6A0CE00CDB195 /* CommunityViewModel+CellUpdates.swift */,
+				E8F1C5D72BD7E726007456B9 /* CommunityViewModel+Debug.swift */,
+				E8F1C5D92BD7F57B007456B9 /* CommunityViewModel+Reconcile.swift */,
+				E8F1C5DB2BD80BD1007456B9 /* CommunityViewModel+VisibleCellStateChange.swift */,
+				E8F1C5DF2BD810E4007456B9 /* CommunityViewModel+FetchMorePages.swift */,
 				E8E2D9622BC822E000A41EC0 /* CommunityCellData.swift */,
 				E8CDA08C2BD5793A003A1C73 /* CommunityCellModel.swift */,
 				E8E733A52BD30D5D0095A81A /* CellModelState.swift */,
@@ -170,6 +180,7 @@
 				E867A0D92BC9F820003C77B4 /* RootView.swift */,
 				E867A0DB2BC9FC20003C77B4 /* RootViewModel.swift */,
 				E8DFD92A2BCA037C00D2A107 /* MovieDetailsView.swift */,
+				E8CDA08A2BD56EC7003A1C73 /* FirstAndLastIndex.swift */,
 			);
 			path = BlockchainMoviesApp;
 			sourceTree = "<group>";
@@ -224,6 +235,7 @@
 		E867A0E92BC9FFFD003C77B4 /* Grid */ = {
 			isa = PBXGroup;
 			children = (
+				E8CDA0822BD54CBF003A1C73 /* CommunityGridViewController.swift */,
 				E8CDA0842BD54CD1003A1C73 /* CommunityGridView.swift */,
 				E8CDA08E2BD57DBB003A1C73 /* CommunityGridCellView.swift */,
 				E860FDF32BD5DB80009EF7A1 /* CommunityGridCellBottomContentView.swift */,
@@ -234,10 +246,7 @@
 				E860FDF52BD5E6E2009EF7A1 /* CommunityCellNullImageView.swift */,
 				E8CDA07E2BD5483A003A1C73 /* CommunityCellMissingContentView.swift */,
 				E8CDA0802BD54A41003A1C73 /* CommunityCellConstants.swift */,
-				E8CDA0822BD54CBF003A1C73 /* CommunityGridViewController.swift */,
 				E8CDA0862BD54D58003A1C73 /* CommunityGridViewControllerRepresentable.swift */,
-				E8CDA08A2BD56EC7003A1C73 /* FirstAndLastIndex.swift */,
-				E8D30CE32BD5BCB400FBC658 /* CommunityCellSuccessView.swift */,
 				E8D30CE52BD5BCC100FBC658 /* CommunityCellLoadingView.swift */,
 				E8D30CE72BD5BE0F00FBC658 /* CommunityCellFrameView.swift */,
 				E81BC6CE2BD6F1C400CDB195 /* CommunityGridNoContentView.swift */,
@@ -323,6 +332,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E8F1C5D82BD7E726007456B9 /* CommunityViewModel+Debug.swift in Sources */,
 				E8CDA0812BD54A41003A1C73 /* CommunityCellConstants.swift in Sources */,
 				E83EA6E92BC5BE690076D6BB /* DirtyImageCache.swift in Sources */,
 				E8D30CE82BD5BE0F00FBC658 /* CommunityCellFrameView.swift in Sources */,
@@ -333,10 +343,10 @@
 				E8E733AA2BD3177D0095A81A /* CommunityGridLayout.swift in Sources */,
 				E8CDA0942BD57E10003A1C73 /* DrawableButton.swift in Sources */,
 				E8CDA0792BD547FB003A1C73 /* CommunityCellErrorView.swift in Sources */,
+				E8F1C5DC2BD80BD1007456B9 /* CommunityViewModel+VisibleCellStateChange.swift in Sources */,
 				E867A0F22BC9FFFD003C77B4 /* Device.swift in Sources */,
 				E867A0F12BC9FFFD003C77B4 /* CGSize+Aspect.swift in Sources */,
 				E83EA6A92BC4E9B20076D6BB /* BlockchainMoviesAppApp.swift in Sources */,
-				E8D30CE42BD5BCB400FBC658 /* CommunityCellSuccessView.swift in Sources */,
 				E8CDA0832BD54CBF003A1C73 /* CommunityGridViewController.swift in Sources */,
 				E83EA6D52BC5A79E0076D6BB /* CommunityViewModel.swift in Sources */,
 				E860FDF62BD5E6E2009EF7A1 /* CommunityCellNullImageView.swift in Sources */,
@@ -358,9 +368,11 @@
 				E867A0DA2BC9F820003C77B4 /* RootView.swift in Sources */,
 				E81BC6D12BD6F1D700CDB195 /* CommunityGridErrorView.swift in Sources */,
 				E81BC6D52BD6F28700CDB195 /* FullScreenNoItemsView.swift in Sources */,
+				E8F1C5E02BD810E4007456B9 /* CommunityViewModel+FetchMorePages.swift in Sources */,
 				E83EA6E22BC5B9840076D6BB /* DirtyImageDownloader.swift in Sources */,
 				E83EA6DF2BC5B2F80076D6BB /* DarkwingDuckTheme.swift in Sources */,
 				E8E733A62BD30D5D0095A81A /* CellModelState.swift in Sources */,
+				E8F1C5DA2BD7F57B007456B9 /* CommunityViewModel+Reconcile.swift in Sources */,
 				E8D30CE62BD5BCC100FBC658 /* CommunityCellLoadingView.swift in Sources */,
 				E81BC6CF2BD6F1C400CDB195 /* CommunityGridNoContentView.swift in Sources */,
 				E867A0F62BC9FFFD003C77B4 /* UIImage+Resize.swift in Sources */,

@@ -25,10 +25,10 @@ import UIKit
 }
 
 protocol DirtyImageDownloaderDelegate: AnyObject {
-    func dataDownloadDidStart(_ index: Int)
-    func dataDownloadDidSucceed(_ index: Int, image: UIImage)
-    func dataDownloadDidFail(_ index: Int)
-    func dataDownloadDidCancel(_ index: Int)
+    @MainActor func dataDownloadDidStart(_ index: Int)
+    @MainActor func dataDownloadDidSucceed(_ index: Int, image: UIImage)
+    @MainActor func dataDownloadDidFail(_ index: Int)
+    @MainActor func dataDownloadDidCancel(_ index: Int)
 }
 
 protocol DirtyImageDownloaderType: AnyObject, Hashable {
@@ -237,8 +237,6 @@ class DirtyImageDownloader {
     }
     
     @DirtyImageDownloaderActor func addDownloadTask(_ item: any DirtyImageDownloaderType) {
-        
-        print("{{🐲}} Added Download @ \(item.index), Which is \(ObjectIdentifier(item))")
         
         if isBlocked {
             return

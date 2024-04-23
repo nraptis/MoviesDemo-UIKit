@@ -2,7 +2,7 @@
 //  NoItemsView.swift
 //  BlockchainMoviesApp
 //
-//  Created by Nicky Taylor on 4/22/24.
+//  Created by Nameless Bastard on 4/22/24.
 //
 
 import SwiftUI

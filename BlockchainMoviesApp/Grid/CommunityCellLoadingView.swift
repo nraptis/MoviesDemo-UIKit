@@ -2,7 +2,7 @@
 //  CommunityCellLoadingView.swift
 //  BlockchainMoviesApp
 //
-//  Created by Nicky Taylor on 4/21/24.
+//  Created by Nameless Bastard on 4/21/24.
 //
 
 import UIKit
@@ -22,11 +22,8 @@ class CommunityCellLoadingView: UIView {
     }()
     
     required init(isShowing: Bool) {
-        
         super.init(frame: .zero)
-        
         addSubview(activityIndicatorView)
-        
         addConstraints([
             NSLayoutConstraint(item: activityIndicatorView, attribute: .centerX, relatedBy: .equal,
                                toItem: self, attribute: .centerX, multiplier: 1.0, constant: 0.0),
