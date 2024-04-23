@@ -9,6 +9,14 @@ import UIKit
 
 class CommunityGridView: UIView {
     
+    enum GridState {
+        case noItems
+        case error
+        case normal
+    }
+    
+    private var gridState = GridState.noItems
+    
     lazy var scrollView: UIScrollView = {
         let result = UIScrollView(frame: .zero)
         result.translatesAutoresizingMaskIntoConstraints = false
@@ -18,6 +26,24 @@ class CommunityGridView: UIView {
     
     lazy var scrollContent: UIView = {
         let result = UIView(frame: .zero)
+        result.translatesAutoresizingMaskIntoConstraints = false
+        return result
+    }()
+    
+    lazy var cellContainer: UIView = {
+        let result = UIView(frame: .zero)
+        result.translatesAutoresizingMaskIntoConstraints = false
+        return result
+    }()
+    
+    lazy var errorView: CommunityGridErrorView = {
+        let result = CommunityGridErrorView(frame: CGRect(x: 0.0, y: 0.0, width: 512.0, height: 512.0))
+        result.translatesAutoresizingMaskIntoConstraints = false
+        return result
+    }()
+    
+    lazy var noContentView: CommunityGridNoContentView = {
+        let result = CommunityGridNoContentView(frame: CGRect(x: 0.0, y: 0.0, width: 512.0, height: 512.0))
         result.translatesAutoresizingMaskIntoConstraints = false
         return result
     }()
@@ -74,6 +100,43 @@ class CommunityGridView: UIView {
         
         scrollContent.addConstraint(scrollContentHeightConstraint)
         scrollContent.backgroundColor = DarkwingDuckTheme._gray050
+        
+        scrollContent.addSubview(cellContainer)
+        scrollContent.addConstraints([
+            NSLayoutConstraint(item: cellContainer, attribute: .top, relatedBy: .equal, toItem: scrollContent, attribute: .top, multiplier: 1.0, constant: 0.0),
+            NSLayoutConstraint(item: cellContainer, attribute: .bottom, relatedBy: .equal, toItem: scrollContent, attribute: .bottom, multiplier: 1.0, constant: 0.0),
+            NSLayoutConstraint(item: cellContainer, attribute: .left, relatedBy: .equal, toItem: scrollContent, attribute: .left, multiplier: 1.0, constant: 0.0),
+            NSLayoutConstraint(item: cellContainer, attribute: .right, relatedBy: .equal, toItem: scrollContent, attribute: .right, multiplier: 1.0, constant: 0.0),
+        ])
+        cellContainer.isHidden = true
+        cellContainer.isUserInteractionEnabled = false
+        
+        scrollContent.addSubview(errorView)
+        scrollContent.addConstraints([
+            NSLayoutConstraint(item: errorView, attribute: .top, relatedBy: .equal, toItem: scrollContent, attribute: .top,
+                               multiplier: 1.0, constant: 0.0),
+            NSLayoutConstraint(item: errorView, attribute: .left, relatedBy: .equal, toItem: scrollContent, attribute: .left,
+                               multiplier: 1.0, constant: 0.0),
+            NSLayoutConstraint(item: errorView, attribute: .right, relatedBy: .equal, toItem: scrollContent, attribute: .right,
+                               multiplier: 1.0, constant: 0.0),
+        ])
+        addConstraint(NSLayoutConstraint(item: errorView, attribute: .height, relatedBy: .equal, toItem: self,
+                                         attribute: .height, multiplier: 1.0, constant: 0.0))
+        errorView.hide()
+        
+        
+        scrollContent.addSubview(noContentView)
+        scrollContent.addConstraints([
+            NSLayoutConstraint(item: noContentView, attribute: .top, relatedBy: .equal, toItem: scrollContent, attribute: .top,
+                               multiplier: 1.0, constant: 0.0),
+            NSLayoutConstraint(item: noContentView, attribute: .left, relatedBy: .equal, toItem: scrollContent, attribute: .left,
+                               multiplier: 1.0, constant: 0.0),
+            NSLayoutConstraint(item: noContentView, attribute: .right, relatedBy: .equal, toItem: scrollContent, attribute: .right,
+                               multiplier: 1.0, constant: 0.0),
+        ])
+        addConstraint(NSLayoutConstraint(item: noContentView, attribute: .height, relatedBy: .equal, toItem: self,
+                                         attribute: .height, multiplier: 1.0, constant: 0.0))
+        
     }
     
     required init?(coder: NSCoder) {
@@ -87,8 +150,84 @@ class CommunityGridView: UIView {
         }
     }
     
-    //CommunityCellData
+    private func _updateContentHeightConstraint() {
+        switch gridState {
+        case .error, .noItems:
+            print("Updated Height to Container, gridState = \(gridState)")
+            scrollContentHeightConstraint.constant = containerSize.height
+        case .normal:
+            print("Updated Height to Content, gridState = \(gridState)")
+            scrollContentHeightConstraint.constant = contentSize.height
+        }
+    }
     
+    private func _calculateGridState() {
+        if _storedAnyItemPresent {
+            gridState = .normal
+        } else if _storedNetworkErrorPresent {
+            gridState = .error
+        } else {
+            gridState = .noItems
+        }
+        _updateContentHeightConstraint()
+        
+        print("Updated gridState = \(gridState)")
+        
+        
+        switch gridState {
+        case .noItems:
+            if noContentView.isHidden == true {
+                noContentView.show()
+            }
+            if errorView.isHidden == false {
+                errorView.hide()
+            }
+            if cellContainer.isHidden == false {
+                cellContainer.isHidden = true
+                cellContainer.isUserInteractionEnabled = false
+                for communityGridCellView in communityGridCellViews {
+                    if communityGridCellView.isActive {
+                        communityGridCellView.isHidden = true
+                        communityGridCellView.isUserInteractionEnabled = false
+                    }
+                }
+            }
+        case .error:
+            if noContentView.isHidden == false {
+                noContentView.hide()
+            }
+            if errorView.isHidden == true {
+                errorView.show()
+            }
+            if cellContainer.isHidden == false {
+                cellContainer.isHidden = true
+                cellContainer.isUserInteractionEnabled = false
+                for communityGridCellView in communityGridCellViews {
+                    if communityGridCellView.isActive {
+                        communityGridCellView.isHidden = true
+                        communityGridCellView.isUserInteractionEnabled = false
+                    }
+                }
+            }
+        case .normal:
+            if noContentView.isHidden == false {
+                noContentView.hide()
+            }
+            if errorView.isHidden == false {
+                errorView.hide()
+            }
+            if cellContainer.isHidden == true {
+                cellContainer.isHidden = false
+                cellContainer.isUserInteractionEnabled = true
+                for communityGridCellView in communityGridCellViews {
+                    if communityGridCellView.isActive {
+                        communityGridCellView.isHidden = false
+                        communityGridCellView.isUserInteractionEnabled = true
+                    }
+                }
+            }
+        }
+    }
     
     func worldNotifyContainerSizeMayHaveChanged(_ newContainerSize: CGSize) {
         
@@ -99,6 +238,9 @@ class CommunityGridView: UIView {
         
         print("worldNotifyContainerSizeMayHaveChanged")
         
+        
+        //containerSize
+        
         if newContainerSize.width != containerSize.width || newContainerSize.height != containerSize.height {
             containerSize = newContainerSize
             gridLayout.registerContainer(containerSize, communityViewModel.numberOfCells)
@@ -106,18 +248,32 @@ class CommunityGridView: UIView {
         }
     }
     
+    private var _storedAnyItemPresent = false
+    func notifyAnyItemPresentChanged() {
+        if communityViewModel.isAnyItemPresent != _storedAnyItemPresent {
+            _storedAnyItemPresent = communityViewModel.isAnyItemPresent
+            _calculateGridState()
+        }
+    }
+    
+    private var _storedNetworkErrorPresent = false
+    func notifyNetworkErrorPresentChanged() {
+        if communityViewModel.isNetworkErrorPresent != _storedNetworkErrorPresent {
+            _storedNetworkErrorPresent = communityViewModel.isNetworkErrorPresent
+            _calculateGridState()
+        }
+    }
+    
     func layoutNotifyContainerSizeDidChange(_ newContainerSize: CGSize) {
-        
-        let maxxo = gridLayout.getMaximumNumberOfVisibleCells()
-        print("layoutNotifyContainerSizeDidChange => \(maxxo)")
-        
         
     }
     
     func layoutNotifyotifyContentSizeMayHaveChanged(_ newContentSize: CGSize) {
+        let newContentSize = CGSize(width: containerSize.width,
+                                    height: max(containerSize.height, newContentSize.height))
         if newContentSize.width != contentSize.width || newContentSize.height != contentSize.height {
             contentSize = newContentSize
-            scrollContentHeightConstraint.constant = newContentSize.height
+            _updateContentHeightConstraint()
             handleScrollContentOffsetMayHaveChanged()
             refreshAllActiveFrames()
         }
@@ -161,7 +317,6 @@ class CommunityGridView: UIView {
         }
     }
     
-    
     private var _visibleCommunityCellModelSet = Set<Int>()
     private var _visibleCommunityGridCellViewSet = Set<Int>()
     
@@ -171,6 +326,8 @@ class CommunityGridView: UIView {
     private var _communityCellModelsToAdd = [CommunityCellModel]()
     
     var communityGridCellViews = [CommunityGridCellView]()
+    
+    
     
     func layoutNotifyotifyVisibleCellsMayHaveChanged() {
         
@@ -297,13 +454,14 @@ class CommunityGridView: UIView {
     
     func createCommunityGridCellView() {
         
-        let communityGridCellView = CommunityGridCellView(communityViewModel: communityViewModel, communityCellModel: placeholderCommunityCellModel)
-        scrollContent.addSubview(communityGridCellView)
+        let communityGridCellView = CommunityGridCellView(communityViewModel: communityViewModel, 
+                                                          communityCellModel: placeholderCommunityCellModel)
+        cellContainer.addSubview(communityGridCellView)
         communityGridCellView.translatesAutoresizingMaskIntoConstraints = false
         let constraintLeft = NSLayoutConstraint(item: communityGridCellView, attribute: .left, relatedBy: .equal,
-                                                toItem: scrollContent, attribute: .left, multiplier: 1.0, constant: 0.0)
+                                                toItem: cellContainer, attribute: .left, multiplier: 1.0, constant: 0.0)
         let constraintTop = NSLayoutConstraint(item: communityGridCellView, attribute: .top, relatedBy: .equal,
-                                               toItem: scrollContent, attribute: .top, multiplier: 1.0, constant: 0.0)
+                                               toItem: cellContainer, attribute: .top, multiplier: 1.0, constant: 0.0)
         let constraintWidth = NSLayoutConstraint(item: communityGridCellView, attribute: .width, relatedBy: .equal,
                                                  toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: 256.0)
         let constraintHeight = NSLayoutConstraint(item: communityGridCellView, attribute: .height, relatedBy: .equal,
@@ -314,7 +472,7 @@ class CommunityGridView: UIView {
         communityGridCellView.constraintWidth = constraintWidth
         communityGridCellView.constraintHeight = constraintHeight
         
-        scrollContent.addConstraints([
+        cellContainer.addConstraints([
             constraintLeft,
             constraintTop])
         

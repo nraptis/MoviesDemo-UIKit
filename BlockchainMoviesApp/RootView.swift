@@ -27,6 +27,5 @@ struct RootView: View {
             Alert(title: Text(rootViewModel.errorTitle)
                   , message: Text(rootViewModel.errorMessage))
         }
-        
     }
 }

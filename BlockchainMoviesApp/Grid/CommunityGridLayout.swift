@@ -155,6 +155,9 @@ class CommunityGridLayout {
             height += CGFloat((_numberOfRows - 1) * cellSpacingV)
         }
         
+        print("previousWidth = \(previousWidth), width = \(width)")
+        print("previousHeight = \(previousHeight), height = \(height)")
+        
         if (previousWidth != width) || (previousHeight != height) {
             delegate?.layoutContentsDidChangeSize(size: CGSize(width: width,
                                                                height: height))

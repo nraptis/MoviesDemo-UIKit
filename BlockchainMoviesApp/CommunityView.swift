@@ -9,6 +9,15 @@ import SwiftUI
 
 struct CommunityView: View {
     
+    //
+    // These mirror our view model, we are
+    // not using Observation framework.
+    //
+    @State var isShowingNetworkError = false
+    @State var isAnyItemPresent = false
+    @State var isFetching = false
+    @State var isFirstFetchComplete = false
+    
     var communityViewModel: CommunityViewModel
     var body: some View {
         
@@ -49,6 +58,18 @@ struct CommunityView: View {
             }
         }
         .background(DarkwingDuckTheme.gray050)
+        .onReceive(communityViewModel.$isNetworkErrorPresent) { value in
+            isShowingNetworkError = value
+        }
+        .onReceive(communityViewModel.$isAnyItemPresent) { value in
+            isAnyItemPresent = value
+        }
+        .onReceive(communityViewModel.$isFetching) { value in
+            isFetching = value
+        }
+        .onReceive(communityViewModel.$isFirstFetchComplete) { value in
+            isFirstFetchComplete = value
+        }
     }
     
     @MainActor func guts(containerGeometry: GeometryProxy) -> some View {
@@ -63,24 +84,27 @@ struct CommunityView: View {
         // The loading view is really only there for the
         // initial load. Once we get an item or an error,
         // all the loading will be done with the pull-refresh.
-        //
         
         var isLoadingViewShowing = false
-        if communityViewModel.isAnyItemPresent {
+        if isAnyItemPresent {
             
         } else {
-            if communityViewModel.isFetching {
+            if isFetching {
                 isLoadingViewShowing = true
             }
+        }
+        
+        if isFirstFetchComplete == false {
+            isLoadingViewShowing = true
         }
         
         return ZStack {
             CommunityGridViewControllerRepresentable(communityViewModel: communityViewModel,
                                                      width: geometryWidth,
                                                      height: geometryHeight)
-            LoadingView()
-                .frame(width: geometryWidth, height: geometryHeight)
-                .opacity(isLoadingViewShowing ? 1.0 : 0.0)
+            if isLoadingViewShowing {
+                FullScreenLoadingView()
+            }
         }
         .frame(width: geometryWidth, height: geometryHeight)
     }
@@ -108,8 +132,9 @@ struct CommunityView: View {
                 .renderingMode(.template)
                 .font(.system(size: CGFloat(min(bottomBarHeight - 14, 22))))
                 .foregroundStyle(DarkwingDuckTheme.naughtyYellow)
-                .opacity(communityViewModel.isNetworkErrorPresent ? 1.0 : 0.0)
-            
+                .opacity(isShowingNetworkError ? 1.0 : 0.0)
+                .scaleEffect(isShowingNetworkError ? 1.0 : 0.85)
+                .animation(.easeInOut, value: isShowingNetworkError)
         }
         .frame(height: CGFloat(bottomBarHeight))
         .background(DarkwingDuckTheme.gray100)

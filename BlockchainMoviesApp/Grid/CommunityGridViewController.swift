@@ -62,6 +62,10 @@ class CommunityGridViewController: UIViewController {
     var layoutContainerSizeUpdateSubscriber: AnyCancellable?
     var layoutContentsSizeUpdateSubscriber: AnyCancellable?
     var visibleCellsUpdateSubscriber: AnyCancellable?
+    var isNetworkErrorPresentSubscriber: AnyCancellable?
+    var isAnyItemPresentSubscriber: AnyCancellable?
+    
+    
     
     func linkUpSubscribers() {
         
@@ -104,5 +108,21 @@ class CommunityGridViewController: UIViewController {
                     self.communityGridView.layoutNotifyotifyVisibleCellsMayHaveChanged()
                 }
             }
+        
+        
+        isNetworkErrorPresentSubscriber = communityViewModel.$isNetworkErrorPresent
+            .sink { [weak self] _ in
+                if let self = self {
+                    self.communityGridView.notifyAnyItemPresentChanged()
+                }
+            }
+        
+        isAnyItemPresentSubscriber = communityViewModel.$isAnyItemPresent
+            .sink { [weak self] _ in
+                if let self = self {
+                    self.communityGridView.notifyNetworkErrorPresentChanged()
+                }
+            }
+        
     }
 }

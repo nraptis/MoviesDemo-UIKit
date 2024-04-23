@@ -74,9 +74,6 @@ class CommunityGridCellView: UIView {
         return result
     }()
     
-    
-    
-    
     lazy var button: ColoredButton = {
         let result = ColoredButton(upColor: UIColor.clear, downColor: UIColor.black.withAlphaComponent(0.4))
         result.translatesAutoresizingMaskIntoConstraints = false
@@ -97,12 +94,7 @@ class CommunityGridCellView: UIView {
         self.communityCellModel = communityCellModel
         super.init(frame: CGRect(x: 0.0, y: 0.0, width: 256.0, height: 256.0))
         self.translatesAutoresizingMaskIntoConstraints = false
-        //self.backgroundColor = DarkwingDuckTheme._gray900
-        
-        self.backgroundColor = UIColor(red: CGFloat.random(in: 0.0...1.0),
-                                       green: CGFloat.random(in: 0.0...1.0),
-                                       blue: CGFloat.random(in: 0.0...1.0),
-                                       alpha: 1.0)
+        self.backgroundColor = DarkwingDuckTheme._gray900
         
         layer.cornerRadius = CommunityCellConstants.outerRadius
         clipsToBounds = true
@@ -303,10 +295,12 @@ class CommunityGridCellView: UIView {
         
         let cellModelState = communityCellModel.cellModelState
         
+        /*
         self.backgroundColor = UIColor(red: CGFloat.random(in: 0.0...1.0),
                                        green: CGFloat.random(in: 0.0...1.0),
                                        blue: CGFloat.random(in: 0.0...1.0),
                                        alpha: 1.0)
+        */
         
         switch cellModelState {
         case .downloading, .downloadingActively:

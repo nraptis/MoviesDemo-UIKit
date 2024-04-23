@@ -12,7 +12,7 @@ extension CommunityViewModel {
     // We return true if we published an update.
     @MainActor func attemptUpdateCellStateSuccess(communityCellModel: CommunityCellModel,
                                                   communityCellData: CommunityCellData,
-                                                  visibleCellIndices: Set<Int>,
+                                                  visibleCellIndices: Set<Int>?,
                                                   isFromRefresh: Bool,
                                                   key: String,
                                                   image: UIImage,
@@ -25,8 +25,13 @@ extension CommunityViewModel {
         }
         
         if communityCellModel.attemptUpdateCellStateSuccess(communityCellData, key, image) {
-            print("[[\(emoji)]] Cell #{\(communityCellModel.index)} State Updated => .Success (\(image.size.width) x \(image.size.height)) [\(debug)]")
-            let isVisible = visibleCellIndices.contains(communityCellModel.index)
+            if Self.DEBUG_STATE_CHANGES {
+                print("[[\(emoji)]] Cell #{\(communityCellModel.index)} State Updated => .Success (\(image.size.width) x \(image.size.height)) [\(debug)]")
+            }
+            var isVisible = true
+            if let visibleCellIndices = visibleCellIndices {
+                isVisible = visibleCellIndices.contains(communityCellModel.index)
+            }
             if isVisible {
                 cellNeedsUpdatePublisher.send(communityCellModel)
                 return true
@@ -35,9 +40,10 @@ extension CommunityViewModel {
         return false
     }
     
+    
     @MainActor func attemptUpdateCellStateDownloading(communityCellModel: CommunityCellModel,
                                                       communityCellData: CommunityCellData,
-                                                      visibleCellIndices: Set<Int>,
+                                                      visibleCellIndices: Set<Int>?,
                                                       isFromRefresh: Bool,
                                                       key: String,
                                                       debug: String,
@@ -49,8 +55,13 @@ extension CommunityViewModel {
         }
         
         if communityCellModel.attemptUpdateCellStateDownloading(communityCellData, key) {
-            print("[[\(emoji)]] Cell #{\(communityCellModel.index)} State Updated => .Downloading [\(debug)]")
-            let isVisible = visibleCellIndices.contains(communityCellModel.index)
+            if Self.DEBUG_STATE_CHANGES {
+                print("[[\(emoji)]] Cell #{\(communityCellModel.index)} State Updated => .Downloading [\(debug)]")
+            }
+            var isVisible = true
+            if let visibleCellIndices = visibleCellIndices {
+                isVisible = visibleCellIndices.contains(communityCellModel.index)
+            }
             if isVisible {
                 cellNeedsUpdatePublisher.send(communityCellModel)
                 return true
@@ -61,7 +72,7 @@ extension CommunityViewModel {
     
     @MainActor func attemptUpdateCellStateDownloadingActively(communityCellModel: CommunityCellModel,
                                                               communityCellData: CommunityCellData,
-                                                              visibleCellIndices: Set<Int>,
+                                                              visibleCellIndices: Set<Int>?,
                                                               isFromRefresh: Bool,
                                                               key: String,
                                                               debug: String,
@@ -73,8 +84,13 @@ extension CommunityViewModel {
         }
         
         if communityCellModel.attemptUpdateCellStateDownloadingActively(communityCellData, key) {
-            print("[[\(emoji)]] Cell #{\(communityCellModel.index)} State Updated => .DownloadingActively [\(debug)]")
-            let isVisible = visibleCellIndices.contains(communityCellModel.index)
+            if Self.DEBUG_STATE_CHANGES {
+                print("[[\(emoji)]] Cell #{\(communityCellModel.index)} State Updated => .DownloadingActively [\(debug)]")
+            }
+            var isVisible = true
+            if let visibleCellIndices = visibleCellIndices {
+                isVisible = visibleCellIndices.contains(communityCellModel.index)
+            }
             if isVisible {
                 cellNeedsUpdatePublisher.send(communityCellModel)
                 return true
@@ -85,7 +101,7 @@ extension CommunityViewModel {
     
     @MainActor func attemptUpdateCellStateError(communityCellModel: CommunityCellModel,
                                                 communityCellData: CommunityCellData,
-                                                visibleCellIndices: Set<Int>,
+                                                visibleCellIndices: Set<Int>?,
                                                 isFromRefresh: Bool,
                                                 key: String,
                                                 debug: String,
@@ -97,8 +113,13 @@ extension CommunityViewModel {
         }
         
         if communityCellModel.attemptUpdateCellStateError(communityCellData, key) {
-            print("[[\(emoji)]] Cell #{\(communityCellModel.index)} State Updated => .Error [\(debug)]")
-            let isVisible = visibleCellIndices.contains(communityCellModel.index)
+            if Self.DEBUG_STATE_CHANGES {
+                print("[[\(emoji)]] Cell #{\(communityCellModel.index)} State Updated => .Error [\(debug)]")
+            }
+            var isVisible = true
+            if let visibleCellIndices = visibleCellIndices {
+                isVisible = visibleCellIndices.contains(communityCellModel.index)
+            }
             if isVisible {
                 cellNeedsUpdatePublisher.send(communityCellModel)
                 return true
@@ -109,7 +130,7 @@ extension CommunityViewModel {
     
     @MainActor func attemptUpdateCellStateIdle(communityCellModel: CommunityCellModel,
                                                communityCellData: CommunityCellData,
-                                               visibleCellIndices: Set<Int>,
+                                               visibleCellIndices: Set<Int>?,
                                                isFromRefresh: Bool,
                                                key: String,
                                                debug: String,
@@ -121,8 +142,13 @@ extension CommunityViewModel {
         }
         
         if communityCellModel.attemptUpdateCellStateIdle(communityCellData, key) {
-            print("[[\(emoji)]] Cell #{\(communityCellModel.index)} State Updated => .Idle [\(debug)]")
-            let isVisible = visibleCellIndices.contains(communityCellModel.index)
+            if Self.DEBUG_STATE_CHANGES {
+                print("[[\(emoji)]] Cell #{\(communityCellModel.index)} State Updated => .Idle [\(debug)]")
+            }
+            var isVisible = true
+            if let visibleCellIndices = visibleCellIndices {
+                isVisible = visibleCellIndices.contains(communityCellModel.index)
+            }
             if isVisible {
                 cellNeedsUpdatePublisher.send(communityCellModel)
                 return true
@@ -133,7 +159,7 @@ extension CommunityViewModel {
     
     @MainActor func attemptUpdateCellStateMissingKey(communityCellModel: CommunityCellModel,
                                                      communityCellData: CommunityCellData,
-                                                     visibleCellIndices: Set<Int>,
+                                                     visibleCellIndices: Set<Int>?,
                                                      isFromRefresh: Bool,
                                                      debug: String,
                                                      emoji: String) -> Bool {
@@ -144,8 +170,13 @@ extension CommunityViewModel {
         }
         
         if communityCellModel.attemptUpdateCellStateMisingKey(communityCellData) {
-            print("[[\(emoji)]] Cell #{\(communityCellModel.index)} State Updated => .MissingKey [\(debug)]")
-            let isVisible = visibleCellIndices.contains(communityCellModel.index)
+            if Self.DEBUG_STATE_CHANGES {
+                print("[[\(emoji)]] Cell #{\(communityCellModel.index)} State Updated => .MissingKey [\(debug)]")
+            }
+            var isVisible = true
+            if let visibleCellIndices = visibleCellIndices {
+                isVisible = visibleCellIndices.contains(communityCellModel.index)
+            }
             if isVisible {
                 cellNeedsUpdatePublisher.send(communityCellModel)
                 return true
@@ -155,7 +186,7 @@ extension CommunityViewModel {
     }
     
     @MainActor func attemptUpdateCellStateMisingModel(communityCellModel: CommunityCellModel,
-                                                      visibleCellIndices: Set<Int>,
+                                                      visibleCellIndices: Set<Int>?,
                                                       isFromRefresh: Bool,
                                                       debug: String,
                                                       emoji: String) -> Bool {
@@ -166,8 +197,13 @@ extension CommunityViewModel {
         }
         
         if communityCellModel.attemptUpdateCellStateMisingModel() {
-            print("[[\(emoji)]] Cell #{\(communityCellModel.index)} State Updated => .MisingModel [\(debug)]")
-            let isVisible = visibleCellIndices.contains(communityCellModel.index)
+            if Self.DEBUG_STATE_CHANGES {
+                print("[[\(emoji)]] Cell #{\(communityCellModel.index)} State Updated => .MisingModel [\(debug)]")
+            }
+            var isVisible = true
+            if let visibleCellIndices = visibleCellIndices {
+                isVisible = visibleCellIndices.contains(communityCellModel.index)
+            }
             if isVisible {
                 cellNeedsUpdatePublisher.send(communityCellModel)
                 return true

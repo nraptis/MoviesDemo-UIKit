@@ -59,33 +59,71 @@ class DirtyImageDownloader {
     }
     
     @DirtyImageDownloaderActor func cancelAll() async {
+        var _taskList = [DirtyImageDownloaderTask]()
         for (_, task) in taskDict {
-            await task.invalidate()
+            _taskList.append(task)
         }
         taskDict.removeAll(keepingCapacity: true)
+        
+        let ___taskList = _taskList
+        await MainActor.run {
+            if let delegate = delegate {
+                for task in ___taskList {
+                    delegate.dataDownloadDidCancel(task.index)
+                }
+            }
+        }
     }
     
     @DirtyImageDownloaderActor func cancelAllRandomly() async {
+        var _taskList = [DirtyImageDownloaderTask]()
         for (_, task) in taskDict {
             if Bool.random() {
-                await task.invalidate()
+                _taskList.append(task)
             }
         }
-        taskDict.removeAll(keepingCapacity: true)
+        for task in _taskList {
+            taskDict.removeValue(forKey: task.index)
+        }
+        
+        let ___taskList = _taskList
+        await MainActor.run {
+            if let delegate = delegate {
+                for task in ___taskList {
+                    delegate.dataDownloadDidCancel(task.index)
+                }
+            }
+        }
     }
     
-    @DirtyImageDownloaderActor private var _purgeList = [Int]()
-    
     @DirtyImageDownloaderActor func cancelAllOutOfIndexRange(firstIndex: Int, lastIndex: Int) async {
-        for (index, task) in taskDict {
+        
+        var _taskList = [DirtyImageDownloaderTask]()
+        for (_, task) in taskDict {
+            let index = task.index
             if index >= firstIndex && index <= lastIndex {
                 
             } else {
-                await task.invalidate()
+                if !task.isInvalidated {
+                    _taskList.append(task)
+                }
+            }
+        }
+        for task in _taskList {
+            taskDict.removeValue(forKey: task.index)
+        }
+        
+        let ___taskList = _taskList
+        await MainActor.run {
+            if let delegate = delegate {
+                for task in ___taskList {
+                    delegate.dataDownloadDidCancel(task.index)
+                }
             }
         }
     }
     
+    @DirtyImageDownloaderActor private var _killList = [DirtyImageDownloaderTask]()
     @DirtyImageDownloaderActor func startTasksIfNecessary() async {
     
         if isBlocked || isPaused {
@@ -94,49 +132,50 @@ class DirtyImageDownloader {
         
         var numberOfActiveDownloads = 0
         
-        for (key, task) in taskDict {
-            if task.item === nil ||
-                task.downloader === nil ||
-                task.isInvalidated == true {
-                _purgeList.append(key)
+        // This is where we do our tidying process.
+        // We really can't accumulate billions and
+        // billions of tasks. Ergo, we can just clean
+        // on this part. No real right answer, it works.
+        _killList.removeAll(keepingCapacity: true)
+        for (_, task) in taskDict {
+            let index = task.index
+            if task.isInvalidated == true {
+                _killList.append(task)
             } else {
                 if task.isActive {
                     numberOfActiveDownloads += 1
                 }
             }
         }
-        
-        if _purgeList.count > 0 {
-            for key in _purgeList {
-                if let task = taskDict[key] {
-                    await task.invalidate()
-                }
-                taskDict.removeValue(forKey: key)
-            }
-            _purgeList.removeAll(keepingCapacity: true)
+        for task in _killList {
+            taskDict.removeValue(forKey: task.index)
         }
+        
         
         let numberOfTasksToStart = (numberOfSimultaneousDownloads - numberOfActiveDownloads)
         if numberOfTasksToStart <= 0 { return }
         
         let tasksToStart = chooseTasksToStart(numberOfTasks: numberOfTasksToStart)
         
+        // Set active early. These will be fired.
+        // We are only calling this from one place
+        // in code, so it's unlikely ro cause
+        // any sort of race condition anyway.
         for taskToStart in tasksToStart {
-            let index = taskToStart.index
             taskToStart.isActive = true
-            await MainActor.run {
-                delegate?.dataDownloadDidStart(index)
+        }
+        
+        await MainActor.run {
+            if let delegate = delegate {
+                for taskToStart in tasksToStart {
+                    let index = taskToStart.index
+                    delegate.dataDownloadDidStart(index)
+                }
             }
         }
         
-        Task {
-            await withTaskGroup(of: Void.self) { taskGroup in
-                for taskToStart in tasksToStart {
-                    taskGroup.addTask {
-                        await taskToStart.fire()
-                    }
-                }
-            }
+        for taskToStart in tasksToStart {
+            taskToStart.fire()
         }
     }
     
@@ -147,7 +186,20 @@ class DirtyImageDownloader {
         }
         
         let index = item.index
-        await removeDownloadTask(item)
+        
+        
+        if let previousTask = taskDict[index] {
+            if !previousTask.isInvalidated {
+                previousTask.invalidate()
+                await MainActor.run {
+                    if let delegate = delegate {
+                        delegate.dataDownloadDidCancel(previousTask.index)
+                    }
+                }
+            }
+            taskDict.removeValue(forKey: index)
+        }
+        
         addDownloadTask(item)
         
         if isPaused {
@@ -159,7 +211,9 @@ class DirtyImageDownloader {
             task.isActive = true
             
             await MainActor.run {
-                delegate?.dataDownloadDidStart(index)
+                if let delegate = delegate {
+                    delegate.dataDownloadDidStart(index)
+                }
             }
             
             // For the sake of user feedback, let's
@@ -167,7 +221,7 @@ class DirtyImageDownloader {
             
             try? await Task.sleep(nanoseconds: 1_000_000_000)
             
-            await task.fire()
+            task.fire()
         }
     }
     
@@ -184,27 +238,27 @@ class DirtyImageDownloader {
     
     @DirtyImageDownloaderActor func addDownloadTask(_ item: any DirtyImageDownloaderType) {
         
+        print("{{🐲}} Added Download @ \(item.index), Which is \(ObjectIdentifier(item))")
+        
         if isBlocked {
             return
         }
         
-        var shouldCreate = true
-        if taskDict[item.index] !== nil {
-            shouldCreate = false
-        }
-        
-        if shouldCreate {
+        if taskDict[item.index] === nil {
             let newTask = DirtyImageDownloaderTask(downloader: self, item: item)
             taskDict[item.index] = newTask
         }
     }
     
+    // Have to be vry careful with this...
+    /*
     @DirtyImageDownloaderActor func removeDownloadTask(_ item: any DirtyImageDownloaderType) async {
         if let task = taskDict[item.index] {
             await task.invalidate()
         }
         taskDict.removeValue(forKey: item.index)
     }
+    */
     
     @DirtyImageDownloaderActor func setPriorityBatch(_ items: [any DirtyImageDownloaderType], _ priorities: [Int]) {
         var index = 0
@@ -301,18 +355,33 @@ class DirtyImageDownloader {
 }
 
 extension DirtyImageDownloader {
-    @MainActor func handleDownloadTaskDidInvalidate(task: DirtyImageDownloaderTask) {
+    
+    func handleDownloadTaskDidSucceed(task: DirtyImageDownloaderTask, image: UIImage) {
+        
         let index = task.index
-        delegate?.dataDownloadDidCancel(index)
+        Task { @DirtyImageDownloaderActor in
+            // We cross asynchronous boundary. Maybe the taskDict
+            // has been updated with a different value. Check again.
+            if taskDict[index] === task {
+                taskDict.removeValue(forKey: index)
+            }
+            await MainActor.run {
+                delegate?.dataDownloadDidSucceed(index, image: image)
+            }
+        }
     }
     
-    @MainActor func handleDownloadTaskDidSucceed(task: DirtyImageDownloaderTask, image: UIImage) {
+    func handleDownloadTaskDidFail(task: DirtyImageDownloaderTask) {
         let index = task.index
-        delegate?.dataDownloadDidSucceed(index, image: image)
-    }
-    
-    @MainActor func handleDownloadTaskDidFail(task: DirtyImageDownloaderTask) {
-        let index = task.index
-        delegate?.dataDownloadDidFail(index)
+        Task { @DirtyImageDownloaderActor in
+            // We cross asynchronous boundary. Maybe the taskDict
+            // has been updated with a different value. Check again.
+            if taskDict[index] === task {
+                taskDict.removeValue(forKey: index)
+            }
+            await MainActor.run {
+                delegate?.dataDownloadDidFail(index)
+            }
+        }
     }
 }
