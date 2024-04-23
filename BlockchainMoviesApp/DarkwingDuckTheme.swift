@@ -41,5 +41,4 @@ struct DarkwingDuckTheme {
     static let gray150 = Color(uiColor: Self._gray150)
     static let gray100 = Color(uiColor: Self._gray100)
     static let gray050 = Color(uiColor: Self._gray050)
-    
 }

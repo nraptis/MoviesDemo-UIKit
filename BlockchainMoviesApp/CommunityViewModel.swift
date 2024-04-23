@@ -162,6 +162,9 @@ class CommunityViewModel {
         print("{{🚔}} App Will Enter Foreground ==> Woot!")
         _isAppInBackground = false
         
+        // Let's try to re-fetch all the fails...
+        _imageFailedSet.removeAll(keepingCapacity: true)
+        
         print("_heartBeatTask = ... (enter force ground, alt)")
         _heartBeatTask = Task { @MainActor in
             await self.heartbeat()
@@ -194,6 +197,10 @@ class CommunityViewModel {
         recentFetches.removeAll(keepingCapacity: true)
         if ReachabilityMonitor.shared.isReachable {
             if !_isAppInBackground {
+                
+                // Let's try to re-fetch all the fails...
+                _imageFailedSet.removeAll(keepingCapacity: true)
+                
                 if self.isFirstFetchComplete && !self.isFetching && !self.isRefreshing {
                     self.fetchMorePagesIfNecessary()
                 }
