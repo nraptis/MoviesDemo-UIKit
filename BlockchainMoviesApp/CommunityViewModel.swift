@@ -17,7 +17,7 @@ class CommunityViewModel {
     
     static let probeAheadOrBehindRangeForDownloads = Device.isPad ? 12 : 8
     
-    static let DEBUG_STATE_CHANGES = true
+    static let DEBUG_STATE_CHANGES = false
     
     @MainActor let cellNeedsUpdatePublisher = PassthroughSubject<CommunityCellModel, Never>()
     @MainActor let layoutContainerSizeUpdatePublisher = PassthroughSubject<CGSize, Never>()
