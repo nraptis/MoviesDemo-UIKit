@@ -39,6 +39,7 @@ extension CommunityViewModel {
                                                           communityCellData: communityCellData,
                                                           visibleCellIndices: _visibleCommunityCellModelIndices,
                                                           isFromRefresh: false,
+                                                          isFromHeartBeat: false,
                                                           key: key,
                                                           image: image,
                                                           debug: "VisibleCellsChanged, Have Image",
@@ -48,6 +49,7 @@ extension CommunityViewModel {
                                                         communityCellData: communityCellData,
                                                         visibleCellIndices: _visibleCommunityCellModelIndices,
                                                         isFromRefresh: false,
+                                                        isFromHeartBeat: false,
                                                         key: key,
                                                         debug: "VisibleCellsChanged, FailSet",
                                                         emoji: "🧰")
@@ -64,6 +66,7 @@ extension CommunityViewModel {
                                                                   communityCellData: communityCellData,
                                                                   visibleCellIndices: _visibleCommunityCellModelIndices,
                                                                   isFromRefresh: false,
+                                                                  isFromHeartBeat: false,
                                                                   key: key,
                                                                   debug: "VisibleCellsChanged, Mock Downloading",
                                                                   emoji: "🧰")
@@ -75,6 +78,7 @@ extension CommunityViewModel {
                                                          communityCellData: communityCellData,
                                                          visibleCellIndices: _visibleCommunityCellModelIndices,
                                                          isFromRefresh: false,
+                                                         isFromHeartBeat: false,
                                                          debug: "Key Not Found",
                                                          emoji: "🧰")
                 }
@@ -83,6 +87,7 @@ extension CommunityViewModel {
                 _ = attemptUpdateCellStateMisingModel(communityCellModel: communityCellModel,
                                                       visibleCellIndices: _visibleCommunityCellModelIndices,
                                                       isFromRefresh: false,
+                                                      isFromHeartBeat: false,
                                                       debug: "Model Not Found",
                                                       emoji: "🧰")
             }

@@ -17,10 +17,16 @@ extension CommunityViewModel {
                                                   communityCellData: CommunityCellData,
                                                   visibleCellIndices: Set<Int>?,
                                                   isFromRefresh: Bool,
+                                                  isFromHeartBeat: Bool,
                                                   key: String,
                                                   image: UIImage,
                                                   debug: String,
                                                   emoji: String) -> Bool {
+        
+        if isFromHeartBeat && communityCellModel.isBlockedFromHeartBeat {
+            return false
+        }
+        
         if isRefreshing {
             if !isFromRefresh {
                 return false
@@ -48,9 +54,15 @@ extension CommunityViewModel {
                                                       communityCellData: CommunityCellData,
                                                       visibleCellIndices: Set<Int>?,
                                                       isFromRefresh: Bool,
+                                                      isFromHeartBeat: Bool,
                                                       key: String,
                                                       debug: String,
                                                       emoji: String) -> Bool {
+        
+        if isFromHeartBeat && communityCellModel.isBlockedFromHeartBeat {
+            return false
+        }
+        
         if isRefreshing {
             if !isFromRefresh {
                 return false
@@ -77,9 +89,15 @@ extension CommunityViewModel {
                                                               communityCellData: CommunityCellData,
                                                               visibleCellIndices: Set<Int>?,
                                                               isFromRefresh: Bool,
+                                                              isFromHeartBeat: Bool,
                                                               key: String,
                                                               debug: String,
                                                               emoji: String) -> Bool {
+        
+        if isFromHeartBeat && communityCellModel.isBlockedFromHeartBeat {
+            return false
+        }
+        
         if isRefreshing {
             if !isFromRefresh {
                 return false
@@ -106,9 +124,15 @@ extension CommunityViewModel {
                                                 communityCellData: CommunityCellData,
                                                 visibleCellIndices: Set<Int>?,
                                                 isFromRefresh: Bool,
+                                                isFromHeartBeat: Bool,
                                                 key: String,
                                                 debug: String,
                                                 emoji: String) -> Bool {
+        
+        if isFromHeartBeat && communityCellModel.isBlockedFromHeartBeat {
+            return false
+        }
+        
         if isRefreshing {
             if !isFromRefresh {
                 return false
@@ -135,9 +159,15 @@ extension CommunityViewModel {
                                                communityCellData: CommunityCellData,
                                                visibleCellIndices: Set<Int>?,
                                                isFromRefresh: Bool,
+                                               isFromHeartBeat: Bool,
                                                key: String,
                                                debug: String,
                                                emoji: String) -> Bool {
+        
+        if isFromHeartBeat && communityCellModel.isBlockedFromHeartBeat {
+            return false
+        }
+        
         if isRefreshing {
             if !isFromRefresh {
                 return false
@@ -164,8 +194,14 @@ extension CommunityViewModel {
                                                      communityCellData: CommunityCellData,
                                                      visibleCellIndices: Set<Int>?,
                                                      isFromRefresh: Bool,
+                                                     isFromHeartBeat: Bool,
                                                      debug: String,
                                                      emoji: String) -> Bool {
+        
+        if isFromHeartBeat && communityCellModel.isBlockedFromHeartBeat {
+            return false
+        }
+        
         if isRefreshing {
             if !isFromRefresh {
                 return false
@@ -191,8 +227,14 @@ extension CommunityViewModel {
     @MainActor func attemptUpdateCellStateMisingModel(communityCellModel: CommunityCellModel,
                                                       visibleCellIndices: Set<Int>?,
                                                       isFromRefresh: Bool,
+                                                      isFromHeartBeat: Bool,
                                                       debug: String,
                                                       emoji: String) -> Bool {
+        
+        if isFromHeartBeat && communityCellModel.isBlockedFromHeartBeat {
+            return false
+        }
+        
         if isRefreshing {
             if !isFromRefresh {
                 return false

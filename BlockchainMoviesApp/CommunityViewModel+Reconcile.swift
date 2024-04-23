@@ -118,6 +118,7 @@ extension CommunityViewModel {
                                                                      communityCellData: communityCellData,
                                                                      visibleCellIndices: nil,
                                                                      isFromRefresh: false,
+                                                                     isFromHeartBeat: true,
                                                                      key: key,
                                                                      image: image,
                                                                      debug: "Reconcile, Recovered From Master Dict",
@@ -129,6 +130,7 @@ extension CommunityViewModel {
                                                                    communityCellData: communityCellData,
                                                                    visibleCellIndices: nil,
                                                                    isFromRefresh: false,
+                                                                   isFromHeartBeat: true,
                                                                    key: key,
                                                                    debug: "Reconcile, Front Loaded Error State",
                                                                    emoji: "🎰") {
@@ -153,7 +155,6 @@ extension CommunityViewModel {
         _checkCacheKeys.removeAll(keepingCapacity: true)
         for communityCellModel in visibleCommunityCellModels {
             let index = communityCellModel.index
-            if _imageFailedSet.contains(index) { continue }
             if _imageDidCheckCacheSet.contains(index) { continue }
             if let communityCellData = getCommunityCellData(at: index) {
                 if let key = communityCellData.key {
@@ -174,6 +175,10 @@ extension CommunityViewModel {
             // from the cache, so we can inject.
             let keyIndexImageDict = await imageCache.retrieveBatch(_checkCacheKeys)
             
+            let kmm = keyIndexImageDict.keys.map {
+                $0
+            }.sorted()
+            print("Hirring Cache: \(kmm)")
             
             // This loop, which is repeated several times, ensures that only
             // "batchUpdateChunkNumberOfCells" cells are updated between each
@@ -185,20 +190,19 @@ extension CommunityViewModel {
             // "batchUpdateChunkNumberOfCells" "updates" then we sleep, to
             // allow UI to catch up, to not interrupt the scrolling.
             var waveUpdateIndex = 0
-            while waveUpdateIndex < visibleCommunityCellModels.count {
+            while waveUpdateIndex < communityCellModels.count {
                 
                 // Do not return if task is cancelled, we need to transfer
                 // state, the attempted cache hits must finish syncing
                 
                 var waveNumberOfUpdatesTriggered = 0
-                while waveUpdateIndex < visibleCommunityCellModels.count && waveNumberOfUpdatesTriggered < batchUpdateChunkNumberOfCells {
-                    let communityCellModel = visibleCommunityCellModels[waveUpdateIndex]
+                while waveUpdateIndex < communityCellModels.count && waveNumberOfUpdatesTriggered < batchUpdateChunkNumberOfCells {
+                    let communityCellModel = communityCellModels[waveUpdateIndex]
                     let index = communityCellModel.index
-                    if let communityCellData = getCommunityCellData(at: index) {
-                        if let key = communityCellData.key {
-                            let keyIndex = KeyIndex(key: key, index: index)
-                            if let image = keyIndexImageDict[keyIndex] {
-                                
+                    
+                    if let image = keyIndexImageDict[index] {
+                        if let communityCellData = getCommunityCellData(at: index) {
+                            if let key = communityCellData.key {
                                 // Insert this image into our master dictionary.
                                 _imageDict[key] = image
                                 
@@ -206,6 +210,7 @@ extension CommunityViewModel {
                                                                  communityCellData: communityCellData,
                                                                  visibleCellIndices: nil,
                                                                  isFromRefresh: false,
+                                                                 isFromHeartBeat: true,
                                                                  key: key,
                                                                  image: image,
                                                                  debug: "Reconcile, Batch Cache Hit",
@@ -257,13 +262,14 @@ extension CommunityViewModel {
                             default:
                                 // Update to the success state
                                 _ = attemptUpdateCellStateSuccess(communityCellModel: communityCellModel,
-                                                                 communityCellData: communityCellData,
-                                                                 visibleCellIndices: nil,
-                                                                 isFromRefresh: false,
-                                                                 key: key,
-                                                                 image: image,
-                                                                 debug: "Post Cache Scrape Check-Up, Image Now Exists",
-                                                                 emoji: "🌚")
+                                                                  communityCellData: communityCellData,
+                                                                  visibleCellIndices: nil,
+                                                                  isFromRefresh: false,
+                                                                  isFromHeartBeat: true,
+                                                                  key: key,
+                                                                  image: image,
+                                                                  debug: "Post Cache Scrape Check-Up, Image Now Exists",
+                                                                  emoji: "🌚")
                             }
                         } else if _imageFailedSet.contains(index) {
                             // We no longer need to download the image.
@@ -277,6 +283,7 @@ extension CommunityViewModel {
                                                                 communityCellData: communityCellData,
                                                                 visibleCellIndices: nil,
                                                                 isFromRefresh: false,
+                                                                isFromHeartBeat: true,
                                                                 key: key,
                                                                 debug: "Post Cache Scrape Check-Up, Error State Now Exists",
                                                                 emoji: "🌚")
@@ -378,13 +385,14 @@ extension CommunityViewModel {
                             default:
                                 // Update to the success state
                                 _ = attemptUpdateCellStateSuccess(communityCellModel: communityCellModel,
-                                                                 communityCellData: communityCellData,
-                                                                 visibleCellIndices: nil,
-                                                                 isFromRefresh: false,
-                                                                 key: key,
-                                                                 image: image,
-                                                                 debug: "PostDownloadQueue-Up Check, Image Now Exists",
-                                                                 emoji: "☃️")
+                                                                  communityCellData: communityCellData,
+                                                                  visibleCellIndices: nil,
+                                                                  isFromRefresh: false,
+                                                                  isFromHeartBeat: true,
+                                                                  key: key,
+                                                                  image: image,
+                                                                  debug: "PostDownloadQueue-Up Check, Image Now Exists",
+                                                                  emoji: "☃️")
                             }
                         } else if _imageFailedSet.contains(index) {
                             // We no longer need to download the image.
@@ -398,6 +406,7 @@ extension CommunityViewModel {
                                                                 communityCellData: communityCellData,
                                                                 visibleCellIndices: nil,
                                                                 isFromRefresh: false,
+                                                                isFromHeartBeat: true,
                                                                 key: key,
                                                                 debug: "PostDownloadQueue-Up Check, Error State Now Exists",
                                                                 emoji: "☃️")
@@ -486,6 +495,7 @@ extension CommunityViewModel {
                 if attemptUpdateCellStateMisingModel(communityCellModel: communityCellModel,
                                                      visibleCellIndices: nil,
                                                      isFromRefresh: false,
+                                                     isFromHeartBeat: true,
                                                      debug: "ExhaustiveCheck, Missing Model",
                                                      emoji: "📚") {
                     return true
@@ -504,6 +514,7 @@ extension CommunityViewModel {
                                                     communityCellData: communityCellData,
                                                     visibleCellIndices: nil,
                                                     isFromRefresh: false,
+                                                    isFromHeartBeat: true,
                                                     debug: "ExhaustiveCheck, Missing Key",
                                                     emoji: "📚") {
                     return true
@@ -527,6 +538,7 @@ extension CommunityViewModel {
                                                  communityCellData: communityCellData,
                                                  visibleCellIndices: nil,
                                                  isFromRefresh: false,
+                                                 isFromHeartBeat: true,
                                                  key: key,
                                                  image: image,
                                                  debug: "ExhaustiveCheck, Image From Dict (Normal)",
@@ -555,6 +567,7 @@ extension CommunityViewModel {
                                                   communityCellData: communityCellData,
                                                   visibleCellIndices: nil,
                                                   isFromRefresh: false,
+                                                  isFromHeartBeat: true,
                                                   key: key,
                                                   debug: "ExhaustiveCheck, Oddball Image State",
                                                   emoji: "🎱") {
@@ -599,6 +612,7 @@ extension CommunityViewModel {
                                                      communityCellData: communityCellData,
                                                      visibleCellIndices: nil,
                                                      isFromRefresh: false,
+                                                     isFromHeartBeat: true,
                                                      key: key,
                                                      image: image,
                                                      debug: "ExhaustiveCheck, Downloading Oddball Image State",
@@ -612,6 +626,7 @@ extension CommunityViewModel {
                                                    communityCellData: communityCellData,
                                                    visibleCellIndices: nil,
                                                    isFromRefresh: false,
+                                                   isFromHeartBeat: true,
                                                    key: key,
                                                    debug: "ExhaustiveCheck, Downloading Oddball Error State",
                                                    emoji: "🎱") {
@@ -624,6 +639,7 @@ extension CommunityViewModel {
                                                   communityCellData: communityCellData,
                                                   visibleCellIndices: nil,
                                                   isFromRefresh: false,
+                                                  isFromHeartBeat: true,
                                                   key: key,
                                                   debug: "ExhaustiveCheck, Downloading Oddball Idle State",
                                                   emoji: "🎱") {
@@ -659,6 +675,7 @@ extension CommunityViewModel {
                                                                  communityCellData: communityCellData,
                                                                  visibleCellIndices: nil,
                                                                  isFromRefresh: false,
+                                                                 isFromHeartBeat: true,
                                                                  key: key,
                                                                  debug: "ExhaustiveCheck, Downloading Actively",
                                                                  emoji: "📚") {
@@ -678,6 +695,7 @@ extension CommunityViewModel {
                                                          communityCellData: communityCellData,
                                                          visibleCellIndices: nil,
                                                          isFromRefresh: false,
+                                                         isFromHeartBeat: true,
                                                          key: key,
                                                          debug: "ExhaustiveCheck, Downloading Pasively",
                                                          emoji: "📚") {
@@ -708,6 +726,7 @@ extension CommunityViewModel {
                                                communityCellData: communityCellData,
                                                visibleCellIndices: nil,
                                                isFromRefresh: false,
+                                               isFromHeartBeat: true,
                                                key: key,
                                                debug: "ExhaustiveCheck, Oddball Image State",
                                                emoji: "📚") {
@@ -732,6 +751,7 @@ extension CommunityViewModel {
                                               communityCellData: communityCellData,
                                               visibleCellIndices: nil,
                                               isFromRefresh: false,
+                                              isFromHeartBeat: true,
                                               key: key,
                                               debug: "ExhaustiveCheck, Oddball Exhausted State",
                                               emoji: "🎱") {

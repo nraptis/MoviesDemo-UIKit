@@ -92,8 +92,8 @@ class DirtyImageCache {
         }
     }
     
-    @DirtyImageCacheActor func retrieveBatch(_ keyIndexList: [KeyIndex]) async -> [KeyIndex: UIImage] {
-        var result = [KeyIndex: UIImage]()
+    @DirtyImageCacheActor func retrieveBatch(_ keyIndexList: [KeyIndex]) async -> [Int: UIImage] {
+        var result = [Int: UIImage]()
         
         if DISABLED { return result }
         
@@ -111,7 +111,7 @@ class DirtyImageCache {
                 
                 if let node = self.fileRecycler.get(keyIndex.key) {
                     
-                    result[keyIndex] = node.loadImage()
+                    result[keyIndex.index] = node.loadImage()
                     waveNumberOfUpdatesTriggered += 1
                 }
                 waveUpdateIndex += 1

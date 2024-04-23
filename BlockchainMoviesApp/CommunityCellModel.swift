@@ -17,6 +17,8 @@ class CommunityCellModel {
     // has an index of 0, and cells[100] has an index of 100.
     var index: Int = -1
     
+    var isBlockedFromHeartBeat = false
+    
     func attemptUpdateCellStateSuccess(_ communityCellData: CommunityCellData, 
                                      _ key: String,
                                      _ image: UIImage) -> Bool {

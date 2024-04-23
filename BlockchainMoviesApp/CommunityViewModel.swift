@@ -17,7 +17,7 @@ class CommunityViewModel {
     
     static let probeAheadOrBehindRangeForDownloads = Device.isPad ? 12 : 8
     
-    static let DEBUG_STATE_CHANGES = false
+    static let DEBUG_STATE_CHANGES = true
     
     @MainActor let cellNeedsUpdatePublisher = PassthroughSubject<CommunityCellModel, Never>()
     @MainActor let layoutContainerSizeUpdatePublisher = PassthroughSubject<CGSize, Never>()
@@ -353,6 +353,7 @@ class CommunityViewModel {
                 if attemptUpdateCellStateMisingModel(communityCellModel: communityCellModel,
                                                      visibleCellIndices: _visibleCommunityCellModelIndices,
                                                      isFromRefresh: true,
+                                                     isFromHeartBeat: false,
                                                      debug: "Refresh, Set All Missing Model",
                                                      emoji: "🔩") {
                     waveNumberOfUpdatesTriggered += 1
@@ -816,34 +817,105 @@ class CommunityViewModel {
     }
     
     @MainActor func handleCellForceRetryDownload(at index: Int) async {
-        if let communityCellData = getCommunityCellData(at: index) {
-            print("🚦 Force download restart @ \(index)")
-            _imageFailedSet.remove(index)
-            await downloader.forceRestart(communityCellData)
-            if index >= 0 && index < communityCellModels.count {
-                let communityCellModel = communityCellModels[index]
-                switch communityCellModel.cellModelState {
-                case .downloadingActively:
-                    // We are already downloding actively
-                    break
-                default:
-                    // We jump straight to downloading actively
-                    if let communityCellData = getCommunityCellData(at: index) {
-                        if let key = communityCellData.key {
-                            _visibleCommunityCellModelIndices.removeAll(keepingCapacity: true)
-                            _visibleCommunityCellModelIndices.insert(index)
-                            _ = attemptUpdateCellStateDownloadingActively(communityCellModel: communityCellModel,
-                                                                          communityCellData: communityCellData,
-                                                                          visibleCellIndices: _visibleCommunityCellModelIndices,
-                                                                          isFromRefresh: false,
-                                                                          key: key,
-                                                                          debug: "Force Retry",
-                                                                          emoji: "🍩")
-                        }
-                    }
-                }
-            }
+        print("🚦 Force download restart @ \(index)")
+        
+        guard (index >= 0 && index < communityCellModels.count) else {
+            return
         }
+        
+        let communityCellModel = communityCellModels[index]
+        
+        guard let communityCellData = getCommunityCellData(at: index) else {
+            return
+        }
+        
+        guard let key = communityCellData.key else {
+            return
+        }
+        
+        communityCellModel.isBlockedFromHeartBeat = true
+        
+        switch communityCellModel.cellModelState {
+        case .downloadingActively:
+            // We are already downloding actively
+            break
+        default:
+            _ = attemptUpdateCellStateDownloadingActively(communityCellModel: communityCellModel,
+                                                          communityCellData: communityCellData,
+                                                          visibleCellIndices: _visibleCommunityCellModelIndices,
+                                                          isFromRefresh: false,
+                                                          isFromHeartBeat: false,
+                                                          key: key,
+                                                          debug: "Force Retry, Mock Downloading",
+                                                          emoji: "🍩")
+        }
+        
+        try? await Task.sleep(nanoseconds: 1_000_000_000)
+        
+        if let image = _imageDict[key] {
+            _imageFailedSet.remove(index)
+            switch communityCellModel.cellModelState {
+            case .success:
+                // We are already downloding actively
+                break
+            default:
+                _ = attemptUpdateCellStateSuccess(communityCellModel: communityCellModel,
+                                                  communityCellData: communityCellData,
+                                                  visibleCellIndices: _visibleCommunityCellModelIndices,
+                                                  isFromRefresh: false,
+                                                  isFromHeartBeat: false,
+                                                  key: key,
+                                                  image: image,
+                                                  debug: "Force Retry, Had Image (Local)",
+                                                  emoji: "🍩")
+            }
+            communityCellModel.isBlockedFromHeartBeat = false
+            return
+        }
+        
+        let keyIndex = KeyIndex(key: key, index: index)
+        if let image = await imageCache.retrieve(keyIndex) {
+            _imageDict[key] = image
+            _imageFailedSet.remove(index)
+            switch communityCellModel.cellModelState {
+            case .success:
+                // We are already downloding actively
+                break
+            default:
+                _ = attemptUpdateCellStateSuccess(communityCellModel: communityCellModel,
+                                                  communityCellData: communityCellData,
+                                                  visibleCellIndices: _visibleCommunityCellModelIndices,
+                                                  isFromRefresh: false,
+                                                  isFromHeartBeat: false,
+                                                  key: key,
+                                                  image: image,
+                                                  debug: "Force Retry, Had Image (Cache)",
+                                                  emoji: "🍩")
+            }
+            communityCellModel.isBlockedFromHeartBeat = false
+            return
+        }
+        
+        await downloader.forceRestart(communityCellData)
+        
+        _imageFailedSet.remove(index)
+        
+        switch communityCellModel.cellModelState {
+        case .downloadingActively:
+            // We are already downloding actively
+            break
+        default:
+            _ = attemptUpdateCellStateDownloadingActively(communityCellModel: communityCellModel,
+                                                          communityCellData: communityCellData,
+                                                          visibleCellIndices: _visibleCommunityCellModelIndices,
+                                                          isFromRefresh: false,
+                                                          isFromHeartBeat: false,
+                                                          key: key,
+                                                          debug: "Force Retry (We re-Download)",
+                                                          emoji: "🍩")
+        }
+        
+        communityCellModel.isBlockedFromHeartBeat = false
     }
     
     @MainActor func getFirstAndLastCellIndexOnScreen() -> FirstAndLastIndex {
