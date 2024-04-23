@@ -44,12 +44,10 @@ class CommunityViewModel {
     var _downloadCommunityCellDatas = [CommunityCellData]()
     var _downloadCommunityCellModelsUnsafe = [CommunityCellModel]()
     
-    @MainActor var pageSize = 0
-    
     @MainActor var numberOfItems = 0
     
     @MainActor var numberOfCells = 0
-    @MainActor var numberOfPages = 0
+    @MainActor var numberOfPages = 100_000_000
     
     @MainActor var highestPageFetchedSoFar = 0
     
@@ -65,6 +63,8 @@ class CommunityViewModel {
     
     // These are sort of the UI driving variables
     // only "isFetching" and "isFetchingDetails" and "isNetworkErrorPresent" are used internally.
+    
+    @Published @MainActor private(set) var isFetchingUserInitiated = false
     @Published @MainActor private(set) var isFetching = false
     @Published @MainActor var isFetchingDetails = false
     @Published @MainActor private(set) var isNetworkErrorPresent = false
@@ -136,15 +136,19 @@ class CommunityViewModel {
                 }
             }
         
-        print("_heartBeatTask = ... (init assigned)")
         _heartBeatTask = Task { @MainActor in
             await self.heartbeat()
         }
         
     }
     
-    @objc private func handleApplicationDidEnterBackground(_ notification: Notification) {
+    @objc @MainActor private func handleApplicationDidEnterBackground(_ notification: Notification) {
         print("{{🚔}} App Did Enter Background ==> Snap!")
+        
+        isFetching = false
+        isRefreshing = false
+        isNetworkErrorPresent = false
+        
         _isAppInBackground = true
         if let ___heartBeatTask = _heartBeatTask {
             ___heartBeatTask.cancel()
@@ -173,9 +177,16 @@ class CommunityViewModel {
         if isFirstFetchComplete {
             if ReachabilityMonitor.shared.isReachable {
                 if self.isFirstFetchComplete && !self.isFetching && !self.isRefreshing {
+                    isNetworkErrorPresent = false
                     self.fetchMorePagesIfNecessary()
+                } else {
+                    isNetworkErrorPresent = true
                 }
+            } else {
+                isNetworkErrorPresent = true
             }
+        } else {
+            isNetworkErrorPresent = true
         }
     }
     
@@ -292,9 +303,9 @@ class CommunityViewModel {
         if isOnPulse {
             var fudge = 0
             while isOnPulse {
-                try? await Task.sleep(nanoseconds: 1_000_000)
+                try? await Task.sleep(nanoseconds: 2_000_000)
                 fudge += 1
-                if fudge >= 2048 {
+                if fudge >= 100_000 {
                     print("🧛🏻‍♂️ Terminating refresh, we are pulse-locked.")
                     downloader.isBlocked = false
                     isRefreshing = false
@@ -308,9 +319,9 @@ class CommunityViewModel {
         if isFetching {
             var fudge = 0
             while isFetching {
-                try? await Task.sleep(nanoseconds: 1_000_000)
+                try? await Task.sleep(nanoseconds: 2_000_000)
                 fudge += 1
-                if fudge >= 2048 {
+                if fudge >= 100_000 {
                     print("🧛🏻‍♂️ Terminating refresh, we are fetch-locked.")
                     downloader.isBlocked = false
                     isRefreshing = false
@@ -373,10 +384,9 @@ class CommunityViewModel {
             } else {
                 // A refresh where there are no network items,
                 // but we do have items from the database...
-                pageSize = -1
                 numberOfItems = dbMovies.count
                 numberOfCells = dbMovies.count
-                numberOfPages = -1
+                numberOfPages = 100_000_000
                 highestPageFetchedSoFar = -1
                 _clearForRefresh()
                 fetchPopularMovies_synchronize(dbMovies: dbMovies)
@@ -429,6 +439,67 @@ class CommunityViewModel {
         communityCellDatas.removeAll(keepingCapacity: true)
     }
     
+    @MainActor func forceFetchPopularMovies() async {
+        isFetchingUserInitiated = true
+        
+        // If there is an active fetch, wait for it to stop.
+        if isFetching {
+            var fudge = 0
+            while isFetching {
+                try? await Task.sleep(nanoseconds: 2_000_000)
+                fudge += 1
+                if fudge >= 100_000 {
+                    print("🧛🏻‍♂️ Terminating user initiated fetch, we are fetch-locked.")
+                    isFetchingUserInitiated = false
+                    return
+                }
+            }
+        }
+        
+        if isRefreshing {
+            var fudge = 0
+            while isRefreshing {
+                try? await Task.sleep(nanoseconds: 2_000_000)
+                fudge += 1
+                if fudge >= 100_000 {
+                    print("🧛🏻‍♂️ Terminating user initiated fetch, we are refresh-locked.")
+                    isFetchingUserInitiated = false
+                    return
+                }
+            }
+        }
+        
+        var chosenPageIndexToFetch = -1
+        
+        let numberOfCols = gridLayout.getNumberOfCols()
+        let firstCellIndexToConsider = gridLayout.getFirstCellIndexOnScreen() - numberOfCols
+        let lastCellIndexToConsider = gridLayout.getLastCellIndexOnScreenNotClamped() + (numberOfCols * 2)
+        
+        var index = firstCellIndexToConsider
+        while index < lastCellIndexToConsider {
+            if getCommunityCellData(at: index) === nil {
+                chosenPageIndexToFetch = index
+                break
+            }
+            index += 1
+        }
+        
+        print("🚨 forceFetchPopularMovies, chosenPageIndexToFetch = \(chosenPageIndexToFetch)")
+        
+        let pageIndexToCheck = (chosenPageIndexToFetch / NWNetworkController.page_size)
+        let pageToCheck = pageIndexToCheck + 1
+        
+        print("🚨 forceFetchPopularMovies, pageToCheck = \(pageToCheck)")
+        
+        recentFetches.removeAll(keepingCapacity: true)
+        
+        await fetchPopularMovies(page: pageToCheck)
+        
+        try? await Task.sleep(nanoseconds: 1_000_000_000)
+        
+        isFetchingUserInitiated = false
+    }
+    
     @MainActor func fetchPopularMovies(page: Int) async {
         
         if isFetching {
@@ -460,10 +531,9 @@ class CommunityViewModel {
                     print("💿 \"_fetchPopularMoviesWithDatabase\" failed, there were no items returned.")
                 } else {
                     print("📀 \"_fetchPopularMoviesWithDatabase\" successfully fetched \(dbMovies.count) items from CoreData.")
-                    pageSize = -1
                     numberOfItems = dbMovies.count
                     numberOfCells = dbMovies.count
-                    numberOfPages = -1
+                    numberOfPages = 100_000_000
                     highestPageFetchedSoFar = -1
                     fetchPopularMovies_synchronize(dbMovies: dbMovies)
                 }
@@ -491,17 +561,13 @@ class CommunityViewModel {
     
     @MainActor private func fetchPopularMovies_synchronize(nwMovies: [NWMovie], page: Int) {
         
-        if pageSize <= 0 {
-            print("🧌 \"fetchPopularMovies_synchronize\" pageSize = \(pageSize), this seems wrong.")
-            return
-        }
         if page <= 0 {
             print("🧌 \"fetchPopularMovies_synchronize\" page = \(page), this seems wrong. We expect the pages to start at 1, and number up.")
             return
         }
         
         // The first index of the cells, in the master list.
-        let startCellIndex = (page - 1) * pageSize
+        let startCellIndex = (page - 1) * NWNetworkController.page_size
         var cellModelIndex = startCellIndex
         
         var newCommunityCellDatas = [CommunityCellData]()
@@ -646,11 +712,11 @@ class CommunityViewModel {
             numberOfItems = response.total_results
             numberOfPages = response.total_pages
             
-            if response.results.count > pageSize { pageSize = response.results.count }
+            if page > highestPageFetchedSoFar {
+                highestPageFetchedSoFar = page
+            }
             
-            if page > highestPageFetchedSoFar { highestPageFetchedSoFar = page }
-            
-            var _numberOfCells = (highestPageFetchedSoFar) * pageSize
+            var _numberOfCells = (highestPageFetchedSoFar) * NWNetworkController.page_size
             if _numberOfCells > numberOfItems { _numberOfCells = numberOfItems }
             
             numberOfCells = _numberOfCells

@@ -16,8 +16,11 @@ import Observation
 
 @Observable class RootViewModel { 
     
+    let musicLooper = MusicLooper()
+    
     init() {
         ReachabilityMonitor.shared.startListening()
+        musicLooper.startAudioPlayer()
     }
     
     @ObservationIgnored var errorTitle = ""

@@ -14,8 +14,8 @@ protocol NWNetworkControllerImplementing {
 
 public struct NWNetworkController: NWNetworkControllerImplementing {
     
-    static let apiKey = "82951838f8541db71be0a09ae99f6519"
-    static let apiReadAccessToken = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI4Mjk1MTgzOGY4NTQxZGI3MWJlMGEwOWFlOTlmNjUxOSIsInN1YiI6IjY2MTQ5ZDcwMGJiMDc2MDE4NTMxYTVkZCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.PAp5NOGOhJCB3DRAqdj0fI8kIOn7obWFb9T0EKVV-HM"
+    public static let page_size = 20
+    private static let apiKey = "82951838f8541db71be0a09ae99f6519"
     
     public static func fetchPopularMovies(page: Int) async throws -> NWMoviesResponse {
         
@@ -26,7 +26,10 @@ public struct NWNetworkController: NWNetworkControllerImplementing {
         
         var request = URLRequest(url: url)
         request.cachePolicy = .reloadIgnoringLocalAndRemoteCacheData
+        request.timeoutInterval = 5.0
         
+       
+        /*
         let (data, response) = try await URLSession.shared.data(for: request)
         guard let httpResponse = response as? HTTPURLResponse else {
             throw URLError(.badServerResponse)
@@ -39,6 +42,9 @@ public struct NWNetworkController: NWNetworkControllerImplementing {
 
         let result = try jsonDecoder.decode(NWMoviesResponse.self, from: data)
         return result
+        */
+        
+        return try await fetch(urlRequest: request, responseType: NWMoviesResponse.self)
     }
     
     public static func fetchMovieDetails(id: Int) async throws -> NWMovieDetails {
@@ -51,7 +57,11 @@ public struct NWNetworkController: NWNetworkControllerImplementing {
         
         var request = URLRequest(url: url)
         request.cachePolicy = .reloadIgnoringLocalAndRemoteCacheData
+        request.timeoutInterval = 10.0
         
+        return try await fetch(urlRequest: request, responseType: NWMovieDetails.self)
+        
+        /*
         let (data, response) = try await URLSession.shared.data(for: request)
         guard let httpResponse = response as? HTTPURLResponse else {
             throw URLError(.badServerResponse)
@@ -64,5 +74,27 @@ public struct NWNetworkController: NWNetworkControllerImplementing {
         
         let result = try jsonDecoder.decode(NWMovieDetails.self, from: data)
         return result
+        */
     }
+    
+    private static func fetch<Response: Decodable>(urlRequest: URLRequest, responseType: Response.Type) async throws -> Response {
+        
+        let urlSession = URLSession(configuration: .ephemeral)
+        
+        let (data, response) = try await urlSession.data(for: urlRequest)
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw URLError(.badServerResponse)
+        }
+        guard (200...299).contains(httpResponse.statusCode) else {
+            throw URLError(.badServerResponse)
+        }
+        
+        let jsonDecoder = JSONDecoder()
+        
+        let result = try jsonDecoder.decode(Response.self, from: data)
+        
+        return result
+    }
+        
+    
 }

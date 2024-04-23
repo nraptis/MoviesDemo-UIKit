@@ -49,14 +49,6 @@ extension CommunityViewModel {
                         communityCellData.urlString = nil
                     }
                 }
-                
-                // Make wrong random keys in the data
-                if Int.random(in: 0...8) == 6 {
-                    if let communityCellData = communityCellDatas[index] {
-                        communityCellData.poster_path = "abc"
-                        communityCellData.urlString = "abc"
-                    }
-                }
             }
         }
         

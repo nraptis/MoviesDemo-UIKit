@@ -18,6 +18,10 @@ struct CommunityView: View {
     @State var isFetching = false
     @State var isFetchingDetails = false
     @State var isFirstFetchComplete = false
+    @State var isFetchingUserInitiated = false
+    
+    
+    
     
     
     
@@ -76,6 +80,11 @@ struct CommunityView: View {
         .onReceive(communityViewModel.$isFirstFetchComplete) { value in
             isFirstFetchComplete = value
         }
+        .onReceive(communityViewModel.$isFetchingUserInitiated) { value in
+            isFetchingUserInitiated = value
+        }
+        
+        
     }
     
     @MainActor func guts(containerGeometry: GeometryProxy) -> some View {
@@ -105,6 +114,10 @@ struct CommunityView: View {
         }
         
         if isFirstFetchComplete == false {
+            isLoadingViewShowing = true
+        }
+        
+        if isFetchingUserInitiated {
             isLoadingViewShowing = true
         }
         
@@ -138,13 +151,25 @@ struct CommunityView: View {
                 }
                 Spacer()
             }
-            Image(systemName: "bolt.trianglebadge.exclamationmark.fill")
-                .renderingMode(.template)
-                .font(.system(size: CGFloat(min(bottomBarHeight - 14, 22))))
-                .foregroundStyle(DarkwingDuckTheme.naughtyYellow)
-                .opacity(isShowingNetworkError ? 1.0 : 0.0)
-                .scaleEffect(isShowingNetworkError ? 1.0 : 0.85)
-                .animation(.easeInOut, value: isShowingNetworkError)
+            Button {
+                Task {
+                    await communityViewModel.forceFetchPopularMovies()
+                }
+            } label: {
+                ZStack {
+                    Image(systemName: "bolt.trianglebadge.exclamationmark.fill")
+                        .renderingMode(.template)
+                        .font(.system(size: CGFloat(min(bottomBarHeight - 14, 22))))
+                        .foregroundStyle(DarkwingDuckTheme.naughtyYellow)
+                }
+                .frame(width: bottomBarHeight + (bottomBarHeight * 0.5),
+                       height: bottomBarHeight)
+            }
+            .opacity(isShowingNetworkError ? 1.0 : 0.0)
+            .scaleEffect(isShowingNetworkError ? 1.0 : 0.85)
+            .animation(.easeInOut, value: isShowingNetworkError)
+
+            
         }
         .frame(height: CGFloat(bottomBarHeight))
         .background(DarkwingDuckTheme.gray100)

@@ -37,6 +37,8 @@
 		E867A0F42BC9FFFD003C77B4 /* FileUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = E867A0E02BC9FFFD003C77B4 /* FileUtils.swift */; };
 		E867A0F62BC9FFFD003C77B4 /* UIImage+Resize.swift in Sources */ = {isa = PBXBuildFile; fileRef = E867A0E22BC9FFFD003C77B4 /* UIImage+Resize.swift */; };
 		E8849EF62BD81EAF00DB2404 /* ReachabilityMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8849EF52BD81EAF00DB2404 /* ReachabilityMonitor.swift */; };
+		E8849EF92BD83DB500DB2404 /* happy_jack.m4a in Resources */ = {isa = PBXBuildFile; fileRef = E8849EF72BD83DB500DB2404 /* happy_jack.m4a */; };
+		E8849EFB2BD83DBF00DB2404 /* MusicLooper.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8849EFA2BD83DBF00DB2404 /* MusicLooper.swift */; };
 		E8CDA0792BD547FB003A1C73 /* CommunityCellErrorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8CDA0782BD547FB003A1C73 /* CommunityCellErrorView.swift */; };
 		E8CDA07F2BD5483A003A1C73 /* CommunityCellMissingContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8CDA07E2BD5483A003A1C73 /* CommunityCellMissingContentView.swift */; };
 		E8CDA0812BD54A41003A1C73 /* CommunityCellConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8CDA0802BD54A41003A1C73 /* CommunityCellConstants.swift */; };
@@ -94,6 +96,8 @@
 		E867A0E22BC9FFFD003C77B4 /* UIImage+Resize.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIImage+Resize.swift"; sourceTree = "<group>"; };
 		E87CC02A2BCA32F100BE42C3 /* BlockchainMoviesApp.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = BlockchainMoviesApp.xctestplan; sourceTree = "<group>"; };
 		E8849EF52BD81EAF00DB2404 /* ReachabilityMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReachabilityMonitor.swift; sourceTree = "<group>"; };
+		E8849EF72BD83DB500DB2404 /* happy_jack.m4a */ = {isa = PBXFileReference; lastKnownFileType = file; path = happy_jack.m4a; sourceTree = "<group>"; };
+		E8849EFA2BD83DBF00DB2404 /* MusicLooper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicLooper.swift; sourceTree = "<group>"; };
 		E8CDA0782BD547FB003A1C73 /* CommunityCellErrorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommunityCellErrorView.swift; sourceTree = "<group>"; };
 		E8CDA07E2BD5483A003A1C73 /* CommunityCellMissingContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommunityCellMissingContentView.swift; sourceTree = "<group>"; };
 		E8CDA0802BD54A41003A1C73 /* CommunityCellConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommunityCellConstants.swift; sourceTree = "<group>"; };
@@ -182,6 +186,8 @@
 				E8CDA08A2BD56EC7003A1C73 /* FirstAndLastIndex.swift */,
 				E83EA6A62BC4E9B20076D6BB /* Products */,
 				E8849EF52BD81EAF00DB2404 /* ReachabilityMonitor.swift */,
+				E8849EFA2BD83DBF00DB2404 /* MusicLooper.swift */,
+				E8849EF82BD83DB500DB2404 /* Assets */,
 			);
 			path = BlockchainMoviesApp;
 			sourceTree = "<group>";
@@ -258,6 +264,14 @@
 			path = Grid;
 			sourceTree = "<group>";
 		};
+		E8849EF82BD83DB500DB2404 /* Assets */ = {
+			isa = PBXGroup;
+			children = (
+				E8849EF72BD83DB500DB2404 /* happy_jack.m4a */,
+			);
+			path = Assets;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -321,6 +335,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E83EA6B02BC4E9B30076D6BB /* Preview Assets.xcassets in Resources */,
+				E8849EF92BD83DB500DB2404 /* happy_jack.m4a in Resources */,
 				E83EA6AD2BC4E9B30076D6BB /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -365,6 +380,7 @@
 				E867A0D62BC9F071003C77B4 /* Router.swift in Sources */,
 				E867A0F42BC9FFFD003C77B4 /* FileUtils.swift in Sources */,
 				E8DFD92B2BCA037C00D2A107 /* MovieDetailsView.swift in Sources */,
+				E8849EFB2BD83DBF00DB2404 /* MusicLooper.swift in Sources */,
 				E867A0DA2BC9F820003C77B4 /* RootView.swift in Sources */,
 				E81BC6D12BD6F1D700CDB195 /* CommunityGridErrorView.swift in Sources */,
 				E81BC6D52BD6F28700CDB195 /* FullScreenNoItemsView.swift in Sources */,

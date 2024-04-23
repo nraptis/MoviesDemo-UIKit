@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import BlockChainNetworking
 
 extension CommunityViewModel {
     
@@ -23,15 +24,11 @@ extension CommunityViewModel {
             return
         }
         
-        if pageSize < 1 { 
-            return
-        }
-        
         let numberOfCols = gridLayout.getNumberOfCols()
         let firstCellIndexToConsider = gridLayout.getFirstCellIndexOnScreen() - numberOfCols
         let lastCellIndexToConsider = gridLayout.getLastCellIndexOnScreenNotClamped() + (numberOfCols * 2)
         
-        let firstPageIndexToCheck = (firstCellIndexToConsider / pageSize)
+        let firstPageIndexToCheck = (firstCellIndexToConsider / NWNetworkController.page_size)
         var firstPageToCheck = firstPageIndexToCheck + 1
         if firstPageToCheck < 1 {
             firstPageToCheck = 1
@@ -40,7 +37,7 @@ extension CommunityViewModel {
             return
         }
         
-        let lastPageIndexToCheck = (lastCellIndexToConsider / pageSize)
+        let lastPageIndexToCheck = (lastCellIndexToConsider / NWNetworkController.page_size)
         var lastPageToCheck = lastPageIndexToCheck + 1
         if lastPageToCheck < 1 {
             lastPageToCheck = 1
@@ -68,8 +65,8 @@ extension CommunityViewModel {
             
             var isEveryCellMissing = true
             
-            let firstCellIndex = (pageToCheck - 1) * pageSize
-            let ceiling = firstCellIndex + pageSize
+            let firstCellIndex = (pageToCheck - 1) * NWNetworkController.page_size
+            let ceiling = firstCellIndex + NWNetworkController.page_size
             
             var cellIndex = firstCellIndex
             while cellIndex < ceiling {
@@ -100,8 +97,8 @@ extension CommunityViewModel {
             
             var isAnyCellMissing = false
             
-            let firstCellIndex = (pageToCheck - 1) * pageSize
-            let ceiling = firstCellIndex + pageSize
+            let firstCellIndex = (pageToCheck - 1) * NWNetworkController.page_size
+            let ceiling = firstCellIndex + NWNetworkController.page_size
             
             var cellIndex = firstCellIndex
             while cellIndex < ceiling {
