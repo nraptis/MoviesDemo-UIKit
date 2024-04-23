@@ -19,8 +19,7 @@ extension CommunityViewModel {
             return
         }
         
-        // They have to pull-to-refresh when the network comes back on...
-        if isNetworkErrorPresent { 
+        if ReachabilityMonitor.shared.isReachable == false { 
             return
         }
         

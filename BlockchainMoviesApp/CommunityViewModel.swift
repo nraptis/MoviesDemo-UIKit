@@ -24,6 +24,8 @@ class CommunityViewModel {
     @MainActor let layoutContentsSizeUpdatePublisher = PassthroughSubject<CGSize, Never>()
     @MainActor let visibleCellsUpdatePublisher = PassthroughSubject<Void, Never>()
     
+    @MainActor private var _reachabilityDidUpdateSunscriber: AnyCancellable?
+    
     private var databaseController = BlockChainDatabase.DBDatabaseController()
     let downloader = DirtyImageDownloader(numberOfSimultaneousDownloads: 3)
     @MainActor let gridLayout = CommunityGridLayout()
@@ -54,7 +56,7 @@ class CommunityViewModel {
     private var _priorityCommunityCellDatas = [CommunityCellData]()
     private var _priorityList = [Int]()
     
-    private var _isFetchingDetails = false
+    private var _isAppInBackground = false
     
     private var isOnPulse = false
     var _visibleCommunityCellModelIndices = Set<Int>()
@@ -62,8 +64,9 @@ class CommunityViewModel {
     @MainActor private(set) var isRefreshing = false
     
     // These are sort of the UI driving variables
-    // only "isFetching" and "isNetworkErrorPresent" are used internally.
+    // only "isFetching" and "isFetchingDetails" and "isNetworkErrorPresent" are used internally.
     @Published @MainActor private(set) var isFetching = false
+    @Published @MainActor var isFetchingDetails = false
     @Published @MainActor private(set) var isNetworkErrorPresent = false
     @Published @MainActor var isAnyItemPresent = false
     @Published @MainActor var isFirstFetchComplete = false
@@ -91,19 +94,12 @@ class CommunityViewModel {
         downloader.delegate = self
         downloader.isBlocked = true
         
-        NotificationCenter.default.addObserver(forName: UIApplication.didReceiveMemoryWarningNotification,
-                                               object: nil, queue: nil) { notification in
-            Task { @MainActor in
-                self._imageDict.removeAll(keepingCapacity: true)
-                self._imageFailedSet.removeAll(keepingCapacity: true)
-                self._imageDidCheckCacheSet.removeAll(keepingCapacity: true)
-            }
-        }
+        gridLayout.delegate = self
         
         // In this case, it doesn't matter the order that the imageCache and dataBase load,
         // however, we want them to both load before the network call fires.
         Task { @MainActor in
-            gridLayout.delegate = self
+            
 
             await withTaskGroup(of: Void.self) { group in
                 group.addTask { @DirtyImageCacheActor in
@@ -117,9 +113,90 @@ class CommunityViewModel {
             await fetchPopularMovies(page: 1)
         }
         
+        NotificationCenter.default.addObserver(forName: UIApplication.didReceiveMemoryWarningNotification, object: nil, queue: nil) { notification in
+            Task { @MainActor [weak self] in
+                if let self = self {
+                    self._handleMemoryWarning()
+                }
+            }
+        }
+        
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(handleApplicationDidEnterBackground(_:)),
+                                               name: UIApplication.didEnterBackgroundNotification,
+                                               object: nil)
+        NotificationCenter.default.addObserver(self,
+                                       selector: #selector(handleApplicationWillEnterForeground(_:)),
+                                       name: UIApplication.willEnterForegroundNotification,
+                                       object: nil)
+        
+        _reachabilityDidUpdateSunscriber = ReachabilityMonitor.shared.reachabilityDidUpdatePublisher
+            .sink { [weak self] in
+                if let self = self {
+                    self._handleReachabilityChanged()
+                }
+            }
+        
         Task { @MainActor in
             await self.heartbeat()
         }
+    }
+    
+    @objc private func handleApplicationDidEnterBackground(_ notification: Notification) {
+        print("{{🚔}} App Did Enter Background ==> Snap!")
+        _isAppInBackground = true
+        
+    }
+    
+    @objc @MainActor private func handleApplicationWillEnterForeground(_ notification: Notification) {
+        
+        print("{{🚔}} App Will Enter Foreground ==> Woot!")
+        _isAppInBackground = false
+        
+        // There is a weird bug where the visible cells change.
+        // So, let's tell the UI that we have updated visible cells.
+        visibleCellsUpdatePublisher.send(())
+        handleVisibleCellsMayHaveChanged()
+        
+        recentFetches.removeAll(keepingCapacity: true)
+        if ReachabilityMonitor.shared.isReachable {
+            if self.isFirstFetchComplete && !self.isFetching && !self.isRefreshing {
+                print("{{🚔}} Application WillEnter Foreground ==> YES fetching more pages. \(self.isFirstFetchComplete) \(self.isFetching) \(self.isRefreshing)")
+                self.fetchMorePagesIfNecessary()
+            }
+        }
+    }
+    
+    @MainActor private func _handleReachabilityChanged() {
+        
+        recentFetches.removeAll(keepingCapacity: true)
+        if ReachabilityMonitor.shared.isReachable {
+            
+            if !_isAppInBackground {
+                
+                if self.isFirstFetchComplete && !self.isFetching && !self.isRefreshing {
+                    print("{{🚔}} Reachability ==> YES fetching more pages. \(self.isFirstFetchComplete) \(self.isFetching) \(self.isRefreshing)")
+                    
+                    // When we enter the foreground, it seems like it will fail the fetch.
+                    // So, we will do 1 right away, then flush, then do few more.
+                    
+                    self.fetchMorePagesIfNecessary()
+                } else {
+                    print("{{🚔}} Reachability ==> NOT fetching more pages. \(self.isFirstFetchComplete) \(self.isFetching) \(self.isRefreshing)")
+                }
+            } else {
+                print("{{🚔}} Reachability ==> NOT fetching more pages. We are in the background!")
+            }
+        } else {
+            print("{{🚔}} Reachability ==> NOT fetching more pages. Not Rachable.")
+        }
+        
+    }
+    
+    @MainActor private func _handleMemoryWarning() {
+        _imageDict.removeAll(keepingCapacity: true)
+        _imageFailedSet.removeAll(keepingCapacity: true)
+        _imageDidCheckCacheSet.removeAll(keepingCapacity: true)
     }
     
     @MainActor func getBatchUpdateChunkNumberOfCells() -> Int {
@@ -306,6 +383,7 @@ class CommunityViewModel {
                 fetchPopularMovies_synchronize(dbMovies: dbMovies)
                 downloader.isBlocked = false
                 isRefreshing = false
+                print("{{🚔}} RegisterNumberOfCells ==> Database Case. #\(numberOfCells) Cells")
                 gridLayout.registerNumberOfCells(numberOfCells)
                 handleVisibleCellsMayHaveChanged()
             }
@@ -325,6 +403,8 @@ class CommunityViewModel {
             
             downloader.isBlocked = false
             isRefreshing = false
+            
+            print("{{🚔}} RegisterNumberOfCells ==> Network Case. #\(numberOfCells) Cells")
             gridLayout.registerNumberOfCells(numberOfCells)
             handleVisibleCellsMayHaveChanged()
         }
@@ -407,6 +487,7 @@ class CommunityViewModel {
             isFetching = false
         }
         
+        print("{{🚔}} RegisterNumberOfCells ==> Refresh Case. #\(numberOfCells) Cells")
         gridLayout.registerNumberOfCells(numberOfCells)
         handleVisibleCellsMayHaveChanged()
         
@@ -638,12 +719,15 @@ class CommunityViewModel {
     
     @MainActor func handleCellClicked(at index: Int) async {
         
-        if _isFetchingDetails {
+        if isFetchingDetails {
             print("🪚 [STOPPED] Attempted to queue up fetch details twice.")
             return
         }
         
-        _isFetchingDetails = true
+        isFetchingDetails = true
+        
+        // Sleep to see the UI
+        try? await Task.sleep(nanoseconds: 2_000_000_000)
         
         if let communityCellData = getCommunityCellData(at: index) {
             do {
@@ -656,7 +740,11 @@ class CommunityViewModel {
                 print("🧌 Unable to fetch movie details (Network): \(error.localizedDescription)")
                 router.rootViewModel.showError("Oops!", "Looks like we couldn't fetch the data! Check your connection!")
             }
-            _isFetchingDetails = false
+            isFetchingDetails = false
+        } else {
+            print("🧌 Unable to fetch movie details (No Model)")
+            router.rootViewModel.showError("Oops!", "Looks like we couldn't fetch the data! Check your connection!")
+            isFetchingDetails = false
         }
     }
     

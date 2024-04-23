@@ -100,7 +100,5 @@ extension CommunityViewModel {
         // Otherwise, deleting random elements from the
         // cache and here is not going to jibe...
         _imageDidCheckCacheSet.removeAll(keepingCapacity: true)
-        
     }
-    
 }

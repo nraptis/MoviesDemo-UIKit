@@ -157,18 +157,6 @@ class DirtyImageDownloaderTask: NSObject, URLSessionDelegate {
             downloader.handleDownloadTaskDidFail(task: self)
             return
         }
-
-        //TODO: Remove
-        
-        if Bool.random() && Bool.random() {
-            isInvalidated = true
-            isActive = false
-            self.item = nil
-            self.downloader = nil
-            downloader.handleDownloadTaskDidFail(task: self)
-            return
-        }
-        
         
         isInvalidated = true
         isActive = false

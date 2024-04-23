@@ -8,13 +8,11 @@
 import UIKit
 
 class DirtyImageCacheFileRecycler {
-    
     private let head = DirtyImageCacheFileRecyclerNode(key: "head", imageNumber: -1, imagePath: "")
     private let tail = DirtyImageCacheFileRecyclerNode(key: "tail", imageNumber: -1, imagePath: "")
     private var table = [String: DirtyImageCacheFileRecyclerNode]()
     private(set) var count = 0
     private var capacity = 0
-    
     init(capacity: Int) {
         self.capacity = capacity
         head.next = tail
@@ -98,7 +96,6 @@ class DirtyImageCacheFileRecycler {
         for node in nodesToAddBack {
             put(node.key, node.imageNumber, node.imagePath)
         }
-        
     }
     
     func dumpToNumberList() -> [Int] {

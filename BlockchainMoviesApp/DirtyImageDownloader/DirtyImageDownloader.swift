@@ -20,6 +20,7 @@ import UIKit
 //       of the internal dictionary. So all awaits are
 //       going to be lightning quick.
 //
+
 @globalActor actor DirtyImageDownloaderActor {
     static let shared = DirtyImageDownloaderActor()
 }
@@ -41,7 +42,7 @@ class DirtyImageDownloader {
     var isPaused = false
     var isBlocked = false
     
-    @MainActor weak var delegate: DirtyImageDownloaderDelegate?
+    weak var delegate: DirtyImageDownloaderDelegate?
     
     private let numberOfSimultaneousDownloads: Int
     init(numberOfSimultaneousDownloads: Int) {
@@ -97,7 +98,6 @@ class DirtyImageDownloader {
     }
     
     @DirtyImageDownloaderActor func cancelAllOutOfIndexRange(firstIndex: Int, lastIndex: Int) async {
-        
         var _taskList = [DirtyImageDownloaderTask]()
         for (_, task) in taskDict {
             let index = task.index
@@ -149,7 +149,6 @@ class DirtyImageDownloader {
         for task in _killList {
             taskDict.removeValue(forKey: task.index)
         }
-        
         
         let numberOfTasksToStart = (numberOfSimultaneousDownloads - numberOfActiveDownloads)
         if numberOfTasksToStart <= 0 { return }

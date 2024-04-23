@@ -20,7 +20,7 @@ class CommunityGridLayout {
 
     }
     
-    @MainActor weak var delegate: CommunityGridLayoutDelegate?
+    weak var delegate: CommunityGridLayoutDelegate?
     
     // The content (grid) entire width and height
     private(set) var width: CGFloat = 255
@@ -155,9 +155,6 @@ class CommunityGridLayout {
             height += CGFloat((_numberOfRows - 1) * cellSpacingV)
         }
         
-        print("previousWidth = \(previousWidth), width = \(width)")
-        print("previousHeight = \(previousHeight), height = \(height)")
-        
         if (previousWidth != width) || (previousHeight != height) {
             delegate?.layoutContentsDidChangeSize(size: CGSize(width: width,
                                                                height: height))
@@ -209,7 +206,6 @@ class CommunityGridLayout {
         let bottomRowIndex = getBottomRowIndex()
         _lastCellIndexOnScreen = getLastCellIndex(rowIndex: bottomRowIndex)
     }
-    
     
     private var _lastCellIndexOnScreenNotClamped = -1
     func getLastCellIndexOnScreenNotClamped() -> Int {

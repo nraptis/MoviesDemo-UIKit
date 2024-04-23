@@ -9,6 +9,9 @@ import UIKit
 
 extension CommunityViewModel {
     
+    // We pipeline all state updates through these functions.
+    // It's simply too many things to consider inline for each case.
+    
     // We return true if we published an update.
     @MainActor func attemptUpdateCellStateSuccess(communityCellModel: CommunityCellModel,
                                                   communityCellData: CommunityCellData,

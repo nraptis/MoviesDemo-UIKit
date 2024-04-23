@@ -36,6 +36,7 @@
 		E867A0F32BC9FFFD003C77B4 /* FileBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E867A0DF2BC9FFFD003C77B4 /* FileBuffer.swift */; };
 		E867A0F42BC9FFFD003C77B4 /* FileUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = E867A0E02BC9FFFD003C77B4 /* FileUtils.swift */; };
 		E867A0F62BC9FFFD003C77B4 /* UIImage+Resize.swift in Sources */ = {isa = PBXBuildFile; fileRef = E867A0E22BC9FFFD003C77B4 /* UIImage+Resize.swift */; };
+		E8849EF62BD81EAF00DB2404 /* ReachabilityMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8849EF52BD81EAF00DB2404 /* ReachabilityMonitor.swift */; };
 		E8CDA0792BD547FB003A1C73 /* CommunityCellErrorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8CDA0782BD547FB003A1C73 /* CommunityCellErrorView.swift */; };
 		E8CDA07F2BD5483A003A1C73 /* CommunityCellMissingContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8CDA07E2BD5483A003A1C73 /* CommunityCellMissingContentView.swift */; };
 		E8CDA0812BD54A41003A1C73 /* CommunityCellConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8CDA0802BD54A41003A1C73 /* CommunityCellConstants.swift */; };
@@ -92,6 +93,7 @@
 		E867A0E02BC9FFFD003C77B4 /* FileUtils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileUtils.swift; sourceTree = "<group>"; };
 		E867A0E22BC9FFFD003C77B4 /* UIImage+Resize.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIImage+Resize.swift"; sourceTree = "<group>"; };
 		E87CC02A2BCA32F100BE42C3 /* BlockchainMoviesApp.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = BlockchainMoviesApp.xctestplan; sourceTree = "<group>"; };
+		E8849EF52BD81EAF00DB2404 /* ReachabilityMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReachabilityMonitor.swift; sourceTree = "<group>"; };
 		E8CDA0782BD547FB003A1C73 /* CommunityCellErrorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommunityCellErrorView.swift; sourceTree = "<group>"; };
 		E8CDA07E2BD5483A003A1C73 /* CommunityCellMissingContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommunityCellMissingContentView.swift; sourceTree = "<group>"; };
 		E8CDA0802BD54A41003A1C73 /* CommunityCellConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommunityCellConstants.swift; sourceTree = "<group>"; };
@@ -179,6 +181,7 @@
 				E8DFD92A2BCA037C00D2A107 /* MovieDetailsView.swift */,
 				E8CDA08A2BD56EC7003A1C73 /* FirstAndLastIndex.swift */,
 				E83EA6A62BC4E9B20076D6BB /* Products */,
+				E8849EF52BD81EAF00DB2404 /* ReachabilityMonitor.swift */,
 			);
 			path = BlockchainMoviesApp;
 			sourceTree = "<group>";
@@ -358,6 +361,7 @@
 				E8CDA08B2BD56EC7003A1C73 /* FirstAndLastIndex.swift in Sources */,
 				E8CDA08F2BD57DBB003A1C73 /* CommunityGridCellView.swift in Sources */,
 				E81BC6D72BD6F29400CDB195 /* FullScreenErrorView.swift in Sources */,
+				E8849EF62BD81EAF00DB2404 /* ReachabilityMonitor.swift in Sources */,
 				E867A0D62BC9F071003C77B4 /* Router.swift in Sources */,
 				E867A0F42BC9FFFD003C77B4 /* FileUtils.swift in Sources */,
 				E8DFD92B2BCA037C00D2A107 /* MovieDetailsView.swift in Sources */,

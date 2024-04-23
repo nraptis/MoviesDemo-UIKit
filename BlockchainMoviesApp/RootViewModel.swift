@@ -16,6 +16,10 @@ import Observation
 
 @Observable class RootViewModel { 
     
+    init() {
+        ReachabilityMonitor.shared.startListening()
+    }
+    
     @ObservationIgnored var errorTitle = ""
     @ObservationIgnored var errorMessage = ""
     
@@ -26,5 +30,7 @@ import Observation
         errorMessage = message
         isShowingError = true
     }
+    
+    
     
 }

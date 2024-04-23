@@ -284,8 +284,6 @@ class CommunityGridView: UIView {
     
     var communityGridCellViews = [CommunityGridCellView]()
     
-    
-    
     func layoutNotifyotifyVisibleCellsMayHaveChanged() {
         
         let visibleCommunityCellModels = communityViewModel.visibleCommunityCellModels
@@ -352,8 +350,6 @@ class CommunityGridView: UIView {
     }
     
     func notifyCellStateChange(_ communityCellModel: CommunityCellModel) {
-        //print("Now the Visible Cells: \(communityCellModel.index) haith ChanGeD")
-        
         for communityGridCellView in communityGridCellViews {
             if communityGridCellView.isActive {
                 // The model may have swapped, so we may need to re-assign.
@@ -400,7 +396,6 @@ class CommunityGridView: UIView {
             }
         }
     }
-    
     
     lazy private var placeholderCommunityCellModel: CommunityCellModel = {
         let result = CommunityCellModel()

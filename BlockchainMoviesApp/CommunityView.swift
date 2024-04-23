@@ -16,7 +16,10 @@ struct CommunityView: View {
     @State var isShowingNetworkError = false
     @State var isAnyItemPresent = false
     @State var isFetching = false
+    @State var isFetchingDetails = false
     @State var isFirstFetchComplete = false
+    
+    
     
     var communityViewModel: CommunityViewModel
     var body: some View {
@@ -67,6 +70,9 @@ struct CommunityView: View {
         .onReceive(communityViewModel.$isFetching) { value in
             isFetching = value
         }
+        .onReceive(communityViewModel.$isFetchingDetails) { value in
+            isFetchingDetails = value
+        }
         .onReceive(communityViewModel.$isFirstFetchComplete) { value in
             isFirstFetchComplete = value
         }
@@ -92,6 +98,10 @@ struct CommunityView: View {
             if isFetching {
                 isLoadingViewShowing = true
             }
+        }
+        
+        if isFetchingDetails {
+            isLoadingViewShowing = true
         }
         
         if isFirstFetchComplete == false {
