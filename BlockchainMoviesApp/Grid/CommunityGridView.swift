@@ -51,8 +51,6 @@ class CommunityGridView: UIView {
                            constant: containerSize.height)
     }()
     
-    
-    
     let communityViewModel: CommunityViewModel
     let communityGridViewController: CommunityGridViewController
     let gridLayout: CommunityGridLayout
@@ -133,10 +131,8 @@ class CommunityGridView: UIView {
     private func _updateContentHeightConstraint() {
         switch gridState {
         case .noItems:
-            print("Updated Height to Container, gridState = \(gridState)")
             scrollContentHeightConstraint.constant = containerSize.height
         case .yesItems:
-            print("Updated Height to Content, gridState = \(gridState)")
             scrollContentHeightConstraint.constant = contentSize.height
         }
     }
@@ -189,11 +185,6 @@ class CommunityGridView: UIView {
         // The parent view changed sizes. So, we will update
         // the layout. Then the layout will do some calcultions
         // and post an update here for us in "layoutNotifyContainerSizeDidChange"
-        
-        print("worldNotifyContainerSizeMayHaveChanged")
-        
-        
-        //containerSize
         
         if newContainerSize.width != containerSize.width || newContainerSize.height != containerSize.height {
             containerSize = newContainerSize
@@ -260,6 +251,7 @@ class CommunityGridView: UIView {
                 } else {
                     print("💣 [GCCM] [HARD FAIL] We need to destroy \(numberToDestroy) cells, but cannot find candidates...")
                 }
+                
             }
             
         } else if maximumNumberOfVisibleCells > communityGridCellViews.count {

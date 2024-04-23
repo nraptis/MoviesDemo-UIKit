@@ -166,19 +166,12 @@ extension CommunityViewModel {
         
         if _checkCacheKeys.count > 0 {
             
-            print("🔧 Reconcile Process: We check \(_checkCacheKeys.count) key/index pairs in image cache.")
-            
             // Batch fetch these "need to check cache". This batch fetch
             // automatically will sleep after loading several images, so
             // we are not starving the processor. When this finishes,
             // we'll have the whole dictionary of [KeyIndex: UIImage]
             // from the cache, so we can inject.
-            let keyIndexImageDict = await imageCache.retrieveBatch(_checkCacheKeys)
-            
-            let kmm = keyIndexImageDict.keys.map {
-                $0
-            }.sorted()
-            print("Hirring Cache: \(kmm)")
+            let indexImageDict = await imageCache.retrieveBatch(_checkCacheKeys)
             
             // This loop, which is repeated several times, ensures that only
             // "batchUpdateChunkNumberOfCells" cells are updated between each
@@ -200,7 +193,7 @@ extension CommunityViewModel {
                     let communityCellModel = communityCellModels[waveUpdateIndex]
                     let index = communityCellModel.index
                     
-                    if let image = keyIndexImageDict[index] {
+                    if let image = indexImageDict[index] {
                         if let communityCellData = getCommunityCellData(at: index) {
                             if let key = communityCellData.key {
                                 // Insert this image into our master dictionary.
@@ -423,7 +416,6 @@ extension CommunityViewModel {
             
             // Now, we hand them off to the downloader...
             if _downloadCommunityCellDatas.count > 0 {
-                print("🔧 Reconcile Process: We hand \(_downloadCommunityCellDatas.count) cell models to downloader. We originally were considering \(_downloadCommunityCellModelsUnsafe.count) models. (Usually 2 numbers are the same)")
                 await downloader.addDownloadTaskBatch(_downloadCommunityCellDatas)
             }
         }

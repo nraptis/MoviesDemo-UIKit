@@ -41,7 +41,7 @@ class DirtyImageCache {
     var DISABLED = false
     
     @DirtyImageCacheActor
-    private var fileRecycler = DirtyImageCacheFileRecycler(capacity: 4096)
+    private var fileRecycler = DirtyImageCacheFileRecycler(capacity: 8192)
     
     
     /// Creates a unique file cache object.
