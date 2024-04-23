@@ -19,7 +19,7 @@ extension CommunityViewModel {
             return
         }
         
-        if ReachabilityMonitor.shared.isReachable == false { 
+        if ReachabilityMonitor.shared.isReachable == false {
             return
         }
         
@@ -53,7 +53,7 @@ extension CommunityViewModel {
         if recentFetches.count >= 2 {
             if recentFetches[recentFetches.count - 1].page == recentFetches[recentFetches.count - 2].page {
                 let timeElapsed = Date().timeIntervalSince(recentFetches[recentFetches.count - 1].date)
-                if timeElapsed <= 120 {
+                if timeElapsed <= 10 {
                     pageIndexOfLastTwoRecentFetches = recentFetches[recentFetches.count - 1].page
                 }
             }

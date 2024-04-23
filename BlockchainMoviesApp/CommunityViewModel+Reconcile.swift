@@ -96,6 +96,10 @@ extension CommunityViewModel {
             var waveUpdateIndex = 0
             while waveUpdateIndex < visibleCommunityCellModels.count {
                 
+                if Task.isCancelled {
+                    return
+                }
+                
                 var waveNumberOfUpdatesTriggered = 0
                 while waveUpdateIndex < visibleCommunityCellModels.count && waveNumberOfUpdatesTriggered < batchUpdateChunkNumberOfCells {
                     let communityCellModel = visibleCommunityCellModels[waveUpdateIndex]
@@ -183,6 +187,9 @@ extension CommunityViewModel {
             var waveUpdateIndex = 0
             while waveUpdateIndex < visibleCommunityCellModels.count {
                 
+                // Do not return if task is cancelled, we need to transfer
+                // state, the attempted cache hits must finish syncing
+                
                 var waveNumberOfUpdatesTriggered = 0
                 while waveUpdateIndex < visibleCommunityCellModels.count && waveNumberOfUpdatesTriggered < batchUpdateChunkNumberOfCells {
                     let communityCellModel = visibleCommunityCellModels[waveUpdateIndex]
@@ -214,6 +221,10 @@ extension CommunityViewModel {
                     try? await Task.sleep(nanoseconds: batchUpdateChunkSleepDuration)
                 }
             }
+        }
+        
+        if Task.isCancelled {
+            return
         }
         
         // There is now a race condition. Since we did await, it's
@@ -318,6 +329,10 @@ extension CommunityViewModel {
             }
         }
         
+        if Task.isCancelled {
+            return
+        }
+        
         // There is now a race condition. Since we did await, it's
         // possible that the internal state required for these cells
         // has changed. One race condition we will not account for
@@ -345,6 +360,10 @@ extension CommunityViewModel {
             // add it to the list. This is not a game.
             var loopIndex = 0
             while loopIndex < _downloadCommunityCellModelsUnsafe.count {
+                
+                if Task.isCancelled {
+                    return
+                }
                 
                 let communityCellModel = _downloadCommunityCellModelsUnsafe[loopIndex]
                 let index = communityCellModel.index
@@ -405,9 +424,17 @@ extension CommunityViewModel {
         // start a download task if the priority is set.
         await _computeDownloadPriorities()
         
+        if Task.isCancelled {
+            return
+        }
+        
         // This will be the ONLY place we start the download
         // tasks. So, the priorities should always be set ahead of time.
         await downloader.startTasksIfNecessary()
+        
+        if Task.isCancelled {
+            return
+        }
         
         // Now, we are going to see if cell model states
         // should be updated, or are out of sync.
@@ -428,6 +455,10 @@ extension CommunityViewModel {
             // allow UI to catch up, to not interrupt the scrolling.
             var waveUpdateIndex = 0
             while waveUpdateIndex < visibleCommunityCellModels.count {
+                
+                if Task.isCancelled {
+                    return
+                }
                 
                 var waveNumberOfUpdatesTriggered = 0
                 while waveUpdateIndex < visibleCommunityCellModels.count && waveNumberOfUpdatesTriggered < batchUpdateChunkNumberOfCells {
