@@ -33,7 +33,4 @@ import Observation
         errorMessage = message
         isShowingError = true
     }
-    
-    
-    
 }

@@ -28,22 +28,6 @@ public struct NWNetworkController: NWNetworkControllerImplementing {
         request.cachePolicy = .reloadIgnoringLocalAndRemoteCacheData
         request.timeoutInterval = 5.0
         
-       
-        /*
-        let (data, response) = try await URLSession.shared.data(for: request)
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw URLError(.badServerResponse)
-        }
-        guard (200...299).contains(httpResponse.statusCode) else {
-            throw URLError(.badServerResponse)
-        }
-        
-        let jsonDecoder = JSONDecoder()
-
-        let result = try jsonDecoder.decode(NWMoviesResponse.self, from: data)
-        return result
-        */
-        
         return try await fetch(urlRequest: request, responseType: NWMoviesResponse.self)
     }
     
@@ -60,21 +44,6 @@ public struct NWNetworkController: NWNetworkControllerImplementing {
         request.timeoutInterval = 10.0
         
         return try await fetch(urlRequest: request, responseType: NWMovieDetails.self)
-        
-        /*
-        let (data, response) = try await URLSession.shared.data(for: request)
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw URLError(.badServerResponse)
-        }
-        guard (200...299).contains(httpResponse.statusCode) else {
-            throw URLError(.badServerResponse)
-        }
-        
-        let jsonDecoder = JSONDecoder()
-        
-        let result = try jsonDecoder.decode(NWMovieDetails.self, from: data)
-        return result
-        */
     }
     
     private static func fetch<Response: Decodable>(urlRequest: URLRequest, responseType: Response.Type) async throws -> Response {

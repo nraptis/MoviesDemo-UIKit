@@ -19,7 +19,6 @@ public struct NWMoviesResponse {
         self.total_pages = total_pages
         self.total_results = total_results
     }
-    
 }
 
 extension NWMoviesResponse: Decodable {
