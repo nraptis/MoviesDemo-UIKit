@@ -58,13 +58,21 @@ class DirtyImageDownloader {
     }
     
     @DirtyImageDownloaderActor func cancelAll() async {
+        
         var _taskList = [DirtyImageDownloaderTask]()
+        
         for (_, task) in taskDict {
             _taskList.append(task)
         }
+        
         taskDict.removeAll(keepingCapacity: true)
         
         let ___taskList = _taskList
+        
+        for task in ___taskList {
+            task.invalidate()
+        }
+        
         await MainActor.run {
             if let delegate = delegate {
                 for task in ___taskList {
@@ -75,17 +83,25 @@ class DirtyImageDownloader {
     }
     
     @DirtyImageDownloaderActor func cancelAllRandomly() async {
+        
         var _taskList = [DirtyImageDownloaderTask]()
+        
         for (_, task) in taskDict {
             if Bool.random() {
                 _taskList.append(task)
             }
         }
+        
         for task in _taskList {
             taskDict.removeValue(forKey: task.index)
         }
         
         let ___taskList = _taskList
+        
+        for task in ___taskList {
+            task.invalidate()
+        }
+        
         await MainActor.run {
             if let delegate = delegate {
                 for task in ___taskList {
@@ -96,7 +112,9 @@ class DirtyImageDownloader {
     }
     
     @DirtyImageDownloaderActor func cancelAllOutOfIndexRange(firstIndex: Int, lastIndex: Int) async {
+        
         var _taskList = [DirtyImageDownloaderTask]()
+        
         for (_, task) in taskDict {
             let index = task.index
             if index >= firstIndex && index <= lastIndex {
@@ -107,11 +125,17 @@ class DirtyImageDownloader {
                 }
             }
         }
+        
         for task in _taskList {
             taskDict.removeValue(forKey: task.index)
         }
         
         let ___taskList = _taskList
+        
+        for task in ___taskList {
+            task.invalidate()
+        }
+        
         await MainActor.run {
             if let delegate = delegate {
                 for task in ___taskList {

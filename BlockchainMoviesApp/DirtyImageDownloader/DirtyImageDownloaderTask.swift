@@ -19,6 +19,8 @@ class DirtyImageDownloaderTask: NSObject, URLSessionDelegate {
     
     private(set) var index: Int
     
+    private var downloadTask: Task<Void, Never>?
+    
     var isVisited = false
     
     init(downloader: DirtyImageDownloader, item: any DirtyImageDownloaderType) {
@@ -38,15 +40,27 @@ class DirtyImageDownloaderTask: NSObject, URLSessionDelegate {
         isActive = false
         item = nil
         downloader = nil
+        if let downloadTask = downloadTask {
+            print("[🚔] Cancelling \(index), with active task. Risky?")
+            downloadTask.cancel()
+            self.downloadTask = nil
+        }
     }
     
     @DirtyImageDownloaderActor func fire() {
-        Task { @DirtyImageCacheActor in
+        downloadTask = Task { @DirtyImageCacheActor in
             await _fire()
         }
     }
     
     @DirtyImageDownloaderActor private func _fire() async {
+        
+        if isInvalidated {
+            isActive = false
+            self.item = nil
+            self.downloader = nil
+            return
+        }
         
         guard let downloader = self.downloader else {
             isActive = false
@@ -94,9 +108,15 @@ class DirtyImageDownloaderTask: NSObject, URLSessionDelegate {
             _response = response
         } catch {
             isActive = false
-            isInvalidated = true
             self.item = nil
             self.downloader = nil
+            if isInvalidated {
+                isActive = false
+                self.item = nil
+                self.downloader = nil
+                return
+            }
+            isInvalidated = true
             downloader.handleDownloadTaskDidFail(task: self)
             return
         }
