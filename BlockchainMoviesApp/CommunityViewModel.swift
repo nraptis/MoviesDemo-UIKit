@@ -1057,6 +1057,7 @@ extension CommunityViewModel: CommunityGridLayoutDelegate {
     }
     
     @MainActor func layoutContainerDidChangeSize(size: CGSize) {
+        handleVisibleCellsMayHaveChanged()
         layoutContainerSizeUpdatePublisher.send(size)
     }
     
