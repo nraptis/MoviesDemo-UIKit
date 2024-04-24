@@ -2,7 +2,7 @@
 //  DirtyImageCache.swift
 //  BlockchainMoviesApp
 //
-//  Created by "Nick" Django Raptis on 4/9/24.
+//  Created by Nicholas Alexander Raptis on 4/9/24.
 //
 
 import UIKit
@@ -43,13 +43,6 @@ class DirtyImageCache {
     @DirtyImageCacheActor
     private var fileRecycler = DirtyImageCacheFileRecycler(capacity: 8192)
     
-    
-    /// Creates a unique file cache object.
-    /// - Parameters:
-    ///   - name: should be unique for each instance of DirtyImageCache (only numbers, letters, and _)
-    ///   - fileCapacity: number of images stored on disk (should be prime number somewhere close to 1,000)
-    ///   - ramCapacity: number of images stored in RAM (should be prime number somewhere between 30 and 200,
-    ///                  larger than the max number of image displayed on any given screen  (will be flushed on memory warning)
     init(name: String) {
         self.name = name
     }

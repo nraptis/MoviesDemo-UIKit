@@ -2,7 +2,7 @@
 //  CommunityGridNoContentView.swift
 //  BlockchainMoviesApp
 //
-//  Created by Nameless Bastard on 4/22/24.
+//  Created by Nicholas Alexander Raptis on 4/22/24.
 //
 
 import UIKit

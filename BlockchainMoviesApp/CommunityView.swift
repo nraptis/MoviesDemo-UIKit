@@ -2,7 +2,7 @@
 //  CommunityView.swift
 //  BlockchainMoviesApp
 //
-//  Created by Nameless Bastard on 4/21/24.
+//  Created by Nicholas Alexander Raptis on 4/21/24.
 //
 
 import SwiftUI
@@ -19,11 +19,6 @@ struct CommunityView: View {
     @State var isFetchingDetails = false
     @State var isFirstFetchComplete = false
     @State var isFetchingUserInitiated = false
-    
-    
-    
-    
-    
     
     var communityViewModel: CommunityViewModel
     var body: some View {
@@ -168,8 +163,6 @@ struct CommunityView: View {
             .opacity(isShowingNetworkError ? 1.0 : 0.0)
             .scaleEffect(isShowingNetworkError ? 1.0 : 0.85)
             .animation(.easeInOut, value: isShowingNetworkError)
-
-            
         }
         .frame(height: CGFloat(bottomBarHeight))
         .background(DarkwingDuckTheme.gray100)

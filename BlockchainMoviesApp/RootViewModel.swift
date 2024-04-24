@@ -2,7 +2,7 @@
 //  RootViewModel.swift
 //  BlockchainMoviesApp
 //
-//  Created by "Nick" Django Raptis on 4/12/24.
+//  Created by Nicholas Alexander Raptis on 4/12/24.
 //
 
 import Foundation

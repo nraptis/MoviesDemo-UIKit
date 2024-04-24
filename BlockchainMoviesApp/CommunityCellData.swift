@@ -2,18 +2,19 @@
 //  HomeGridCellData.swift
 //  BlockchainMoviesApp
 //
-//  Created by "Nick" Django Raptis on 4/9/24.
+//  Created by Nicholas Alexander Raptis on 4/9/24.
 //
 
 import Foundation
 import BlockChainNetworking
 import BlockChainDatabase
 
+// This is just a wrapper for the network (and database) movie
+// model objects. It's important to note that these do *NOT* drive
+// the UI directly. There can be "holes" in the data. There will
+// still be a placeholder cell for said hole.
+
 class CommunityCellData {
-    
-    // The state of the cell, the UI
-    // should always reflect this state.
-    //var cellModelState = CellModelState.illegal
     
     // This index is the # of the cell, for example cells[0]
     // has an index of 0, and cells[100] has an index of 100.

@@ -2,7 +2,7 @@
 //  DirtyImageDownloader.swift
 //  BlockchainMoviesApp
 //
-//  Created by "Nick" Django Raptis on 4/9/24.
+//  Created by Nicholas Alexander Raptis on 4/9/24.
 //
 
 import UIKit
@@ -12,8 +12,6 @@ import UIKit
 // is that it is PRIORITY based. It WILL NOT START a download
 // task until the priority has been set. This is to prevent
 // race conditions, such as the wrong item downloading first.
-//
-
 //
 // Note: This "DirtyImageDownloaderActor" is a high speed
 //       actor, it is only for protecting the mutable state

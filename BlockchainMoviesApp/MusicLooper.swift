@@ -2,7 +2,7 @@
 //  MusicLooper.swift
 //  BlockchainMoviesApp
 //
-//  Created by Nicky Taylor on 4/23/24.
+//  Created by Nicholas Alexander Raptis on 4/23/24.
 //
 
 import Foundation
@@ -28,7 +28,7 @@ class MusicLooper: NSObject {
         }
     }
     
-    @IBAction func startAudioPlayer() {
+    func startAudioPlayer() {
         if let audioPlayer = audioPlayer {
             if audioPlayer.isPlaying {
                 stopAudioPlayer()
@@ -55,22 +55,18 @@ class MusicLooper: NSObject {
 
 extension MusicLooper: AVAudioPlayerDelegate {
     func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
-        print("FINISH PLAYING")
         startAudioPlayer()
     }
     
     func audioPlayerDecodeErrorDidOccur(_ player: AVAudioPlayer, error: Error?) {
-        print("AV ERROR!")
         stopAudioPlayer()
     }
     
     func audioPlayerBeginInterruption(_ player: AVAudioPlayer) {
-        print("AV INTERRUPTED, NOW PAUSED")
         audioPlayer?.pause()
     }
     
     func audioPlayerEndInterruption(_ player: AVAudioPlayer, withOptions flags: Int) {
-        print("AV END INTERRUPTION")
         audioPlayer?.play()
     }
 }

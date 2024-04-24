@@ -2,10 +2,13 @@
 //  CommunityCellModel.swift
 //  BlockchainMoviesApp
 //
-//  Created by Nameless Bastard on 4/21/24.
+//  Created by Nicholas Alexander Raptis on 4/21/24.
 //
 
 import UIKit
+
+// This is the model which drives the UI. For each of these cell
+// models, there will be a cell on the screen (only visible ones).
 
 class CommunityCellModel {
     

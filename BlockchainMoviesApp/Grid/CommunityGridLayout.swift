@@ -2,7 +2,7 @@
 //  CommunityGridLayout.swift
 //  BlockchainMoviesApp
 //
-//  Created by "Nick" Django Raptis on 4/19/24.
+//  Created by Nicholas Alexander Raptis on 4/19/24.
 //
 
 import UIKit

@@ -2,7 +2,7 @@
 //  CommunityViewModel+Debug.swift
 //  BlockchainMoviesApp
 //
-//  Created by Nameless Bastard on 4/23/24.
+//  Created by Nicholas Alexander Raptis on 4/23/24.
 //
 
 import UIKit

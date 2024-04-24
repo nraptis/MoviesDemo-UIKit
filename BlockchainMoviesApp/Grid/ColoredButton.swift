@@ -2,7 +2,7 @@
 //  ColoredButton.swift
 //  BlockchainMoviesApp
 //
-//  Created by Nameless Bastard on 4/11/24.
+//  Created by Nicholas Alexander Raptis on 4/11/24.
 //
 
 import UIKit
