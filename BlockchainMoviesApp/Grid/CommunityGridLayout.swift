@@ -27,8 +27,8 @@ class CommunityGridLayout {
     private(set) var height: CGFloat = 255
     
     // cell grid layout parameters
-    //private let cellMaximumWidth = Device.isPad ? 170 : 100
-    private let cellMaximumWidth = Device.isPad ? 90 : 70
+    private let cellMaximumWidth = Device.isPad ? 170 : 100
+    //private let cellMaximumWidth = Device.isPad ? 90 : 70
     
     private var cellWidth = 100
     private var cellHeight = 100

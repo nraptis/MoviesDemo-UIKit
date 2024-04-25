@@ -10,7 +10,7 @@ import SwiftUI
 
 struct DarkwingDuckTheme {
     
-    @MainActor static let logo = UIImage(named: "blockchain_logo") ?? UIImage()
+    @MainActor static let logo = UIImage(named: "walmart_logo") ?? UIImage()
     
     static let _naughtyYellow = UIColor(red: 0.98, green: 0.82, blue: 0.025, alpha: 1.0)
     static let _silkyBlue = UIColor(red: 0.200, green: 0.630, blue: 1.000, alpha: 1.0)

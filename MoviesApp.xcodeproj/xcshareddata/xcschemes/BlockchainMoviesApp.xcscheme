@@ -18,7 +18,7 @@
                BlueprintIdentifier = "E83EA6A42BC4E9B20076D6BB"
                BuildableName = "BlockchainMoviesApp.app"
                BlueprintName = "BlockchainMoviesApp"
-               ReferencedContainer = "container:BlockchainMoviesApp.xcodeproj">
+               ReferencedContainer = "container:MoviesApp.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -43,7 +43,7 @@
                BlueprintIdentifier = "E8DFD92F2BCA127E00D2A107"
                BuildableName = "BlockchainMoviesAppTests.xctest"
                BlueprintName = "BlockchainMoviesAppTests"
-               ReferencedContainer = "container:BlockchainMoviesApp.xcodeproj">
+               ReferencedContainer = "container:MoviesApp.xcodeproj">
             </BuildableReference>
          </TestableReference>
          <TestableReference
@@ -54,7 +54,7 @@
                BlueprintIdentifier = "E8DFD93C2BCA12B300D2A107"
                BuildableName = "BlockchainMoviesAppAutomationTests.xctest"
                BlueprintName = "BlockchainMoviesAppAutomationTests"
-               ReferencedContainer = "container:BlockchainMoviesApp.xcodeproj">
+               ReferencedContainer = "container:MoviesApp.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -76,7 +76,7 @@
             BlueprintIdentifier = "E83EA6A42BC4E9B20076D6BB"
             BuildableName = "BlockchainMoviesApp.app"
             BlueprintName = "BlockchainMoviesApp"
-            ReferencedContainer = "container:BlockchainMoviesApp.xcodeproj">
+            ReferencedContainer = "container:MoviesApp.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -93,7 +93,7 @@
             BlueprintIdentifier = "E83EA6A42BC4E9B20076D6BB"
             BuildableName = "BlockchainMoviesApp.app"
             BlueprintName = "BlockchainMoviesApp"
-            ReferencedContainer = "container:BlockchainMoviesApp.xcodeproj">
+            ReferencedContainer = "container:MoviesApp.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

@@ -34,7 +34,6 @@ class DirtyImageDownloaderTask: NSObject, URLSessionDelegate {
         priorityHasBeenSetAtLeastOnce = true
     }
     
-    
     @DirtyImageDownloaderActor func invalidate() {
         isInvalidated = true
         isActive = false

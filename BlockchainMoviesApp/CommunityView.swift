@@ -170,8 +170,8 @@ struct CommunityView: View {
     
     @MainActor func getLogoBar(width: CGFloat, height: CGFloat) -> some View {
         
-        let logoMainBodyWidth = 1024
-        let logoMainBodyHeight = 158
+        let logoMainBodyWidth = 1200
+        let logoMainBodyHeight = 320
         
         let fitZoneWidth = (width - 64)
         let fitZoneHeight = (height - 16)
