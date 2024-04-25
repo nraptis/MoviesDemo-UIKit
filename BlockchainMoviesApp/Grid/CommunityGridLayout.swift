@@ -17,7 +17,7 @@ protocol CommunityGridLayoutDelegate: AnyObject {
 class CommunityGridLayout {
     
     init() {
-
+        
     }
     
     weak var delegate: CommunityGridLayoutDelegate?
